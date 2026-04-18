@@ -176,6 +176,7 @@ export function HistoryClient({ snapshots }: HistoryClientProps) {
                       certifications={selectedFull.snapshotData.certifications}
                       resumeProjects={selectedFull.snapshotData.resumeProjects}
                       licenses={selectedFull.snapshotData.licenses}
+                      achievements={selectedFull.snapshotData.achievements}
                     />
                  </div>
               </div>

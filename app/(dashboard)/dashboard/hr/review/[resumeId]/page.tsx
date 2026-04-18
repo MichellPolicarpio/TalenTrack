@@ -12,6 +12,7 @@ import {
   getCertificationsByResumeId,
   getResumeProjectsByResumeId,
   getLicensesByResumeId,
+  getAchievementsByResumeId,
 } from "@/lib/repositories/sections.repository";
 import { HrReviewClient } from "@/components/hr/HrReviewClient";
 
@@ -40,6 +41,7 @@ export default async function HrReviewPage({
     certifications,
     resumeProjects,
     licenses,
+    achievements,
   ] = await Promise.all([
     getResumeWithEmployeeById(resumeId),
     getResumeById(resumeId),
@@ -50,6 +52,7 @@ export default async function HrReviewPage({
     getCertificationsByResumeId(resumeId),
     getResumeProjectsByResumeId(resumeId),
     getLicensesByResumeId(resumeId),
+    getAchievementsByResumeId(resumeId),
   ]);
 
   if (!resume) notFound();
@@ -71,6 +74,7 @@ export default async function HrReviewPage({
         certifications={certifications}
         resumeProjects={resumeProjects}
         licenses={licenses}
+        achievements={achievements}
         auditLog={auditLog}
         resumeUpdatedAtIso={
           resumeUpdatedAt ? resumeUpdatedAt.toISOString() : null

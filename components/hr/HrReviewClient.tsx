@@ -9,6 +9,7 @@ import { HrReviewPanel } from "@/components/hr/HrReviewPanel";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type {
+  Achievement,
   AuditLogEntry,
   Certification,
   Education,
@@ -65,6 +66,7 @@ export type HrReviewClientProps = {
   certifications: Certification[];
   resumeProjects: ResumeProject[];
   licenses: License[];
+  achievements: Achievement[];
   auditLog: AuditLogEntry[];
   resumeUpdatedAtIso: string | null;
   reviewerName: string;
@@ -83,6 +85,7 @@ export function HrReviewClient({
   certifications,
   resumeProjects,
   licenses,
+  achievements,
   auditLog,
   resumeUpdatedAtIso,
   reviewerName,
@@ -106,6 +109,10 @@ export function HrReviewClient({
   const proj = useMemo(
     () => resumeProjects.filter((p) => p.isVisibleOnResume),
     [resumeProjects],
+  );
+  const ach = useMemo(
+    () => achievements.filter((a) => a.isVisibleOnResume),
+    [achievements],
   );
 
   const scale = zoomPct / 100;
@@ -248,6 +255,7 @@ export function HrReviewClient({
                     certifications={cert}
                     resumeProjects={proj}
                     licenses={licenses}
+                    achievements={ach}
                   />
                 </div>
               </div>
