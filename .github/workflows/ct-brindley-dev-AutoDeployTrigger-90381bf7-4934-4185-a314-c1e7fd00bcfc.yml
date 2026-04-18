@@ -1,0 +1,80 @@
+name: Deploy to Azure Container Apps
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to ACR
+        run: |
+          echo "${{ secrets.CTBRINDLEYDEV_REGISTRY_PASSWORD }}" | docker login crbrindleydev.azurecr.io -u "${{ secrets.CTBRINDLEYDEV_REGISTRY_USERNAME }}" --password-stdin
+
+      - name: Build Docker image
+        run: |
+          docker build -t crbrindleydev.azurecr.io/ct-brindley-dev:${{ github.sha }} -t crbrindleydev.azurecr.io/ct-brindley-dev:latest .
+
+      - name: Push Docker image
+        run: |
+          docker push crbrindleydev.azurecr.io/ct-brindley-dev:${{ github.sha }}
+          docker push crbrindleydev.azurecr.io/ct-brindley-dev:latest
+
+      - name: Login to Azure CLI
+        run: |
+          az login --service-principal \
+            -u "${{ secrets.AZURE_SP_CLIENT_ID }}" \
+            -p "${{ secrets.AZURE_SP_CLIENT_SECRET }}" \
+            --tenant "${{ secrets.AZURE_SP_TENANT_ID }}"
+
+      - name: Deploy to Container App
+        run: |
+          az account set --subscription "a41e3a62-8884-43e7-8fb9-0fdb1db8320f"
+          RG=$(az containerapp list --query "[?name=='ct-brindley-dev'].resourceGroup | [0]" -o tsv)
+          echo "Found Resource Group: $RG"
+          if [ -z "$RG" ]; then
+            echo "Error: Could not find Container App 'ct-brindley-dev'. Please check if it exists in your subscription."
+            exit 1
+          fi
+
+          # Function to wait for provisioning to finish
+          wait_for_ready() {
+            echo "Checking if Azure is ready..."
+            while : ; do
+              STATE=$(az containerapp show --name ct-brindley-dev --resource-group "$RG" --query properties.provisioningState -o tsv)
+              echo "Current state: $STATE"
+              if [ "$STATE" != "InProgress" ]; then
+                break
+              fi
+              echo "Azure is busy (InProgress). Waiting 15 seconds..."
+              sleep 15
+            done
+          }
+
+          wait_for_ready
+
+          # Configure credentials so the Container App can pull the image
+          az containerapp registry set \
+            --name ct-brindley-dev \
+            --resource-group "$RG" \
+            --server crbrindleydev.azurecr.io \
+            --username "${{ secrets.CTBRINDLEYDEV_REGISTRY_USERNAME }}" \
+            --password "${{ secrets.CTBRINDLEYDEV_REGISTRY_PASSWORD }}"
+            
+          # Ensure the Ingress routes traffic to the correct container port (3000 for Next.js)
+          az containerapp ingress enable \
+            --name ct-brindley-dev \
+            --resource-group "$RG" \
+            --target-port 3000 \
+            --type external
+            
+          az containerapp update \
+            --name ct-brindley-dev \
+            --resource-group "$RG" \
+            --image crbrindleydev.azurecr.io/ct-brindley-dev:${{ github.sha }}

@@ -1,0 +1,510 @@
+"use client";
+
+import React, { useState, useTransition, useEffect } from "react";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { cn } from "@/lib/utils";
+import {
+  GripVertical,
+  Trash2,
+  Loader2,
+  Eye,
+  EyeOff,
+  Plus,
+  Save,
+  X,
+} from "lucide-react";
+import { toast } from "sonner";
+import {
+  saveEducation,
+  removeEducation,
+  reorderEducationAction,
+  toggleVisibilityAction,
+} from "@/lib/actions/sections.actions";
+import type { Education, EducationInput } from "@/lib/db/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { SectionShell } from "./SectionShell";
+
+function EducationCard({
+  item,
+  resumeId,
+  onDelete,
+  onToggleVisibility,
+  onDraftChange,
+  onPersisted,
+  onDirtyChange,
+  disabled,
+}: {
+  item: Education;
+  resumeId: string;
+  onDelete: (id: string) => void;
+  onToggleVisibility: (id: string, visible: boolean) => void;
+  onDraftChange: (id: string, patch: Partial<Education>) => void;
+  onPersisted?: () => void;
+  onDirtyChange?: (isDirty: boolean, saveFn: () => void) => void;
+  disabled: boolean;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: item.id });
+  const style = { transform: CSS.Transform.toString(transform), transition };
+
+  const initial: EducationInput = {
+    id: item.id,
+    institutionName: item.institutionName,
+    degree: item.degree,
+    fieldOfStudy: item.fieldOfStudy,
+    startYear: item.startYear,
+    endYear: item.endYear,
+    isOngoing: item.isOngoing,
+    gpa: item.gpa,
+  };
+
+  const [form, setForm] = useState<EducationInput>(initial);
+  const [dirty, setDirty] = useState(false);
+  const [saving, startSave] = useTransition();
+
+  function update(patch: Partial<EducationInput>) {
+    const nextForm = { ...form, ...patch };
+    setForm(nextForm);
+
+    const draftPatch: Partial<Education> = {};
+    if (patch.institutionName !== undefined) draftPatch.institutionName = patch.institutionName;
+    if (patch.degree !== undefined) draftPatch.degree = patch.degree;
+    if (patch.fieldOfStudy !== undefined) draftPatch.fieldOfStudy = patch.fieldOfStudy;
+    if (patch.startYear !== undefined) draftPatch.startYear = patch.startYear;
+    if (patch.endYear !== undefined) draftPatch.endYear = patch.endYear;
+    if (patch.isOngoing !== undefined) draftPatch.isOngoing = patch.isOngoing;
+    if (patch.gpa !== undefined) draftPatch.gpa = patch.gpa;
+
+    onDraftChange(item.id, draftPatch);
+    if (!dirty) {
+      setDirty(true);
+      onDirtyChange?.(true, handleSave);
+    }
+  }
+
+  useEffect(() => {
+    if (dirty) {
+      onDirtyChange?.(true, handleSave);
+    }
+  }, [form, dirty]);
+
+  function handleSave() {
+    startSave(async () => {
+      try {
+        await saveEducation(resumeId, form);
+        toast.success("Education saved.");
+        setDirty(false);
+        onDirtyChange?.(false, () => {});
+        onPersisted?.();
+      } catch {
+        toast.error("Could not save.");
+      }
+    });
+  }
+
+  function handleCancel() {
+    setForm(initial);
+    onDraftChange(item.id, {
+      institutionName: initial.institutionName,
+      degree: initial.degree,
+      fieldOfStudy: initial.fieldOfStudy,
+      startYear: initial.startYear,
+      endYear: initial.endYear,
+      isOngoing: initial.isOngoing,
+      gpa: initial.gpa,
+    });
+    setDirty(false);
+    onDirtyChange?.(false, () => {});
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "group relative flex items-start gap-4 rounded-xl border border-neutral-200 bg-white p-5 transition-all hover:border-neutral-300 hover:shadow-md",
+        isDragging && "z-50 opacity-50",
+      )}
+    >
+      <div className="flex shrink-0 flex-col items-center justify-center gap-3 border-r border-neutral-100 pr-4">
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => onToggleVisibility(item.id, !item.isVisibleOnResume)}
+          className="rounded-md p-1 transition-colors hover:bg-neutral-100"
+          title={item.isVisibleOnResume ? "Hide from resume" : "Show on resume"}
+        >
+          {item.isVisibleOnResume ? (
+            <Eye className="size-4 text-[#16A34A]" />
+          ) : (
+            <EyeOff className="size-4 text-[#9CA3AF]" />
+          )}
+        </button>
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => onDelete(item.id)}
+          className="rounded-md p-1 text-[#9CA3AF] transition-colors hover:bg-red-50 hover:text-[#DC2626]"
+        >
+          <Trash2 className="size-[15px]" />
+        </button>
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          className="cursor-grab text-neutral-400 transition-colors hover:text-neutral-600 focus:outline-none"
+          aria-label="Drag to reorder"
+        >
+          <GripVertical className="size-4" />
+        </button>
+      </div>
+
+      <div className="flex-1 space-y-3">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between">
+            <Label className="text-[12px] text-[#6B7280]">Institution</Label>
+            <span className="text-[11px] text-[#9CA3AF] tabular-nums">{form.institutionName.length}/45</span>
+          </div>
+          <Input
+            value={form.institutionName}
+            maxLength={45}
+            onChange={(e) => update({ institutionName: e.target.value.slice(0, 45) })}
+            disabled={disabled}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-[12px] text-[#6B7280]">Degree</Label>
+            <Input
+              value={form.degree}
+              onChange={(e) => update({ degree: e.target.value })}
+              disabled={disabled}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-[12px] text-[#6B7280]">Field of Study</Label>
+            <Input
+              value={form.fieldOfStudy ?? ""}
+              onChange={(e) => update({ fieldOfStudy: e.target.value || null })}
+              disabled={disabled}
+            />
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <div className="flex flex-1 flex-col gap-1.5">
+            <Label className="text-[12px] text-[#6B7280]">Start Year</Label>
+            <Input
+              type="number"
+              min={1950}
+              max={2099}
+              value={form.startYear ?? ""}
+              onChange={(e) => update({ startYear: e.target.value ? Number(e.target.value) : null })}
+              disabled={disabled}
+            />
+          </div>
+          <div className="flex flex-1 flex-col gap-1.5">
+            <Label className="text-[12px] text-[#6B7280]">End Year</Label>
+            <Input
+              type="number"
+              min={1950}
+              max={2099}
+              value={form.endYear ?? ""}
+              onChange={(e) => update({ endYear: e.target.value ? Number(e.target.value) : null })}
+              disabled={disabled || form.isOngoing}
+            />
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Checkbox
+            checked={form.isOngoing}
+            onCheckedChange={(v) =>
+              update({ isOngoing: Boolean(v), endYear: v ? null : form.endYear })
+            }
+            disabled={disabled}
+          />
+          <Label className="text-[12px] font-normal text-[#6B7280]">
+            Currently studying here
+          </Label>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label className="text-[12px] text-[#6B7280]">GPA (optional)</Label>
+          <Input
+            type="number"
+            step="0.01"
+            min={0}
+            max={4}
+            value={form.gpa ?? ""}
+            onChange={(e) => update({ gpa: e.target.value ? Number(e.target.value) : null })}
+            disabled={disabled}
+          />
+        </div>
+        {dirty && !disabled && (
+          <div className="flex gap-2 pt-1">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={handleCancel}
+              className="gap-1.5"
+            >
+              <X className="size-3.5" />
+              Cancel
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const emptyForm: EducationInput = {
+  institutionName: "",
+  degree: "",
+  fieldOfStudy: null,
+  startYear: null,
+  endYear: null,
+  isOngoing: false,
+  gpa: null,
+};
+
+function EducationForm({
+  resumeId,
+  onDone,
+  onPersisted,
+  onDirtyChange,
+}: {
+  resumeId: string;
+  onDone: () => void;
+  onPersisted?: () => void;
+  onDirtyChange?: (isDirty: boolean, saveFn: () => void) => void;
+}) {
+  const [form, setForm] = useState<EducationInput>(emptyForm);
+  const [pending, startTransition] = useTransition();
+
+  function handleSubmit() {
+    startTransition(async () => {
+      try {
+        await saveEducation(resumeId, form);
+        toast.success("Education saved.");
+        onPersisted?.();
+        onDirtyChange?.(false, () => {});
+        onDone();
+      } catch {
+        toast.error("Could not save.");
+      }
+    });
+  }
+
+  useEffect(() => {
+    const isDirty = !!form.institutionName.trim() || !!form.degree.trim();
+    onDirtyChange?.(isDirty, handleSubmit);
+  }, [form]);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="ed-inst">Institution *</Label>
+          <span className="text-[11px] text-[#9CA3AF] tabular-nums">{form.institutionName.length}/45</span>
+        </div>
+        <Input id="ed-inst" maxLength={45} value={form.institutionName} onChange={(e) => setForm((f) => ({ ...f, institutionName: e.target.value.slice(0, 45) }))} />
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="ed-degree">Degree *</Label>
+        <Input id="ed-degree" value={form.degree} onChange={(e) => setForm((f) => ({ ...f, degree: e.target.value }))} />
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="ed-field">Field of study</Label>
+        <Input id="ed-field" value={form.fieldOfStudy ?? ""} onChange={(e) => setForm((f) => ({ ...f, fieldOfStudy: e.target.value || null }))} />
+      </div>
+      <div className="flex gap-3">
+        <div className="flex flex-1 flex-col gap-2">
+          <Label htmlFor="ed-start">Start year</Label>
+          <Input id="ed-start" type="number" min={1950} max={2099} value={form.startYear ?? ""} onChange={(e) => setForm((f) => ({ ...f, startYear: e.target.value ? Number(e.target.value) : null }))} />
+        </div>
+        <div className="flex flex-1 flex-col gap-2">
+          <Label htmlFor="ed-end">End year</Label>
+          <Input id="ed-end" type="number" min={1950} max={2099} value={form.endYear ?? ""} disabled={form.isOngoing} onChange={(e) => setForm((f) => ({ ...f, endYear: e.target.value ? Number(e.target.value) : null }))} />
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <Checkbox id="ed-ongoing" checked={form.isOngoing} onCheckedChange={(v) => setForm((f) => ({ ...f, isOngoing: Boolean(v), endYear: v ? null : f.endYear }))} />
+        <Label htmlFor="ed-ongoing" className="font-normal">Currently studying here</Label>
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="ed-gpa">GPA (optional)</Label>
+        <Input id="ed-gpa" type="number" step="0.01" min={0} max={4} value={form.gpa ?? ""} onChange={(e) => setForm((f) => ({ ...f, gpa: e.target.value ? Number(e.target.value) : null }))} />
+      </div>
+      {/* Internal Save button removed in favor of global header button */}
+    </div>
+  );
+}
+
+export function EducationSection({
+  resumeId,
+  initial,
+  onItemsChange,
+  onPersisted,
+  disabled = false,
+  headerActions,
+}: {
+  resumeId: string;
+  initial: Education[];
+  onItemsChange?: (items: Education[]) => void;
+  onPersisted?: () => void;
+  disabled?: boolean;
+  headerActions?: React.ReactNode;
+}) {
+  const [items, setItems] = useState(initial);
+
+  useEffect(() => {
+    setItems(initial);
+  }, [initial]);
+
+  const [open, setOpen] = useState(false);
+  const [pending, startTransition] = useTransition();
+  const sensors = useSensors(useSensor(PointerSensor));
+
+  const [localDirty, setLocalDirty] = useState(false);
+  const [activeSave, setActiveSave] = useState<(() => void) | null>(null);
+
+  const hijackedActions = React.useMemo(() => {
+    if (!React.isValidElement(headerActions)) return headerActions;
+    return React.cloneElement(headerActions as React.ReactElement<any>, {
+      onSave: localDirty && activeSave ? activeSave : (headerActions.props as any).onSave,
+      hasUnsavedChanges: localDirty || (headerActions.props as any).hasUnsavedChanges,
+    });
+  }, [headerActions, localDirty, activeSave]);
+
+  function updateItems(updater: (prev: Education[]) => Education[]) {
+    setItems((prev) => {
+      const next = updater(prev);
+      if (onItemsChange) setTimeout(() => onItemsChange(next), 0);
+      return next;
+    });
+  }
+
+  function handleDraftChange(id: string, patch: Partial<Education>) {
+    updateItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)));
+  }
+
+  function handleToggleVisibility(id: string, visible: boolean) {
+    updateItems((prev) => prev.map((i) => (i.id === id ? { ...i, isVisibleOnResume: visible } : i)));
+    startTransition(async () => {
+      try {
+        await toggleVisibilityAction(resumeId, "Education", id, visible);
+        onPersisted?.();
+      } catch {
+        updateItems((prev) => prev.map((i) => (i.id === id ? { ...i, isVisibleOnResume: !visible } : i)));
+        toast.error("Could not update visibility.");
+      }
+    });
+  }
+
+  function handleDelete(id: string) {
+    startTransition(async () => {
+      try {
+        await removeEducation(resumeId, id);
+        setItems((prev) => prev.filter((i) => i.id !== id));
+        toast.success("Entry deleted.");
+        onPersisted?.();
+      } catch {
+        toast.error("Could not delete.");
+      }
+    });
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const reordered = arrayMove(
+      items,
+      items.findIndex((i) => i.id === active.id),
+      items.findIndex((i) => i.id === over.id),
+    ).map((item, idx) => ({ ...item, sortOrder: idx + 1 }));
+    setItems(reordered);
+    startTransition(async () => {
+      try {
+        await reorderEducationAction(resumeId, reordered.map((i) => ({ id: i.id, sortOrder: i.sortOrder })));
+        onPersisted?.();
+      } catch {
+        toast.error("Could not save order.");
+      }
+    });
+  }
+
+  return (
+    <SectionShell
+      title="Education"
+      addLabel="Add"
+      open={open}
+      onOpenChange={setOpen}
+      disabled={disabled}
+      headerActions={hijackedActions}
+      form={
+        <EducationForm
+          key="new"
+          resumeId={resumeId}
+          onDone={() => setOpen(false)}
+          onPersisted={onPersisted}
+          onDirtyChange={(isDirty, saveFn) => {
+            setLocalDirty(isDirty);
+            setActiveSave(() => saveFn);
+          }}
+        />
+      }
+    >
+      <DndContext id={`education-${resumeId}`} sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+          <div className="flex flex-col">
+            {items.length === 0 ? (
+              <button
+                type="button"
+                disabled={disabled}
+                onClick={() => { if (!disabled) setOpen(true); }}
+                className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-transparent text-[13px] font-medium text-neutral-500 transition-colors hover:border-[#F17A28]/50 hover:text-[#F17A28] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Plus className="size-4" />
+                Add New Entry
+              </button>
+            ) : (
+              items.map((item) => (
+                <EducationCard
+                  key={item.id}
+                  item={item}
+                  resumeId={resumeId}
+                  onDelete={handleDelete}
+                  onToggleVisibility={handleToggleVisibility}
+                  onDraftChange={handleDraftChange}
+                  onPersisted={onPersisted}
+                  onDirtyChange={(isDirty, saveFn) => {
+                    setLocalDirty(isDirty);
+                    setActiveSave(() => saveFn);
+                  }}
+                  disabled={disabled || pending}
+                />
+              ))
+            )}
+          </div>
+        </SortableContext>
+      </DndContext>
+    </SectionShell>
+  );
+}
