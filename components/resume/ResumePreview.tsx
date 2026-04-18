@@ -564,29 +564,8 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
               style={{ width: ORANGE_RAIL_PX, backgroundColor: ORANGE }}
               aria-hidden
             />
-            <div className="flex min-h-[3.5rem] min-w-0 flex-1 flex-row items-stretch">
-              <div
-                className="box-border flex w-[38%] shrink-0 flex-col items-center justify-center px-6 py-3 text-center"
-                style={{ backgroundColor: "#ffffff" }}
-              >
-                <p className="font-bold leading-[0.9] tracking-tight text-[#000000]">
-                  <span className="text-[34pt]" style={{ color: ORANGE }}>
-                    BE
-                  </span>
-                  <span className="text-[28pt]"> On.</span>
-                </p>
-                <p className="mt-1.5 text-[11pt] text-[#000000]">
-                  brindleyengineering.com
-                </p>
-              </div>
-              <div
-                className="box-border flex min-w-0 flex-1 items-center pl-0 pr-2 py-3"
-                style={{ backgroundColor: "#ffffff" }}
-              >
-                <p className="text-[9.5pt] italic leading-snug text-[#4B5563] text-left">
-                  Proprietary and Confidential — This document contains technical project experience of Brindley Engineering and is intended solely for evaluation purposes.
-                </p>
-              </div>
+            <div className="flex min-h-[3.5rem] min-w-0 flex-1 flex-row items-stretch bg-white">
+              {/* Minimalist footer for Page 2 — no branding or legends */}
             </div>
           </footer>
         </div>
