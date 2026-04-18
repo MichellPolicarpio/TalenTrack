@@ -32,7 +32,7 @@ export function useGenericSection<T extends GenericSectionItem>({
   initial: T[];
   onItemsChange?: (items: T[]) => void;
   onPersisted?: () => void;
-  removeAction: (id: string, resumeId: string) => Promise<void>;
+  removeAction: (resumeId: string, id: string) => Promise<void>;
   reorderAction: (resumeId: string, items: ReorderItem[]) => Promise<void>;
   headerActions?: React.ReactNode;
 }) {
@@ -84,7 +84,7 @@ export function useGenericSection<T extends GenericSectionItem>({
   const handleDelete = useCallback((id: string) => {
     startTransition(async () => {
       try {
-        await removeAction(id, resumeId);
+        await removeAction(resumeId, id);
         updateItems((prev) => prev.filter((i) => i.id !== id));
         toast.success("Entry deleted.");
         onPersisted?.();
