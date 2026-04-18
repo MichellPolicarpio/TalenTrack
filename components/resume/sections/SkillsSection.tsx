@@ -286,7 +286,7 @@ export function SkillsSection({
 
   return (
     <SectionShell
-      title="Technical Mastery"
+      title="Skills"
       addLabel="Add"
       open={open}
       onOpenChange={setOpen}
