@@ -50,16 +50,16 @@
 
   /* Custom palette extensions */
   --color-sidebar-label: #B5A898;
-  --color-topbar: #EAE6DF;
-  --color-topbar-border: #D6D1C8;
-  --color-preview-panel: #E0DBD4;
-  --color-preview-toolbar: #D6D0C8;
+  --color-topbar: #F7F6F3;
+  --color-topbar-border: #F0EDE8;
+  --color-preview-panel: #F2F0EB;
+  --color-preview-toolbar: #F0EDE8;
   --color-btn-submit: #111827;
 }
 
 :root {
-  /* Brindley Palette Update */
-  --background: #F4F1EC;
+  /* Brindley Palette Update - Ultra Light */
+  --background: #FBFBFA;
   --foreground: #6B5E52;
   --card: #FFFFFF;
   --card-foreground: #2D2416;
@@ -84,13 +84,13 @@
   --chart-5: #2D2416;
   --radius: 0.75rem;
 
-  --sidebar: #EAE6DF;
+  --sidebar: #F7F6F3;
   --sidebar-foreground: #6B5E52;
   --sidebar-primary: #E87722;
   --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent: #FFE8D4;
   --sidebar-accent-foreground: #C05E0E;
-  --sidebar-border: #E0DBD4;
+  --sidebar-border: #F2F0EB;
   --sidebar-ring: #E87722;
 }
 
