@@ -214,7 +214,7 @@ function SidebarBody(
   const roleLabel = ROLE_LABELS[role];
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col bg-sidebar">
+    <div className="flex h-full min-h-0 w-full flex-col bg-sidebar border-r border-sidebar-border">
 
       {/* ── Brand header ──────────────────────────────────────────────── */}
       <div

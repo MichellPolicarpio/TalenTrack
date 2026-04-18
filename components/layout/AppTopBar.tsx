@@ -127,15 +127,15 @@ export function AppTopBar({
 
           <DropdownMenu>
             <DropdownMenuTrigger
-              className="group flex items-center gap-3 rounded-full border border-topbar-border bg-card py-1.5 pl-4 pr-1.5 shadow-sm transition-all hover:border-primary/30 hover:shadow-md outline-none"
+              render={
+                <div className="flex shrink-0 cursor-pointer items-center gap-3 rounded-full border border-sidebar-border bg-sidebar px-3 py-1.5 transition-all hover:bg-sidebar-accent/50 hover:shadow-md active:scale-95" />
+              }
             >
-              <div className="min-w-0 text-right">
-                <p className="truncate text-xs font-semibold text-sidebar-accent-foreground">
-                  {userName.split(" ")[0]}
-                </p>
-                <p className="text-[10px] font-medium text-sidebar-foreground/60">{roleLabel}</p>
+              <div className="flex flex-col items-end">
+                <p className="text-[12px] font-bold text-sidebar-accent-foreground leading-none">{userName}</p>
+                <p className="text-[10px] font-medium text-sidebar-foreground/50 mt-1 uppercase tracking-tight">{roleLabel}</p>
               </div>
-              <div className="flex size-8 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground ring-2 ring-card transition-transform group-hover:scale-105">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sidebar-accent/80 font-bold text-sidebar-accent-foreground shadow-sm ring-2 ring-sidebar-border group-hover:ring-primary/30 group-hover:shadow-primary/20 transition-all">
                 {initials}
               </div>
             </DropdownMenuTrigger>
@@ -149,17 +149,27 @@ export function AppTopBar({
                 </DropdownMenuLabel>
               </DropdownMenuGroup>
               <DropdownMenuSeparator className="-mx-1.5 my-1.5" />
-              <DropdownMenuItem asChild>
-                <Link href={profileHref} className="flex w-full items-center gap-2.5 cursor-pointer px-2 py-2">
-                  <User className="size-4 text-sidebar-foreground/70" />
-                  <span className="text-[13px] font-medium">Ver Perfil</span>
-                </Link>
+              <DropdownMenuItem
+                render={
+                  <Link 
+                    href={profileHref} 
+                    className="flex w-full items-center gap-2.5 cursor-pointer px-2 py-2" 
+                  />
+                }
+              >
+                <User className="size-4 text-sidebar-foreground/70" />
+                <span className="text-[13px] font-medium">Ver Perfil</span>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/dashboard/settings" className="flex w-full items-center gap-2.5 cursor-pointer px-2 py-2">
-                  <Settings className="size-4 text-sidebar-foreground/70" />
-                  <span className="text-[13px] font-medium">Configuración</span>
-                </Link>
+              <DropdownMenuItem
+                render={
+                  <Link 
+                    href="/dashboard/settings" 
+                    className="flex w-full items-center gap-2.5 cursor-pointer px-2 py-2" 
+                  />
+                }
+              >
+                <Settings className="size-4 text-sidebar-foreground/70" />
+                <span className="text-[13px] font-medium">Configuración</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="-mx-1.5 my-1.5" />
               <DropdownMenuItem disabled className="flex items-center gap-2.5 px-2 py-2 opacity-60">
