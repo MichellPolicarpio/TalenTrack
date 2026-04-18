@@ -424,7 +424,7 @@ export function ResumeEditorClient({
 
                       <div
                         ref={tabStripScrollRef}
-                        className="min-h-9 min-w-0 flex-1 overflow-x-auto scroll-smooth rounded-lg border border-border bg-sidebar/50 scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                        className="min-h-9 min-w-0 flex-1 overflow-x-auto scroll-smooth rounded-lg border border-border bg-white/40 scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                       >
                         <TabsList
                           variant="default"
