@@ -329,7 +329,7 @@ export function AchievementsSection({
 
   return (
     <SectionShell
-      title="Achievements & Awards"
+      title="Achievements"
       addLabel="Add"
       open={open}
       onOpenChange={setOpen}
