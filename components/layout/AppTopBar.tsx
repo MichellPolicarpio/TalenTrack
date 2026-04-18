@@ -128,7 +128,7 @@ export function AppTopBar({
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <div className="flex shrink-0 cursor-pointer items-center gap-3 rounded-full border border-sidebar-border bg-white/60 px-3 py-1.5 transition-all hover:bg-sidebar-accent/50 hover:shadow-md active:scale-95" />
+                <button className="flex shrink-0 items-center gap-3 rounded-full border border-sidebar-border bg-white/60 px-3 py-1.5 transition-all hover:bg-sidebar-accent/50 hover:shadow-md active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-primary/30" />
               }
             >
               <div className="flex flex-col items-end">
