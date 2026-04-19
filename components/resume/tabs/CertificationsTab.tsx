@@ -1,5 +1,5 @@
 import { CertificationsSection } from "@/components/resume/sections/CertificationsSection";
-import type { Certification } from "@/lib/db/types";
+import type { Certification, CertificationInput } from "@/lib/db/types";
 
 export function CertificationsTab({
   resumeId,
@@ -18,7 +18,7 @@ export function CertificationsTab({
   disabled: boolean;
   headerActions?: React.ReactNode;
   onAddingChange?: (isAdding: boolean) => void;
-  onNewDraftChange?: (draft: Certification | null) => void;
+  onNewDraftChange?: (draft: CertificationInput | null) => void;
 }) {
   return (
     <CertificationsSection

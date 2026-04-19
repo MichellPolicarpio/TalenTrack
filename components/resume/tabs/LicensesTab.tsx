@@ -1,5 +1,5 @@
 import { LicensesSection } from "@/components/resume/sections/LicensesSection";
-import type { License } from "@/lib/db/types";
+import type { License, LicenseInput } from "@/lib/db/types";
 
 export function LicensesTab({
   resumeId,
@@ -18,7 +18,7 @@ export function LicensesTab({
   disabled: boolean;
   headerActions?: React.ReactNode;
   onAddingChange?: (isAdding: boolean) => void;
-  onNewDraftChange?: (draft: License | null) => void;
+  onNewDraftChange?: (draft: LicenseInput | null) => void;
 }) {
   return (
     <LicensesSection
