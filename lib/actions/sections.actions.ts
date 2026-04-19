@@ -23,9 +23,9 @@ import {
   upsertAchievement,
   deleteAchievement,
   reorderAchievements,
-  upsertResumeProject,
-  deleteResumeProject,
-  reorderResumeProjects,
+  upsertProject,
+  deleteProject,
+  reorderProjects,
   upsertLicense,
   deleteLicense,
   reorderLicenses,
@@ -37,8 +37,8 @@ import type {
   SkillInput,
   CertificationInput,
   AchievementInput,
-  ResumeProject,
-  ResumeProjectInput,
+  Project,
+  ProjectInput,
   LicenseInput,
   ReorderItem,
 } from "@/lib/db/types";
@@ -221,31 +221,31 @@ export async function reorderAchievementsAction(
 
 // ─── Resume projects ─────────────────────────────────────────────────────────
 
-export async function saveResumeProject(
+export async function saveProject(
   resumeId: string,
-  data: ResumeProjectInput,
-): Promise<ResumeProject> {
+  data: ProjectInput,
+): Promise<Project> {
   const employee = await getVerifiedEmployee(resumeId);
-  const project = await upsertResumeProject(resumeId, data);
+  const project = await upsertProject(resumeId, data);
   await afterContentMutation(resumeId, employee.id);
   return project;
 }
 
-export async function removeResumeProject(
+export async function removeProject(
   resumeId: string,
   id: string,
 ): Promise<void> {
   const employee = await getVerifiedEmployee(resumeId);
-  await deleteResumeProject(id, resumeId);
+  await deleteProject(id, resumeId);
   await afterContentMutation(resumeId, employee.id);
 }
 
-export async function reorderResumeProjectsAction(
+export async function reorderProjectsAction(
   resumeId: string,
   items: ReorderItem[],
 ): Promise<void> {
   const employee = await getVerifiedEmployee(resumeId);
-  await reorderResumeProjects(items);
+  await reorderProjects(items);
   await afterContentMutation(resumeId, employee.id);
 }
 

@@ -39,8 +39,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SectionShell } from "./SectionShell";
 import { useGenericSection } from "@/lib/hooks/useGenericSection";
+
+const DEGREE_TYPES = [
+  "Associate",
+  "Bachelor",
+  "Master",
+  "PhD",
+  "Undergraduate",
+  "Graduate",
+  "Certificate",
+  "Diploma",
+  "Other",
+];
 
 function EducationCard({
   item,
@@ -69,11 +88,11 @@ function EducationCard({
     id: item.id,
     institutionName: item.institutionName,
     degree: item.degree,
-    fieldOfStudy: item.fieldOfStudy,
+    degreeType: item.degreeType,
+    specialization: item.specialization,
     startYear: item.startYear,
     endYear: item.endYear,
     isOngoing: item.isOngoing,
-    gpa: item.gpa,
   };
 
   const [form, setForm] = useState<EducationInput>(initial);
@@ -87,16 +106,24 @@ function EducationCard({
     const draftPatch: Partial<Education> = {};
     if (patch.institutionName !== undefined) draftPatch.institutionName = patch.institutionName;
     if (patch.degree !== undefined) draftPatch.degree = patch.degree;
-    if (patch.fieldOfStudy !== undefined) draftPatch.fieldOfStudy = patch.fieldOfStudy;
+    if (patch.degreeType !== undefined) draftPatch.degreeType = patch.degreeType;
+    if (patch.specialization !== undefined) draftPatch.specialization = patch.specialization;
     if (patch.startYear !== undefined) draftPatch.startYear = patch.startYear;
     if (patch.endYear !== undefined) draftPatch.endYear = patch.endYear;
     if (patch.isOngoing !== undefined) draftPatch.isOngoing = patch.isOngoing;
-    if (patch.gpa !== undefined) draftPatch.gpa = patch.gpa;
+
+    const isValid = !!nextForm.institutionName.trim() && 
+                    !!nextForm.degree.trim() && 
+                    !!nextForm.degreeType && 
+                    nextForm.startYear !== null;
 
     onDraftChange(item.id, draftPatch);
     if (!dirty) {
       setDirty(true);
-      onDirtyChange?.(true, handleSave);
+      onDirtyChange?.(true, () => {
+        if (isValid) handleSave();
+        else toast.error("Please fill all mandatory fields.");
+      });
     }
   }
 
@@ -107,6 +134,16 @@ function EducationCard({
   }, [form, dirty]);
 
   function handleSave() {
+    const isValid = !!form.institutionName.trim() && 
+                    !!form.degree.trim() && 
+                    !!form.degreeType && 
+                    form.startYear !== null;
+
+    if (!isValid) {
+      toast.error("Please fill all mandatory fields (Institution, Major, Level, Start Year).");
+      return;
+    }
+
     startSave(async () => {
       try {
         await saveEducation(resumeId, form);
@@ -125,11 +162,11 @@ function EducationCard({
     onDraftChange(item.id, {
       institutionName: initial.institutionName,
       degree: initial.degree,
-      fieldOfStudy: initial.fieldOfStudy,
+      degreeType: initial.degreeType,
+      specialization: initial.specialization,
       startYear: initial.startYear,
       endYear: initial.endYear,
       isOngoing: initial.isOngoing,
-      gpa: initial.gpa,
     });
     setDirty(false);
     onDirtyChange?.(false, () => {});
@@ -180,7 +217,7 @@ function EducationCard({
       <div className="flex-1 space-y-3">
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <Label className="text-[12px] text-[#6B7280]">Institution</Label>
+            <Label className="text-[12px] text-[#6B7280]">Institution *</Label>
             <span className="text-[11px] text-[#9CA3AF] tabular-nums">{form.institutionName.length}/45</span>
           </div>
           <Input
@@ -190,27 +227,49 @@ function EducationCard({
             disabled={disabled}
           />
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1.5">
-            <Label className="text-[12px] text-[#6B7280]">Degree</Label>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div className="flex flex-col gap-1.5 md:col-span-1">
+            <Label className="text-[12px] text-[#6B7280]">Level *</Label>
+            <Select
+              value={form.degreeType ?? ""}
+              onValueChange={(v) => update({ degreeType: v })}
+              disabled={disabled}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Level" />
+              </SelectTrigger>
+              <SelectContent>
+                {DEGREE_TYPES.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {t}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-col gap-1.5 md:col-span-3">
+            <Label className="text-[12px] text-[#6B7280]">Major *</Label>
             <Input
               value={form.degree}
               onChange={(e) => update({ degree: e.target.value })}
               disabled={disabled}
-            />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label className="text-[12px] text-[#6B7280]">Field of Study</Label>
-            <Input
-              value={form.fieldOfStudy ?? ""}
-              onChange={(e) => update({ fieldOfStudy: e.target.value || null })}
-              disabled={disabled}
+              placeholder="e.g. Civil Engineering"
             />
           </div>
         </div>
-        <div className="flex gap-3">
-          <div className="flex flex-1 flex-col gap-1.5">
-            <Label className="text-[12px] text-[#6B7280]">Start Year</Label>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+          <div className="flex flex-col gap-1.5 md:col-span-2">
+            <Label className="text-[12px] text-[#6B7280]">Specialization</Label>
+            <Input
+              value={form.specialization ?? ""}
+              onChange={(e) => update({ specialization: e.target.value || null })}
+              disabled={disabled}
+              placeholder="e.g. AI"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5 md:col-span-1">
+            <Label className="text-[12px] text-[#6B7280]">Start *</Label>
             <Input
               type="number"
               min={1950}
@@ -218,10 +277,11 @@ function EducationCard({
               value={form.startYear ?? ""}
               onChange={(e) => update({ startYear: e.target.value ? Number(e.target.value) : null })}
               disabled={disabled}
+              className="w-full h-9 text-[11pt]"
             />
           </div>
-          <div className="flex flex-1 flex-col gap-1.5">
-            <Label className="text-[12px] text-[#6B7280]">End Year</Label>
+          <div className="flex flex-col gap-1.5 md:col-span-1">
+            <Label className="text-[12px] text-[#6B7280]">End</Label>
             <Input
               type="number"
               min={1950}
@@ -229,47 +289,24 @@ function EducationCard({
               value={form.endYear ?? ""}
               onChange={(e) => update({ endYear: e.target.value ? Number(e.target.value) : null })}
               disabled={disabled || form.isOngoing}
+              className="w-full h-9 text-[11pt]"
             />
           </div>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-2 pt-1">
           <Checkbox
+            id={`ongoing-${item.id}`}
             checked={form.isOngoing}
             onCheckedChange={(v) =>
               update({ isOngoing: Boolean(v), endYear: v ? null : form.endYear })
             }
             disabled={disabled}
           />
-          <Label className="text-[12px] font-normal text-[#6B7280]">
+          <Label htmlFor={`ongoing-${item.id}`} className="text-[12px] font-normal text-[#6B7280]">
             Currently studying here
           </Label>
         </div>
-        <div className="flex flex-col gap-1.5">
-          <Label className="text-[12px] text-[#6B7280]">GPA (optional)</Label>
-          <Input
-            type="number"
-            step="0.01"
-            min={0}
-            max={4}
-            value={form.gpa ?? ""}
-            onChange={(e) => update({ gpa: e.target.value ? Number(e.target.value) : null })}
-            disabled={disabled}
-          />
-        </div>
-        {dirty && !disabled && (
-          <div className="flex gap-2 pt-1">
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={handleCancel}
-              className="gap-1.5"
-            >
-              <X className="size-3.5" />
-              Cancel
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -278,11 +315,11 @@ function EducationCard({
 const emptyForm: EducationInput = {
   institutionName: "",
   degree: "",
-  fieldOfStudy: null,
+  degreeType: null,
+  specialization: null,
   startYear: null,
   endYear: null,
   isOngoing: false,
-  gpa: null,
 };
 
 function EducationForm({
@@ -300,6 +337,16 @@ function EducationForm({
   const [pending, startTransition] = useTransition();
 
   function handleSubmit() {
+    const isValid = !!form.institutionName.trim() && 
+                    !!form.degree.trim() && 
+                    !!form.degreeType && 
+                    form.startYear !== null;
+
+    if (!isValid) {
+      toast.error("Please fill all mandatory fields.");
+      return;
+    }
+
     startTransition(async () => {
       try {
         await saveEducation(resumeId, form);
@@ -314,12 +361,16 @@ function EducationForm({
   }
 
   useEffect(() => {
-    const isDirty = !!form.institutionName.trim() || !!form.degree.trim();
-    onDirtyChange?.(isDirty, handleSubmit);
+    const isDirty = !!form.institutionName.trim() || !!form.degree.trim() || !!form.degreeType || form.startYear !== null;
+    const isValid = !!form.institutionName.trim() && !!form.degree.trim() && !!form.degreeType && form.startYear !== null;
+    onDirtyChange?.(isDirty, () => {
+      if (isValid) handleSubmit();
+      else toast.error("Please fill all mandatory fields.");
+    });
   }, [form]);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <Label htmlFor="ed-inst">Institution *</Label>
@@ -327,33 +378,55 @@ function EducationForm({
         </div>
         <Input id="ed-inst" maxLength={45} value={form.institutionName} onChange={(e) => setForm((f) => ({ ...f, institutionName: e.target.value.slice(0, 45) }))} />
       </div>
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="ed-degree">Degree *</Label>
-        <Input id="ed-degree" value={form.degree} onChange={(e) => setForm((f) => ({ ...f, degree: e.target.value }))} />
-      </div>
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="ed-field">Field of study</Label>
-        <Input id="ed-field" value={form.fieldOfStudy ?? ""} onChange={(e) => setForm((f) => ({ ...f, fieldOfStudy: e.target.value || null }))} />
-      </div>
-      <div className="flex gap-3">
-        <div className="flex flex-1 flex-col gap-2">
-          <Label htmlFor="ed-start">Start year</Label>
-          <Input id="ed-start" type="number" min={1950} max={2099} value={form.startYear ?? ""} onChange={(e) => setForm((f) => ({ ...f, startYear: e.target.value ? Number(e.target.value) : null }))} />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="flex flex-col gap-2 md:col-span-1">
+          <Label htmlFor="ed-type">Level *</Label>
+          <Select
+            value={form.degreeType ?? ""}
+            onValueChange={(v) => setForm((f) => ({ ...f, degreeType: v }))}
+          >
+            <SelectTrigger id="ed-type">
+              <SelectValue placeholder="Level" />
+            </SelectTrigger>
+            <SelectContent>
+              {DEGREE_TYPES.map((t) => (
+                <SelectItem key={t} value={t}>
+                  {t}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <div className="flex flex-1 flex-col gap-2">
-          <Label htmlFor="ed-end">End year</Label>
-          <Input id="ed-end" type="number" min={1950} max={2099} value={form.endYear ?? ""} disabled={form.isOngoing} onChange={(e) => setForm((f) => ({ ...f, endYear: e.target.value ? Number(e.target.value) : null }))} />
+        <div className="flex flex-col gap-2 md:col-span-3">
+          <Label htmlFor="ed-degree">Major *</Label>
+          <Input 
+            id="ed-degree" 
+            value={form.degree} 
+            onChange={(e) => setForm((f) => ({ ...f, degree: e.target.value }))} 
+            placeholder="e.g. Civil Engineering"
+          />
         </div>
       </div>
-      <div className="flex items-center gap-2">
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <div className="flex flex-col gap-2 md:col-span-2">
+          <Label htmlFor="ed-field">Specialization (optional)</Label>
+          <Input id="ed-field" value={form.specialization ?? ""} onChange={(e) => setForm((f) => ({ ...f, specialization: e.target.value || null }))} placeholder="e.g. AI" />
+        </div>
+        <div className="flex flex-col gap-2 md:col-span-1">
+          <Label htmlFor="ed-start" className="text-neutral-500">Start *</Label>
+          <Input id="ed-start" type="number" min={1950} max={2099} value={form.startYear ?? ""} className="w-full h-9" onChange={(e) => setForm((f) => ({ ...f, startYear: e.target.value ? Number(e.target.value) : null }))} />
+        </div>
+        <div className="flex flex-col gap-2 md:col-span-1">
+          <Label htmlFor="ed-end" className="text-neutral-500">End</Label>
+          <Input id="ed-end" type="number" min={1950} max={2099} value={form.endYear ?? ""} className="w-full h-9" disabled={form.isOngoing} onChange={(e) => setForm((f) => ({ ...f, endYear: e.target.value ? Number(e.target.value) : null }))} />
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 pt-1">
         <Checkbox id="ed-ongoing" checked={form.isOngoing} onCheckedChange={(v) => setForm((f) => ({ ...f, isOngoing: Boolean(v), endYear: v ? null : f.endYear }))} />
-        <Label htmlFor="ed-ongoing" className="font-normal">Currently studying here</Label>
+        <Label htmlFor="ed-ongoing" className="font-normal text-[13px] text-neutral-600">Currently studying here</Label>
       </div>
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="ed-gpa">GPA (optional)</Label>
-        <Input id="ed-gpa" type="number" step="0.01" min={0} max={4} value={form.gpa ?? ""} onChange={(e) => setForm((f) => ({ ...f, gpa: e.target.value ? Number(e.target.value) : null }))} />
-      </div>
-      {/* Internal Save button removed in favor of global header button */}
     </div>
   );
 }
@@ -421,34 +494,22 @@ export function EducationSection({
       <DndContext id={`education-${resumeId}`} sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
           <div className="flex flex-col">
-            {items.length === 0 ? (
-              <button
-                type="button"
-                disabled={disabled}
-                onClick={() => { if (!disabled) setOpen(true); }}
-                className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-transparent text-[13px] font-medium text-neutral-500 transition-colors hover:border-[#F17A28]/50 hover:text-[#F17A28] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Plus className="size-4" />
-                Add New Entry
-              </button>
-            ) : (
-              items.map((item) => (
-                <EducationCard
-                  key={item.id}
-                  item={item}
-                  resumeId={resumeId}
-                  onDelete={handleDelete}
-                  onToggleVisibility={handleToggleVisibility}
-                  onDraftChange={handleDraftChange}
-                  onPersisted={onPersisted}
-                  onDirtyChange={(isDirty, saveFn) => {
-                    setLocalDirty(isDirty);
-                    setActiveSave(() => saveFn);
-                  }}
-                  disabled={disabled || pending}
-                />
-              ))
-            )}
+            {items.map((item) => (
+              <EducationCard
+                key={item.id}
+                item={item}
+                resumeId={resumeId}
+                onDelete={handleDelete}
+                onToggleVisibility={handleToggleVisibility}
+                onDraftChange={handleDraftChange}
+                onPersisted={onPersisted}
+                onDirtyChange={(isDirty, saveFn) => {
+                  setLocalDirty(isDirty);
+                  setActiveSave(() => saveFn);
+                }}
+                disabled={disabled || pending}
+              />
+            ))}
           </div>
         </SortableContext>
       </DndContext>

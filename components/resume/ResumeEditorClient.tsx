@@ -56,7 +56,7 @@ import type {
   Skill,
   Certification,
   Achievement,
-  ResumeProject,
+  Project,
   License,
 } from "@/lib/db/types";
 import type { UserRole } from "@/types/user-role";
@@ -85,7 +85,7 @@ export type ResumeEditorClientProps = {
   skills: Skill[];
   certifications: Certification[];
   achievements: Achievement[];
-  resumeProjects: ResumeProject[];
+  projects: Project[];
   licenses: License[];
 };
 
@@ -99,11 +99,11 @@ const TABS: readonly {
   { value: "personal", label: "Personal Info", icon: User },
   { value: "experience", label: "Experience", icon: Briefcase },
   { value: "education", label: "Education", icon: GraduationCap },
-  { value: "projects", label: "Projects", icon: FolderKanban },
   { value: "skills", label: "Skills", icon: Sparkles },
   { value: "certifications", label: "Certifications", icon: BadgeCheck },
   { value: "licenses", label: "Licenses", icon: Award },
   { value: "achievements", label: "Achievements", icon: Trophy },
+  { value: "projects", label: "Projects", icon: FolderKanban },
 ] as const;
 
 // ─── Zoom constants ───────────────────────────────────────────────────────────
@@ -133,7 +133,7 @@ export function ResumeEditorClient({
   skills,
   certifications,
   achievements,
-  resumeProjects,
+  projects,
   licenses,
 }: ResumeEditorClientProps) {
   // ── Preview state ──
@@ -194,8 +194,8 @@ export function ResumeEditorClient({
     setDraftSkills,
     draftAchievements,
     setDraftAchievements,
-    draftResumeProjects,
-    setDraftResumeProjects,
+    draftProjects,
+    setDraftProjects,
     draftLicenses,
     setDraftLicenses,
     draftCertifications,
@@ -211,7 +211,7 @@ export function ResumeEditorClient({
     skills,
     certifications,
     achievements,
-    resumeProjects,
+    projects,
     licenses,
   });
 
@@ -360,7 +360,7 @@ export function ResumeEditorClient({
   }, [downloading, employeeName]);
 
   // ── On-screen preview (no ref — PDF uses dedicated off-screen instance below) ──
-  const previewContent = <ResumePreview {...previewProps} />;
+  const previewContent = <ResumePreview {...previewProps} activeTab={activeTab} />;
 
   return (
     <>
@@ -375,7 +375,7 @@ export function ResumeEditorClient({
         className="pointer-events-none fixed top-0 isolate"
         style={{ left: -10000, width: 816 }}
       >
-        <ResumePreview ref={previewRef} {...previewProps} />
+        <ResumePreview ref={previewRef} {...previewProps} activeTab={activeTab} />
       </div>
 
       <div className="flex h-full flex-col">
@@ -436,7 +436,7 @@ export function ResumeEditorClient({
                               <TabsTrigger
                                 key={tab.value}
                                 value={tab.value}
-                                className="h-7 shrink-0 gap-2 rounded-md border-0 bg-transparent px-3 text-[12px] font-medium text-sidebar-foreground/60 shadow-none transition-all data-active:bg-primary data-active:text-primary-foreground data-active:shadow-sm"
+                                className="h-7 shrink-0 gap-2 rounded-md border-0 bg-transparent px-3 text-[12px] font-medium text-sidebar-foreground/60 transition-[background-color,box-shadow,transform] duration-200 data-active:bg-primary data-active:text-primary-foreground data-active:hover:text-primary-foreground data-active:shadow-sm"
                               >
                                 <Icon className="size-3.5 shrink-0" />
                                 <span className="whitespace-nowrap">{tab.label}</span>
@@ -525,8 +525,8 @@ export function ResumeEditorClient({
                       <TabsContent value="projects" className="mt-0 border-none p-0 outline-none">
                         <ProjectsTab
                           resumeId={resumeId}
-                          initial={draftResumeProjects}
-                          onItemsChange={setDraftResumeProjects}
+                          initial={draftProjects}
+                          onItemsChange={setDraftProjects}
                           onPersisted={onSectionPersisted}
                           disabled={isLocked}
                           headerActions={headerActions}
@@ -587,7 +587,7 @@ export function ResumeEditorClient({
               <div className="hidden min-w-0 flex-1 flex-col border-l border-preview-toolbar-border bg-preview-panel lg:flex">
                 {/* Right Header */}
                 <div className="flex shrink-0 w-full min-w-0 flex-wrap items-center justify-center gap-x-4 gap-y-2 border-b border-preview-toolbar-border bg-preview-toolbar px-4 sm:px-6 py-2 min-h-[64px]">
-                  {isLocked && !hasUnsavedChanges && (status === "DRAFT" || status === "NEEDS_CHANGES") && (
+                  {(status === "DRAFT" || status === "NEEDS_CHANGES") && (
                     <Button
                       type="button"
                       size="sm"

@@ -33,7 +33,6 @@ export type ResumeProfile = {
   resumeId: string;
   professionalSummary: string | null;
   jobTitle: string | null;
-  linkedInUrl: string | null;
   homeAddress: string | null;
   personalPhone: string | null;
   personalEmail: string | null;
@@ -56,7 +55,6 @@ export type UpsertEmployeeInput = {
 export type UpdateProfileInput = {
   jobTitle: string;
   professionalSummary: string;
-  linkedInUrl: string | null;
   homeAddress: string | null;
   personalPhone: string | null;
   personalEmail: string | null;
@@ -67,7 +65,6 @@ export type ReminderMonthsOption = 3 | 6 | 9 | 12;
 export type ProfileFormValues = {
   jobTitle: string;
   professionalSummary: string;
-  linkedInUrl: string;
   reminderMonths: ReminderMonthsOption;
   personalEmail: string;
   personalPhone: string;
@@ -95,11 +92,11 @@ export type Education = {
   resumeId: string;
   institutionName: string;
   degree: string;
-  fieldOfStudy: string | null;
+  degreeType: string | null;
+  specialization: string | null;
   startYear: number | null;
   endYear: number | null;
   isOngoing: boolean;
-  gpa: number | null;
   sortOrder: number;
   isVisibleOnResume: boolean;
 };
@@ -123,7 +120,7 @@ export type Certification = {
   issueDate: Date | null;
   expirationDate: Date | null;
   credentialId: string | null;
-  credentialUrl: string | null;
+
   sortOrder: number;
   isVisibleOnResume: boolean;
 };
@@ -140,13 +137,16 @@ export type Achievement = {
 };
 
 /** Relevant project experience (Projects tab → resume / PDF right column). */
-export type ResumeProject = {
+/** Relevant project experience (Projects tab → resume / PDF right column). */
+export type Project = {
   id: string;
   resumeId: string;
   projectName: string;
-  clientName: string | null;
-  roleTitle: string | null;
+  industry: string | null;
+  role: string | null;
   projectValue: string | null;
+  year: number | null;
+  expandedTitle: string | null;
   description: string | null;
   sortOrder: number;
   isVisibleOnResume: boolean;
@@ -185,11 +185,11 @@ export type EducationInput = {
   id?: string;
   institutionName: string;
   degree: string;
-  fieldOfStudy: string | null;
+  degreeType: string | null;
+  specialization: string | null;
   startYear: number | null;
   endYear: number | null;
   isOngoing: boolean;
-  gpa: number | null;
 };
 
 export type SkillInput = {
@@ -204,7 +204,7 @@ export type CertificationInput = {
   issueDate: string | null;
   expirationDate: string | null;
   credentialId: string | null;
-  credentialUrl: string | null;
+
 };
 
 export type AchievementInput = {
@@ -215,12 +215,14 @@ export type AchievementInput = {
   description: string | null;
 };
 
-export type ResumeProjectInput = {
+export type ProjectInput = {
   id?: string;
   projectName: string;
-  clientName: string | null;
-  roleTitle: string | null;
+  industry: string | null;
+  role: string | null;
   projectValue: string | null;
+  year: number | null;
+  expandedTitle: string | null;
   description: string | null;
 };
 
@@ -301,7 +303,7 @@ export type FullResumeData = {
   education: Education[];
   skills: Skill[];
   certifications: Certification[];
-  resumeProjects: ResumeProject[];
+  projects: Project[];
   achievements: Achievement[];
   licenses: License[];
 };

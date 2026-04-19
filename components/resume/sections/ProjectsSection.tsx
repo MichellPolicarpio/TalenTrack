@@ -4,50 +4,34 @@ import React, { useState, useTransition, useEffect } from "react";
 import {
   DndContext,
   closestCenter,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
   useSortable,
   verticalListSortingStrategy,
-  arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
 import {
   GripVertical,
   Trash2,
-  Loader2,
   Eye,
   EyeOff,
   Plus,
-  Save,
-  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  saveResumeProject,
-  removeResumeProject,
-  reorderResumeProjectsAction,
+  saveProject,
+  removeProject,
+  reorderProjectsAction,
   toggleVisibilityAction,
 } from "@/lib/actions/sections.actions";
-import type { ResumeProject, ResumeProjectInput } from "@/lib/db/types";
-import { Button } from "@/components/ui/button";
+import type { Project, ProjectInput } from "@/lib/db/types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SectionShell } from "./SectionShell";
 import { useGenericSection } from "@/lib/hooks/useGenericSection";
-
-function projectHeaderPreview(p: ResumeProject): string {
-  return [p.projectName, p.clientName, p.roleTitle, p.projectValue]
-    .map((s) => (s ?? "").trim())
-    .filter(Boolean)
-    .join(" | ");
-}
 
 function ProjectCard({
   item,
@@ -59,11 +43,11 @@ function ProjectCard({
   onDirtyChange,
   disabled,
 }: {
-  item: ResumeProject;
+  item: Project;
   resumeId: string;
   onDelete: (id: string) => void;
   onToggleVisibility: (id: string, visible: boolean) => void;
-  onDraftChange: (id: string, patch: Partial<ResumeProject>) => void;
+  onDraftChange: (id: string, patch: Partial<Project>) => void;
   onPersisted?: () => void;
   onDirtyChange?: (isDirty: boolean, saveFn: () => void) => void;
   disabled: boolean;
@@ -72,40 +56,31 @@ function ProjectCard({
     useSortable({ id: item.id });
   const style = { transform: CSS.Transform.toString(transform), transition };
 
-  const initial: ResumeProjectInput = {
+  const initial: ProjectInput = {
     id: item.id,
     projectName: item.projectName,
-    clientName: item.clientName,
-    roleTitle: item.roleTitle,
+    industry: item.industry,
+    role: item.role,
     projectValue: item.projectValue,
+    year: item.year,
+    expandedTitle: item.expandedTitle,
     description: item.description,
   };
 
-  const [baseline, setBaseline] = useState<ResumeProjectInput>(initial);
-  const [form, setForm] = useState<ResumeProjectInput>(initial);
+  const [form, setForm] = useState<ProjectInput>(initial);
   const [dirty, setDirty] = useState(false);
   const [saving, startSave] = useTransition();
 
-  function update(patch: Partial<ResumeProjectInput>) {
+  function update(patch: Partial<ProjectInput>) {
     const nextForm = { ...form, ...patch };
     setForm(nextForm);
-    
-    // Map back to ResumeProject partial
-    const draftPatch: Partial<ResumeProject> = {};
-    if (patch.projectName !== undefined) draftPatch.projectName = patch.projectName;
-    if (patch.clientName !== undefined) draftPatch.clientName = patch.clientName;
-    if (patch.roleTitle !== undefined) draftPatch.roleTitle = patch.roleTitle;
-    if (patch.projectValue !== undefined) draftPatch.projectValue = patch.projectValue;
-    if (patch.description !== undefined) draftPatch.description = patch.description;
-
-    onDraftChange(item.id, draftPatch);
+    onDraftChange(item.id, patch as Partial<Project>);
     if (!dirty) {
       setDirty(true);
       onDirtyChange?.(true, handleSave);
     }
   }
 
-  // Handle baseline changes for the Save button state
   useEffect(() => {
     if (dirty) {
       onDirtyChange?.(true, handleSave);
@@ -115,11 +90,9 @@ function ProjectCard({
   function handleSave() {
     startSave(async () => {
       try {
-        const updated = await saveResumeProject(resumeId, form);
+        const updated = await saveProject(resumeId, form);
         toast.success("Project saved.");
-        setBaseline(form);
         setDirty(false);
-        // Important: update the local list immediately with the fresh data from server
         onDraftChange(item.id, updated);
         onDirtyChange?.(false, () => {});
         onPersisted?.();
@@ -127,19 +100,6 @@ function ProjectCard({
         toast.error("Could not save.");
       }
     });
-  }
-
-  function handleCancel() {
-    setForm(baseline);
-    onDraftChange(item.id, {
-      projectName: baseline.projectName,
-      clientName: baseline.clientName,
-      roleTitle: baseline.roleTitle,
-      projectValue: baseline.projectValue,
-      description: baseline.description,
-    });
-    setDirty(false);
-    onDirtyChange?.(false, () => {});
   }
 
   return (
@@ -152,6 +112,7 @@ function ProjectCard({
         !item.isVisibleOnResume && "opacity-60 bg-neutral-50/50",
       )}
     >
+      {/* Left controls column — identical to CertCard */}
       <div className="flex shrink-0 flex-col items-center justify-center gap-3 border-r border-neutral-100 pr-4">
         <button
           type="button"
@@ -184,43 +145,69 @@ function ProjectCard({
         </button>
       </div>
 
+      {/* Fields — same label/input style as CertCard */}
       <div className="flex-1 space-y-3">
-
         <div className="flex flex-col gap-1.5">
-          <Label className="text-[12px] text-[#6B7280]">Project name</Label>
+          <Label className="text-[12px] text-[#6B7280]">Project Name</Label>
           <Input
             value={form.projectName}
             onChange={(e) => update({ projectName: e.target.value })}
             disabled={disabled}
           />
         </div>
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-[12px] text-[#6B7280]">Industry</Label>
+            <Input
+              value={form.industry ?? ""}
+              onChange={(e) => update({ industry: e.target.value || null })}
+              disabled={disabled}
+              placeholder="e.g. Oil & Gas"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-[12px] text-[#6B7280]">Role</Label>
+            <Input
+              value={form.role ?? ""}
+              onChange={(e) => update({ role: e.target.value || null })}
+              disabled={disabled}
+              placeholder="e.g. Mechanical Supervisor"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-[12px] text-[#6B7280]">Year</Label>
+            <Input
+              type="number"
+              value={form.year ?? ""}
+              onChange={(e) => update({ year: e.target.value ? parseInt(e.target.value) : null })}
+              disabled={disabled}
+              placeholder="YYYY"
+            />
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <Label className="text-[12px] text-[#6B7280]">Client</Label>
+            <Label className="text-[12px] text-[#6B7280]">Project Value</Label>
             <Input
-              value={form.clientName ?? ""}
-              onChange={(e) => update({ clientName: e.target.value || null })}
+              value={form.projectValue ?? ""}
+              onChange={(e) => update({ projectValue: e.target.value || null })}
               disabled={disabled}
+              placeholder="e.g. $18.5B MDD"
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label className="text-[12px] text-[#6B7280]">Job Title / Role</Label>
+            <Label className="text-[12px] text-[#6B7280]">Expanded Title</Label>
             <Input
-              value={form.roleTitle ?? ""}
-              onChange={(e) => update({ roleTitle: e.target.value || null })}
+              value={form.expandedTitle ?? ""}
+              onChange={(e) => update({ expandedTitle: e.target.value || null })}
               disabled={disabled}
+              placeholder="e.g. Sub-category or scope detail"
             />
           </div>
         </div>
-        <div className="flex flex-col gap-1.5">
-          <Label className="text-[12px] text-[#6B7280]">Value (optional)</Label>
-          <Input
-            value={form.projectValue ?? ""}
-            onChange={(e) => update({ projectValue: e.target.value || null })}
-            disabled={disabled}
-            placeholder="e.g. $18,500 MDD"
-          />
-        </div>
+
         <div className="flex flex-col gap-1.5">
           <Label className="text-[12px] text-[#6B7280]">Description</Label>
           <Textarea
@@ -228,33 +215,21 @@ function ProjectCard({
             value={form.description ?? ""}
             onChange={(e) => update({ description: e.target.value || null })}
             disabled={disabled}
-            placeholder="Brief summary (about 2–3 lines on the resume)"
+            placeholder="Brief summary of achievements..."
           />
         </div>
-        {dirty && !disabled && (
-          <div className="flex gap-2 pt-1">
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={handleCancel}
-              className="gap-1.5"
-            >
-              <X className="size-3.5" />
-              Cancel
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );
 }
 
-const emptyForm: ResumeProjectInput = {
+const emptyForm: ProjectInput = {
   projectName: "",
-  clientName: null,
-  roleTitle: null,
+  industry: null,
+  role: null,
   projectValue: null,
+  year: null,
+  expandedTitle: null,
   description: null,
 };
 
@@ -268,21 +243,19 @@ function ProjectForm({
   resumeId: string;
   onDone: () => void;
   onPersisted?: () => void;
-  onAdded?: (item: ResumeProject) => void;
+  onAdded?: (item: Project) => void;
   onDirtyChange?: (isDirty: boolean, saveFn: () => void) => void;
 }) {
-  const [form, setForm] = useState<ResumeProjectInput>(emptyForm);
+  const [form, setForm] = useState<ProjectInput>(emptyForm);
   const [pending, startTransition] = useTransition();
 
   function handleSubmit() {
+    if (!form.projectName.trim()) return;
     startTransition(async () => {
       try {
-        const newItem = await saveResumeProject(resumeId, form);
-        toast.success("Project saved.");
-        
-        // Callback to parent to add the item to local state before refresh
+        const newItem = await saveProject(resumeId, form);
+        toast.success("Project added.");
         onAdded?.(newItem);
-        
         onPersisted?.();
         onDirtyChange?.(false, () => {});
         onDone();
@@ -298,78 +271,79 @@ function ProjectForm({
   }, [form]);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-2">
         <Label htmlFor="rp-name">Project name *</Label>
         <Input
           id="rp-name"
           value={form.projectName}
-          onChange={(e) =>
-            setForm((f) => ({ ...f, projectName: e.target.value }))
-          }
+          onChange={(e) => setForm((f) => ({ ...f, projectName: e.target.value }))}
           placeholder="e.g. Dos Bocas New Refinery"
         />
       </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="rp-client">Client</Label>
+          <Label htmlFor="rp-industry">Industry</Label>
           <Input
-            id="rp-client"
-            value={form.clientName ?? ""}
-            onChange={(e) =>
-              setForm((f) => ({
-                ...f,
-                clientName: e.target.value || null,
-              }))
-            }
-            placeholder="e.g. Pemex"
+            id="rp-industry"
+            value={form.industry ?? ""}
+            onChange={(e) => setForm((f) => ({ ...f, industry: e.target.value || null }))}
+            placeholder="e.g. Oil & Gas"
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="rp-role">Job title / role</Label>
+          <Label htmlFor="rp-role">Role</Label>
           <Input
             id="rp-role"
-            value={form.roleTitle ?? ""}
-            onChange={(e) =>
-              setForm((f) => ({
-                ...f,
-                roleTitle: e.target.value || null,
-              }))
-            }
-            placeholder="e.g. Mechanical Supervisor"
+            value={form.role ?? ""}
+            onChange={(e) => setForm((f) => ({ ...f, role: e.target.value || null }))}
+            placeholder="e.g. Manager"
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="rp-year">Year</Label>
+          <Input
+            id="rp-year"
+            type="number"
+            value={form.year ?? ""}
+            onChange={(e) => setForm((f) => ({ ...f, year: e.target.value ? parseInt(e.target.value) : null }))}
+            placeholder="YYYY"
           />
         </div>
       </div>
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="rp-value">Value (optional)</Label>
-        <Input
-          id="rp-value"
-          value={form.projectValue ?? ""}
-          onChange={(e) =>
-            setForm((f) => ({
-              ...f,
-              projectValue: e.target.value || null,
-            }))
-          }
-          placeholder="e.g. $18,500 MDD"
-        />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="rp-value">Project Value</Label>
+          <Input
+            id="rp-value"
+            value={form.projectValue ?? ""}
+            onChange={(e) => setForm((f) => ({ ...f, projectValue: e.target.value || null }))}
+            placeholder="e.g. $18.5B"
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="rp-expanded">Expanded Title</Label>
+          <Input
+            id="rp-expanded"
+            value={form.expandedTitle ?? ""}
+            onChange={(e) => setForm((f) => ({ ...f, expandedTitle: e.target.value || null }))}
+            placeholder="Additional context..."
+          />
+        </div>
       </div>
+
       <div className="flex flex-col gap-2">
         <Label htmlFor="rp-desc">Description</Label>
         <Textarea
           id="rp-desc"
           rows={3}
           value={form.description ?? ""}
-          onChange={(e) =>
-            setForm((f) => ({
-              ...f,
-              description: e.target.value || null,
-            }))
-          }
-          placeholder="Brief summary (about 2–3 lines on the resume)"
+          onChange={(e) => setForm((f) => ({ ...f, description: e.target.value || null }))}
+          placeholder="Scope and achievements..."
         />
       </div>
-      {/* Internal Save button removed in favor of global header button */}
     </div>
   );
 }
@@ -383,8 +357,8 @@ export function ProjectsSection({
   headerActions,
 }: {
   resumeId: string;
-  initial: ResumeProject[];
-  onItemsChange?: (items: ResumeProject[]) => void;
+  initial: Project[];
+  onItemsChange?: (items: Project[]) => void;
   onPersisted?: () => void;
   disabled?: boolean;
   headerActions?: React.ReactNode;
@@ -409,14 +383,14 @@ export function ProjectsSection({
     initial,
     onItemsChange,
     onPersisted,
-    removeAction: removeResumeProject,
-    reorderAction: reorderResumeProjectsAction,
+    removeAction: removeProject,
+    reorderAction: reorderProjectsAction,
     headerActions,
   });
 
   return (
     <SectionShell
-      title="Projects"
+      title="Project List"
       addLabel="Add"
       open={open}
       onOpenChange={setOpen}
@@ -453,9 +427,7 @@ export function ProjectsSection({
               <button
                 type="button"
                 disabled={disabled}
-                onClick={() => {
-                  if (!disabled) setOpen(true);
-                }}
+                onClick={() => { if (!disabled) setOpen(true); }}
                 className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-transparent text-[13px] font-medium text-neutral-500 transition-colors hover:border-[#F17A28]/50 hover:text-[#F17A28] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Plus className="size-4" />

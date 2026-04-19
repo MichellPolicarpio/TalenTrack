@@ -16,7 +16,7 @@ export async function ResumeEditor({ resumeId }: ResumeEditorProps) {
     skills,
     certifications,
     achievements,
-    resumeProjects,
+    projects,
     licenses,
   } = data;
   const resume = resumeWithProfile?.resume;
@@ -40,7 +40,7 @@ export async function ResumeEditor({ resumeId }: ResumeEditorProps) {
         skills={skills}
         certifications={certifications}
         achievements={achievements}
-        resumeProjects={resumeProjects}
+        projects={projects}
         licenses={licenses}
       />
     </>

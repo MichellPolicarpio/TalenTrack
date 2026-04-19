@@ -42,6 +42,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SectionShell } from "./SectionShell";
 import { useGenericSection } from "@/lib/hooks/useGenericSection";
+import { MonthYearPicker } from "@/components/ui/month-year-picker";
 
 function toDateStr(d: Date | null): string | null {
   return d ? (d.toISOString().split("T")[0] ?? null) : null;
@@ -215,19 +216,17 @@ function WorkExperienceCard({
         <div className="flex gap-3">
           <div className="flex flex-1 flex-col gap-1.5">
             <Label className="text-[12px] text-[#6B7280]">Start Date</Label>
-            <Input
-              type="date"
-              value={form.startDate ?? ""}
-              onChange={(e) => update({ startDate: e.target.value || null })}
+            <MonthYearPicker
+              value={form.startDate}
+              onChange={(v) => update({ startDate: v })}
               disabled={disabled}
             />
           </div>
           <div className="flex flex-1 flex-col gap-1.5">
             <Label className="text-[12px] text-[#6B7280]">End Date</Label>
-            <Input
-              type="date"
-              value={form.endDate ?? ""}
-              onChange={(e) => update({ endDate: e.target.value || null })}
+            <MonthYearPicker
+              value={form.endDate}
+              onChange={(v) => update({ endDate: v })}
               disabled={disabled || form.isCurrent}
             />
           </div>
@@ -253,20 +252,6 @@ function WorkExperienceCard({
             disabled={disabled}
           />
         </div>
-        {dirty && !disabled && (
-          <div className="flex gap-2 pt-1">
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={handleCancel}
-              className="gap-1.5"
-            >
-              <X className="size-3.5" />
-              Cancel
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -316,7 +301,7 @@ function WorkExperienceForm({
   }, [form]);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-2">
         <Label htmlFor="we-company">Company *</Label>
         <Input id="we-company" value={form.companyName} onChange={(e) => setForm((f) => ({ ...f, companyName: e.target.value }))} />
@@ -332,16 +317,23 @@ function WorkExperienceForm({
       <div className="flex gap-3">
         <div className="flex flex-1 flex-col gap-2">
           <Label htmlFor="we-start">Start date</Label>
-          <Input id="we-start" type="date" value={form.startDate ?? ""} onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value || null }))} />
+          <MonthYearPicker
+            value={form.startDate}
+            onChange={(v) => setForm((f) => ({ ...f, startDate: v }))}
+          />
         </div>
         <div className="flex flex-1 flex-col gap-2">
           <Label htmlFor="we-end">End date</Label>
-          <Input id="we-end" type="date" value={form.endDate ?? ""} disabled={form.isCurrent} onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value || null }))} />
+          <MonthYearPicker
+            value={form.endDate}
+            disabled={form.isCurrent}
+            onChange={(v) => setForm((f) => ({ ...f, endDate: v }))}
+          />
         </div>
       </div>
       <div className="flex items-center gap-2">
         <Checkbox id="we-current" checked={form.isCurrent} onCheckedChange={(v) => setForm((f) => ({ ...f, isCurrent: Boolean(v), endDate: v ? null : f.endDate }))} />
-        <Label htmlFor="we-current" className="font-normal">I currently work here</Label>
+        <Label htmlFor="we-current" className="font-normal text-sm">I currently work here</Label>
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="we-desc">Description</Label>
@@ -423,34 +415,22 @@ export function WorkExperienceSection({
           strategy={verticalListSortingStrategy}
         >
           <div className="flex flex-col">
-            {items.length === 0 ? (
-              <button
-                type="button"
-                disabled={disabled}
-                onClick={() => { if (!disabled) setOpen(true); }}
-                className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-transparent text-[13px] font-medium text-neutral-500 transition-colors hover:border-[#F17A28]/50 hover:text-[#F17A28] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Plus className="size-4" />
-                Add New Entry
-              </button>
-            ) : (
-              items.map((item) => (
-                <WorkExperienceCard
-                  key={item.id}
-                  item={item}
-                  resumeId={resumeId}
-                  onDelete={handleDelete}
-                  onToggleVisibility={handleToggleVisibility}
-                  onDraftChange={handleDraftChange}
-                  onPersisted={onPersisted}
-                  onDirtyChange={(isDirty, saveFn) => {
-                    setLocalDirty(isDirty);
-                    setActiveSave(() => saveFn);
-                  }}
-                  disabled={disabled || pending}
-                />
-              ))
-            )}
+            {items.map((item) => (
+              <WorkExperienceCard
+                key={item.id}
+                item={item}
+                resumeId={resumeId}
+                onDelete={handleDelete}
+                onToggleVisibility={handleToggleVisibility}
+                onDraftChange={handleDraftChange}
+                onPersisted={onPersisted}
+                onDirtyChange={(isDirty, saveFn) => {
+                  setLocalDirty(isDirty);
+                  setActiveSave(() => saveFn);
+                }}
+                disabled={disabled || pending}
+              />
+            ))}
           </div>
         </SortableContext>
       </DndContext>

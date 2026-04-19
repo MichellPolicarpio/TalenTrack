@@ -75,7 +75,6 @@ function CertCard({
     issueDate: toDateStr(item.issueDate),
     expirationDate: toDateStr(item.expirationDate),
     credentialId: item.credentialId,
-    credentialUrl: item.credentialUrl,
   };
 
   const [form, setForm] = useState<CertificationInput>(initial);
@@ -92,7 +91,6 @@ function CertCard({
     if (patch.issueDate !== undefined) draftPatch.issueDate = patch.issueDate ? new Date(patch.issueDate) : null;
     if (patch.expirationDate !== undefined) draftPatch.expirationDate = patch.expirationDate ? new Date(patch.expirationDate) : null;
     if (patch.credentialId !== undefined) draftPatch.credentialId = patch.credentialId;
-    if (patch.credentialUrl !== undefined) draftPatch.credentialUrl = patch.credentialUrl;
 
     onDraftChange(item.id, draftPatch);
     if (!dirty) {
@@ -129,7 +127,6 @@ function CertCard({
       issueDate: initial.issueDate ? new Date(initial.issueDate) : null,
       expirationDate: initial.expirationDate ? new Date(initial.expirationDate) : null,
       credentialId: initial.credentialId,
-      credentialUrl: initial.credentialUrl,
     });
     setDirty(false);
     onDirtyChange?.(false, () => {});
@@ -215,36 +212,13 @@ function CertCard({
           </div>
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label className="text-[12px] text-[#6B7280]">Credential ID</Label>
+          <Label className="text-[12px] text-[#6B7280]">Certification Number or ID</Label>
           <Input
             value={form.credentialId ?? ""}
             onChange={(e) => update({ credentialId: e.target.value || null })}
             disabled={disabled}
           />
         </div>
-        <div className="flex flex-col gap-1.5">
-          <Label className="text-[12px] text-[#6B7280]">Credential URL</Label>
-          <Input
-            type="url"
-            value={form.credentialUrl ?? ""}
-            onChange={(e) => update({ credentialUrl: e.target.value || null })}
-            disabled={disabled}
-          />
-        </div>
-        {dirty && !disabled && (
-          <div className="flex gap-2 pt-1">
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={handleCancel}
-              className="gap-1.5"
-            >
-              <X className="size-3.5" />
-              Cancel
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -256,7 +230,6 @@ const emptyForm: CertificationInput = {
   issueDate: null,
   expirationDate: null,
   credentialId: null,
-  credentialUrl: null,
 };
 
 function CertForm({
@@ -293,7 +266,7 @@ function CertForm({
   }, [form]);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-2">
         <Label htmlFor="cert-name">Certification name *</Label>
         <Input id="cert-name" value={form.certificationName} onChange={(e) => setForm((f) => ({ ...f, certificationName: e.target.value }))} />
@@ -313,12 +286,8 @@ function CertForm({
         </div>
       </div>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="cert-id">Credential ID</Label>
+        <Label htmlFor="cert-id">Certification Number or ID</Label>
         <Input id="cert-id" value={form.credentialId ?? ""} onChange={(e) => setForm((f) => ({ ...f, credentialId: e.target.value || null }))} />
-      </div>
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="cert-url">Credential URL</Label>
-        <Input id="cert-url" type="url" value={form.credentialUrl ?? ""} onChange={(e) => setForm((f) => ({ ...f, credentialUrl: e.target.value || null }))} />
       </div>
       {/* Internal Save button removed in favor of global header button */}
     </div>
@@ -388,34 +357,22 @@ export function CertificationsSection({
       <DndContext id={`certifications-${resumeId}`} sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
           <div className="flex flex-col">
-            {items.length === 0 ? (
-              <button
-                type="button"
-                disabled={disabled}
-                onClick={() => { if (!disabled) setOpen(true); }}
-                className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-transparent text-[13px] font-medium text-neutral-500 transition-colors hover:border-[#F17A28]/50 hover:text-[#F17A28] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Plus className="size-4" />
-                Add New Entry
-              </button>
-            ) : (
-              items.map((item) => (
-                <CertCard
-                  key={item.id}
-                  item={item}
-                  resumeId={resumeId}
-                  onDelete={handleDelete}
-                  onToggleVisibility={handleToggleVisibility}
-                  onDraftChange={handleDraftChange}
-                  onPersisted={onPersisted}
-                  onDirtyChange={(isDirty, saveFn) => {
-                    setLocalDirty(isDirty);
-                    setActiveSave(() => saveFn);
-                  }}
-                  disabled={disabled || pending}
-                />
-              ))
-            )}
+            {items.map((item) => (
+              <CertCard
+                key={item.id}
+                item={item}
+                resumeId={resumeId}
+                onDelete={handleDelete}
+                onToggleVisibility={handleToggleVisibility}
+                onDraftChange={handleDraftChange}
+                onPersisted={onPersisted}
+                onDirtyChange={(isDirty, saveFn) => {
+                  setLocalDirty(isDirty);
+                  setActiveSave(() => saveFn);
+                }}
+                disabled={disabled || pending}
+              />
+            ))}
           </div>
         </SortableContext>
       </DndContext>

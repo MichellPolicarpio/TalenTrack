@@ -59,7 +59,7 @@ export function SectionShell({
       {open ? (
         <div
           ref={formRef}
-          className="mt-1 w-full min-w-0 border-t border-border pt-5 animate-in fade-in slide-in-from-top-2 duration-200"
+          className="mt-2 w-full min-w-0 animate-in fade-in slide-in-from-top-2 duration-200"
         >
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-card-foreground/80">{addLabel}</h3>
@@ -74,6 +74,17 @@ export function SectionShell({
           {form}
         </div>
       ) : null}
+
+      {!disabled && (
+        <button
+          type="button"
+          onClick={() => onOpenChange(true)}
+          className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-transparent text-[13px] font-medium text-neutral-500 transition-colors hover:border-primary/50 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Plus className="size-4" />
+          {addLabel === "Add" ? "Add New Entry" : `Add ${addLabel}`}
+        </button>
+      )}
     </section>
   );
 }

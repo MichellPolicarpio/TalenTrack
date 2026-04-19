@@ -249,51 +249,39 @@ function LicenseCard({
           </div>
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <Label className="text-[12px] text-[#6B7280]">License Number</Label>
-          <Input
-            value={form.licenseNumber ?? ""}
-            onChange={(e) => update({ licenseNumber: e.target.value || null })}
-            placeholder="e.g. 123456"
-            disabled={disabled}
-          />
-        </div>
-
-        <div className="flex items-end gap-3">
-          <div className="flex flex-1 flex-col gap-1.5">
-            <Label className="text-[12px] text-[#6B7280]">Expiration Date</Label>
+        <div className="grid grid-cols-2 gap-3 items-end">
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-[12px] text-[#6B7280]">License Number</Label>
             <Input
-              type="date"
-              value={form.expirationDate || ""}
-              onChange={(e) => update({ expirationDate: e.target.value || null })}
-              disabled={disabled || form.isRetired}
-            />
-          </div>
-          <div className="flex items-center gap-2 pb-2">
-            <Checkbox
-              id={`retired-${item.id}`}
-              checked={form.isRetired}
-              onCheckedChange={(checked) => update({ isRetired: Boolean(checked) })}
+              value={form.licenseNumber ?? ""}
+              onChange={(e) => update({ licenseNumber: e.target.value || null })}
+              placeholder="e.g. 123456"
               disabled={disabled}
             />
-            <Label htmlFor={`retired-${item.id}`} className="text-[13px] font-medium cursor-pointer">Retired</Label>
+          </div>
+
+          <div className="flex items-end gap-3">
+            <div className="flex-1 flex flex-col gap-1.5">
+              <Label className="text-[12px] text-[#6B7280]">Expiration Date</Label>
+              <Input
+                type="date"
+                value={form.expirationDate || ""}
+                onChange={(e) => update({ expirationDate: e.target.value || null })}
+                disabled={disabled || form.isRetired}
+              />
+            </div>
+            <div className="flex items-center gap-2 pb-2">
+              <Checkbox
+                id={`retired-${item.id}`}
+                checked={form.isRetired}
+                onCheckedChange={(checked) => update({ isRetired: Boolean(checked) })}
+                disabled={disabled}
+              />
+              <Label htmlFor={`retired-${item.id}`} className="text-[13px] font-medium cursor-pointer">Retired</Label>
+            </div>
           </div>
         </div>
 
-        {dirty && !disabled && (
-          <div className="flex gap-2 pt-1">
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={handleCancel}
-              className="gap-1.5"
-            >
-              <X className="size-3.5" />
-              Cancel
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -343,8 +331,8 @@ function LicenseForm({
   }, [form]);
 
   return (
-    <div className="relative flex flex-col gap-4 pr-20">
-      <div className="absolute top-0 right-0">
+    <div className="relative flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-5 pr-24 shadow-sm">
+      <div className="absolute top-5 right-5">
         <StatusBadge status={currentStatus} />
       </div>
       <div className="grid grid-cols-2 gap-3">
@@ -376,23 +364,23 @@ function LicenseForm({
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="lic-num">License Number</Label>
-        <Input id="lic-num" value={form.licenseNumber ?? ""} onChange={(e) => setForm((f) => ({ ...f, licenseNumber: e.target.value || null }))} placeholder="e.g. 123456" />
-      </div>
-
-      <div className="flex items-end gap-3">
-        <div className="flex flex-1 flex-col gap-2">
-          <Label htmlFor="lic-exp">Expiration Date</Label>
-          <Input id="lic-exp" type="date" value={form.expirationDate || ""} onChange={(e) => setForm((f) => ({ ...f, expirationDate: e.target.value || null }))} disabled={form.isRetired} />
+      <div className="grid grid-cols-2 gap-4 items-end">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="lic-num">License Number</Label>
+          <Input id="lic-num" value={form.licenseNumber ?? ""} onChange={(e) => setForm((f) => ({ ...f, licenseNumber: e.target.value || null }))} placeholder="e.g. 123456" />
         </div>
-        <div className="flex items-center gap-2 pb-2">
-          <Checkbox id="lic-retired" checked={form.isRetired} onCheckedChange={(checked) => setForm((f) => ({ ...f, isRetired: Boolean(checked) }))} />
-          <Label htmlFor="lic-retired" className="font-medium cursor-pointer">Retired</Label>
+
+        <div className="flex items-end gap-3">
+          <div className="flex-1 flex flex-col gap-2">
+            <Label htmlFor="lic-exp">Expiration Date</Label>
+            <Input id="lic-exp" type="date" value={form.expirationDate || ""} onChange={(e) => setForm((f) => ({ ...f, expirationDate: e.target.value || null }))} disabled={form.isRetired} />
+          </div>
+          <div className="flex items-center gap-2 pb-2">
+            <Checkbox id="lic-retired" checked={form.isRetired} onCheckedChange={(checked) => setForm((f) => ({ ...f, isRetired: Boolean(checked) }))} />
+            <Label htmlFor="lic-retired" className="text-[13px] font-medium cursor-pointer">Retired</Label>
+          </div>
         </div>
       </div>
-
-
       {/* Internal Save button removed in favor of global header button */}
     </div>
   );
@@ -461,34 +449,22 @@ export function LicensesSection({
       <DndContext id={`licenses-${resumeId}`} sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
           <div className="flex flex-col">
-            {items.length === 0 ? (
-              <button
-                type="button"
-                disabled={disabled}
-                onClick={() => { if (!disabled) setOpen(true); }}
-                className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-transparent text-[13px] font-medium text-neutral-500 transition-colors hover:border-[#F17A28]/50 hover:text-[#F17A28] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Plus className="size-4" />
-                Add New Entry
-              </button>
-            ) : (
-              items.map((item) => (
-                <LicenseCard
-                  key={item.id}
-                  item={item}
-                  resumeId={resumeId}
-                  onDelete={handleDelete}
-                  onToggleVisibility={handleToggleVisibility}
-                  onDraftChange={handleDraftChange}
-                  onPersisted={onPersisted}
-                  onDirtyChange={(isDirty, saveFn) => {
-                    setLocalDirty(isDirty);
-                    setActiveSave(() => saveFn);
-                  }}
-                  disabled={disabled || pending}
-                />
-              ))
-            )}
+            {items.map((item) => (
+              <LicenseCard
+                key={item.id}
+                item={item}
+                resumeId={resumeId}
+                onDelete={handleDelete}
+                onToggleVisibility={handleToggleVisibility}
+                onDraftChange={handleDraftChange}
+                onPersisted={onPersisted}
+                onDirtyChange={(isDirty, saveFn) => {
+                  setLocalDirty(isDirty);
+                  setActiveSave(() => saveFn);
+                }}
+                disabled={disabled || pending}
+              />
+            ))}
           </div>
         </SortableContext>
       </DndContext>

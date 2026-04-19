@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useState } from "react";
+import { forwardRef, useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import type {
   ResumeProfile,
@@ -8,7 +8,7 @@ import type {
   Education,
   Skill,
   Certification,
-  ResumeProject,
+  Project,
   License,
   Achievement,
 } from "@/lib/db/types";
@@ -20,11 +20,12 @@ export type ResumePreviewProps = {
   education: Education[];
   skills: Skill[];
   certifications: Certification[];
-  resumeProjects: ResumeProject[];
+  projects: Project[];
   licenses: License[];
   achievements: Achievement[];
   className?: string;
   style?: React.CSSProperties;
+  activeTab?: string;
 };
 
 /** Brand orange aligned with Brindley logo artwork */
@@ -61,11 +62,16 @@ function isPeFeCertification(name: string): boolean {
   );
 }
 
-function formatProjectHeaderLine(p: ResumeProject): string {
-  return [p.projectName, p.clientName, p.roleTitle, p.projectValue]
+function formatProjectHeaderLine(p: Project): string {
+  const main = p.projectName;
+  const sub = [p.year?.toString(), p.industry, p.role, p.projectValue]
     .map((s) => (s ?? "").trim())
     .filter(Boolean)
     .join(" | ");
+  
+  if (!main) return sub;
+  if (!sub) return main;
+  return `${main} - ${sub}`;
 }
 
 function LeftSectionTitle({
@@ -103,22 +109,33 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
       education,
       skills,
       certifications,
-      resumeProjects,
+      projects,
       licenses,
       achievements = [],
       className,
       style,
+      activeTab,
     },
     ref,
   ) {
     const [logoOk, setLogoOk] = useState(true);
+    const page1Ref = useRef<HTMLDivElement>(null);
+    const page2Ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+      if (activeTab === "projects") {
+        page2Ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else if (activeTab && activeTab !== "projects") {
+        page1Ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, [activeTab]);
 
     // Centralized filtering (TD-08)
     const visibleExp = experiences.filter((e) => e.isVisibleOnResume);
     const visibleEdu = education.filter((e) => e.isVisibleOnResume);
     const visibleSkills = skills.filter((s) => s.isVisibleOnResume);
     const visibleCerts = certifications.filter((c) => c.isVisibleOnResume);
-    const visibleProjects = resumeProjects.filter((p) => p.isVisibleOnResume);
+    const visibleProjects = projects.filter((p) => p.isVisibleOnResume);
     const visibleLicenses = licenses.filter((l) => l.isVisibleOnResume);
     const visibleAchievements = achievements.filter((a) => a.isVisibleOnResume);
 
@@ -156,6 +173,7 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
       >
         {/* ─── PAGE 1 ─── */}
         <div
+          ref={page1Ref}
           className="resume-page-sheet relative mx-auto flex h-[1056px] w-[816px] min-w-[816px] flex-col overflow-hidden bg-white shadow-2xl"
           style={{
             fontFamily: 'var(--font-tw-cen), "Tw Cen MT", "Tw Cen MT Condensed", "Century Gothic", system-ui, -apple-system, "Segoe UI", sans-serif',
@@ -276,8 +294,9 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
                             {edu.institutionName}
                           </p>
                           <p className="text-[11pt] italic text-[#000000]">
+                            {edu.degreeType ? `${edu.degreeType} in ` : ""}
                             {edu.degree}
-                            {edu.fieldOfStudy ? `, ${edu.fieldOfStudy}` : ""}
+                            {edu.specialization ? `, ${edu.specialization}` : ""}
                           </p>
                         </div>
                       ))}
@@ -345,7 +364,7 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
                             .split("\n")
                             .map((l) => l.replace(/^[-•]\s*/, "").trim())
                             .filter(Boolean)
-                            .join("\n") // Keep as string for splitting again? No, map it.
+                            .join("\n")
                             .split("\n")
                           : [];
                         return (
@@ -379,56 +398,6 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
                     </div>
                   </section>
                 ) : null}
-
-                {visibleProjects.length > 0 ? (
-                  <section className="mb-5">
-                    <RightSectionTitle>Relevant Project Experience</RightSectionTitle>
-                    <ul className="space-y-3">
-                      {visibleProjects.map((p) => {
-                        const header = formatProjectHeaderLine(p);
-                        const desc = (p.description ?? "").trim();
-                        const descLines = desc
-                          ? desc
-                            .split("\n")
-                            .map((l) => l.replace(/^[-•]\s*/, "").trim())
-                            .filter(Boolean)
-                          : [];
-                        return (
-                          <li
-                            key={p.id}
-                            className="flex gap-2 text-[11pt] text-[#000000]"
-                          >
-                            <span
-                              className="shrink-0 font-bold"
-                              style={{ color: ORANGE }}
-                              aria-hidden
-                            >
-                              •
-                            </span>
-                            <div className="min-w-0 flex-1">
-                              {header ? (
-                                <p className="text-[#000000]">{header}</p>
-                              ) : null}
-                              {descLines.length > 0 ? (
-                                <div className="mt-1 space-y-0.5">
-                                  {descLines.map((line, i) => (
-                                    <p key={i} className="text-[#000000]">
-                                      {line}
-                                    </p>
-                                  ))}
-                                </div>
-                              ) : desc ? (
-                                <p className="mt-1 text-[#000000]">{desc}</p>
-                              ) : null}
-                            </div>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </section>
-                ) : null}
-
-
 
                 {!hasBodyContent && !summaryText ? (
                   <div className="flex h-48 flex-col items-center justify-center gap-3 text-center">
@@ -496,6 +465,7 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
 
         {/* ─── PAGE 2 (Independent) ─── */}
         <div
+          ref={page2Ref}
           className="resume-page-sheet relative mx-auto flex h-[1056px] w-[816px] min-w-[816px] flex-col overflow-hidden bg-white shadow-2xl"
           style={{
             fontFamily: 'var(--font-tw-cen), "Tw Cen MT", "Tw Cen MT Condensed", "Century Gothic", system-ui, -apple-system, "Segoe UI", sans-serif',
@@ -550,9 +520,65 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
 
               {/* Main content: Full width (no sidebar) */}
               <main className="flex min-w-0 flex-1 flex-col px-8 py-5">
-                <div className="h-full w-full rounded-md border-2 border-dashed border-neutral-100 flex items-center justify-center">
-                  <p className="text-neutral-400 italic">Page 2 Content Placeholder</p>
-                </div>
+                {visibleProjects.length > 0 ? (
+                  <section className="mb-5">
+                    <RightSectionTitle>Project List</RightSectionTitle>
+
+                    {visibleProjects.map((p, idx) => {
+                      const desc = (p.description ?? "").trim();
+                      return (
+                        <div key={p.id} className="mb-4">
+                          {/* Table Container */}
+                          <div className="border border-[#D1D5DB]">
+                            {/* Table header row */}
+                            <div
+                              className="grid border-b border-[#D1D5DB] text-[9pt] font-bold text-[#000000]"
+                              style={{ gridTemplateColumns: "17% 30% 22% 18% 13%" }}
+                            >
+                              <div className="border-r border-[#D1D5DB] px-1.5 py-0.5">Industry</div>
+                              <div className="border-r border-[#D1D5DB] px-1.5 py-0.5">Project</div>
+                              <div className="border-r border-[#D1D5DB] px-1.5 py-0.5">Role</div>
+                              <div className="border-r border-[#D1D5DB] px-1.5 py-0.5">Value</div>
+                              <div className="px-1.5 py-0.5">Year</div>
+                            </div>
+                            
+                            {/* Table data row */}
+                            <div
+                              className="grid text-[9.5pt] text-[#000000]"
+                              style={{ gridTemplateColumns: "17% 30% 22% 18% 13%" }}
+                            >
+                              <div className="border-r border-[#D1D5DB] px-1.5 py-0.5 break-words">{p.industry ?? ""}</div>
+                              <div className="border-r border-[#D1D5DB] px-1.5 py-0.5 break-words">{p.projectName}</div>
+                              <div className="border-r border-[#D1D5DB] px-1.5 py-0.5 break-words">{p.role ?? ""}</div>
+                              <div className="border-r border-[#D1D5DB] px-1.5 py-0.5 break-words">{p.projectValue ?? ""}</div>
+                              <div className="px-1.5 py-0.5 break-words">{p.year ?? ""}</div>
+                            </div>
+                          </div>
+
+                          {/* Expanded title  (bold, like the Sample label in the image) */}
+                          {p.expandedTitle && (
+                            <p className="mt-2 text-[9.5pt] font-bold text-[#000000] leading-snug">
+                              {p.expandedTitle}
+                            </p>
+                          )}
+
+                          {/* Description paragraph */}
+                          {desc && (
+                            <p className="mt-0.5 text-[9pt] text-[#000000] leading-snug text-justify">
+                              {desc}
+                            </p>
+                          )}
+
+                          {/* Divider between projects */}
+                          {idx < visibleProjects.length - 1 && (
+                            <div className="mt-4 border-b border-[#E5E7EB]" />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </section>
+                ) : null}
+
               </main>
             </div>
           </div>

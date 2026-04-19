@@ -506,7 +506,7 @@ export function ResumePdfDocument({ data }: { data: FullResumeData }) {
   const education = data.education.filter((e) => e.isVisibleOnResume);
   const skills = data.skills.filter((s) => s.isVisibleOnResume);
   const certifications = data.certifications.filter((c) => c.isVisibleOnResume);
-  const resumeProjects = data.resumeProjects.filter((p) => p.isVisibleOnResume);
+  const projects = data.projects.filter((p) => p.isVisibleOnResume);
   const achievements = data.achievements?.filter((a) => a.isVisibleOnResume) ?? [];
   const licenses = data.licenses?.filter((l) => l.isVisibleOnResume) ?? [];
 
@@ -564,7 +564,10 @@ export function ResumePdfDocument({ data }: { data: FullResumeData }) {
                       : e.endYear != null
                         ? String(e.endYear)
                         : null;
-                  const degreeLine = [e.degree, e.fieldOfStudy]
+                  const degreeWithMajor = e.degreeType
+                    ? `${e.degreeType} in ${e.degree}`
+                    : e.degree;
+                  const degreeLine = [degreeWithMajor, e.specialization]
                     .filter(Boolean)
                     .join(", ");
                   return (
@@ -679,50 +682,6 @@ export function ResumePdfDocument({ data }: { data: FullResumeData }) {
               </>
             ) : null}
 
-            {resumeProjects.length > 0 ? (
-              <>
-                <RightSectionTitle>
-                  Relevant Project Experience
-                </RightSectionTitle>
-                {resumeProjects.map((p) => {
-                  const header = [
-                    p.projectName,
-                    p.clientName,
-                    p.roleTitle,
-                    p.projectValue,
-                  ]
-                    .map((s) => (s ?? "").trim())
-                    .filter(Boolean)
-                    .join(" | ");
-                  const descLines = p.description
-                    ? p.description.split("\n").filter((l) => l.trim())
-                    : [];
-                  return (
-                    <View key={p.id} style={styles.entryContainer} wrap={false}>
-                      <View style={styles.bullet}>
-                        <Text style={styles.bulletDot}>•</Text>
-                        <View style={{ flex: 1 }}>
-                          {header ? (
-                            <Text style={styles.bulletText}>
-                              {header}
-                            </Text>
-                          ) : null}
-                          {descLines.map((line, i) => (
-                            <Text
-                              key={`${p.id}-d-${i}`}
-                              style={[styles.bulletText, { marginTop: 2 }]}
-                            >
-                              {line}
-                            </Text>
-                          ))}
-                        </View>
-                      </View>
-                    </View>
-                  );
-                })}
-              </>
-            ) : null}
-
             {sidebarCerts.length > 0 ? (
               <>
                 <RightSectionTitle>Certifications</RightSectionTitle>
@@ -797,10 +756,84 @@ export function ResumePdfDocument({ data }: { data: FullResumeData }) {
 
             {/* Page 2 Body (Full Width) */}
             <View style={styles.pageTwoMain}>
-              <Text style={{ ...styles.bodyTextPlaceholder, textAlign: "center", marginTop: 100 }}>
-                [ Page 2 Content Placeholder ]
-              </Text>
+              {projects.length > 0 ? (
+                <>
+                  <RightSectionTitle>
+                    Project List
+                  </RightSectionTitle>
+
+                  {/* ── Per-project tables ── */}
+                  {projects.map((p, idx) => {
+                    const desc = (p.description ?? "").trim();
+                    return (
+                      <View key={p.id} style={{ marginBottom: idx < projects.length - 1 ? 12 : 2 }} wrap={false}>
+                        {/* Table Container */}
+                        <View style={{ borderWidth: 1, borderColor: RULE_GRAY }}>
+                          
+                          {/* Header Row */}
+                          <View style={{ flexDirection: "row", backgroundColor: "#FAFAFA", borderBottomWidth: 1, borderColor: RULE_GRAY }}>
+                            <View style={{ flex: 17, paddingVertical: 1.5, paddingHorizontal: 3, borderRightWidth: 1, borderColor: RULE_GRAY }}>
+                              <Text style={{ ...pdfFont.bold(), fontSize: 9, color: DARK }}>Industry</Text>
+                            </View>
+                            <View style={{ flex: 30, paddingVertical: 1.5, paddingHorizontal: 3, borderRightWidth: 1, borderColor: RULE_GRAY }}>
+                              <Text style={{ ...pdfFont.bold(), fontSize: 9, color: DARK }}>Project</Text>
+                            </View>
+                            <View style={{ flex: 22, paddingVertical: 1.5, paddingHorizontal: 3, borderRightWidth: 1, borderColor: RULE_GRAY }}>
+                              <Text style={{ ...pdfFont.bold(), fontSize: 9, color: DARK }}>Role</Text>
+                            </View>
+                            <View style={{ flex: 18, paddingVertical: 1.5, paddingHorizontal: 3, borderRightWidth: 1, borderColor: RULE_GRAY }}>
+                              <Text style={{ ...pdfFont.bold(), fontSize: 9, color: DARK }}>Value</Text>
+                            </View>
+                            <View style={{ flex: 13, paddingVertical: 1.5, paddingHorizontal: 3 }}>
+                              <Text style={{ ...pdfFont.bold(), fontSize: 9, color: DARK }}>Year</Text>
+                            </View>
+                          </View>
+
+                          {/* Data Row */}
+                          <View style={{ flexDirection: "row" }}>
+                            <View style={{ flex: 17, paddingVertical: 1.5, paddingHorizontal: 3, borderRightWidth: 1, borderColor: RULE_GRAY }}>
+                              <Text style={{ ...pdfFont.regular(), fontSize: 9.5, color: DARK }}>{p.industry ?? ""}</Text>
+                            </View>
+                            <View style={{ flex: 30, paddingVertical: 1.5, paddingHorizontal: 3, borderRightWidth: 1, borderColor: RULE_GRAY }}>
+                              <Text style={{ ...pdfFont.regular(), fontSize: 9.5, color: DARK }}>{p.projectName}</Text>
+                            </View>
+                            <View style={{ flex: 22, paddingVertical: 1.5, paddingHorizontal: 3, borderRightWidth: 1, borderColor: RULE_GRAY }}>
+                              <Text style={{ ...pdfFont.regular(), fontSize: 9.5, color: DARK }}>{p.role ?? ""}</Text>
+                            </View>
+                            <View style={{ flex: 18, paddingVertical: 1.5, paddingHorizontal: 3, borderRightWidth: 1, borderColor: RULE_GRAY }}>
+                              <Text style={{ ...pdfFont.regular(), fontSize: 9.5, color: DARK }}>{p.projectValue ?? ""}</Text>
+                            </View>
+                            <View style={{ flex: 13, paddingVertical: 1.5, paddingHorizontal: 3 }}>
+                              <Text style={{ ...pdfFont.regular(), fontSize: 9.5, color: DARK }}>{p.year?.toString() ?? ""}</Text>
+                            </View>
+                          </View>
+                        </View>
+
+                        {/* Expanded title */}
+                        {p.expandedTitle ? (
+                          <Text style={{ ...pdfFont.bold(), fontSize: 9.5, color: DARK, marginTop: 4, marginBottom: 1 }}>
+                            {p.expandedTitle}
+                          </Text>
+                        ) : null}
+
+                        {/* Description paragraph */}
+                        {desc ? (
+                          <Text style={{ ...pdfFont.regular(), fontSize: 9, color: GRAY, lineHeight: 1.4, textAlign: "justify" }}>
+                            {desc}
+                          </Text>
+                        ) : null}
+
+                        {/* Divider between projects */}
+                        {idx < projects.length - 1 && (
+                          <View style={{ height: 0.5, backgroundColor: RULE_GRAY, marginTop: 10 }} />
+                        )}
+                      </View>
+                    );
+                  })}
+                </>
+              ) : null}
             </View>
+
           </View>
         </View>
 

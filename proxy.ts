@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import type { NextAuthRequest } from "next-auth";
 
-export default auth((req: NextAuthRequest) => {
+const authHandler = auth((req: NextAuthRequest) => {
   const { pathname } = req.nextUrl;
   const session = req.auth;
   const role = session?.user?.role;
@@ -27,6 +27,10 @@ export default auth((req: NextAuthRequest) => {
 
   return NextResponse.next();
 });
+
+// Next.js 16: the proxy file must export its handler as `proxy` (named or default).
+export const proxy = authHandler;
+export default authHandler;
 
 export const config = {
   matcher: ["/dashboard/:path*"],

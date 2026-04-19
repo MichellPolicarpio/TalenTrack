@@ -1,6 +1,6 @@
 "use client";
 
-import { Lock, LockOpen, Save, Send, Loader2, X } from "lucide-react";
+import { Lock, LockOpen, Save, Send, Loader2, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -45,19 +45,19 @@ export function EditorActionBar({
             <AnimatePresence>
               {isEditHintActive && canEdit && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                  initial={{ opacity: 0, scale: 0.9, y: 5 }}
                   animate={{ 
                     opacity: 1, 
                     scale: 1, 
                     y: 0,
-                    transition: { type: "spring", damping: 12, stiffness: 200 } 
+                    transition: { type: "spring", damping: 15, stiffness: 300 } 
                   }}
-                  exit={{ opacity: 0, scale: 0.8, y: 10 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 5 }}
                   className="absolute top-full left-1/2 mt-3 w-max -translate-x-1/2 z-[100] pointer-events-none"
                 >
-                  <div className="relative rounded-lg bg-primary px-3.5 py-2 text-[12px] font-bold text-white shadow-2xl ring-2 ring-white animate-bounce-subtle">
+                  <div className="relative rounded-xl bg-primary px-4 py-1.5 text-[12px] font-bold text-white shadow-xl animate-bounce-subtle">
                     Click here to edit!
-                    <div className="absolute bottom-full left-1/2 -mb-1.5 size-3 -translate-x-1/2 rotate-45 bg-primary ring-l-2 ring-t-2 ring-white" />
+                    <div className="absolute -top-1.5 left-1/2 size-3 -translate-x-1/2 rotate-45 bg-primary" />
                   </div>
                 </motion.div>
               )}

@@ -304,7 +304,6 @@ export async function getResumeWithEmployeeById(resumeId: string) {
         e.CorporateEmail AS EmployeeEmail,
         p.JobTitle,
         p.ProfessionalSummary,
-        p.LinkedInUrl,
         CAST(r.PublicShareToken AS NVARCHAR(36)) AS PublicShareToken,
         r.IsPublicLinkActive
       FROM dbo.Resumes r
@@ -329,7 +328,6 @@ export async function getResumeWithEmployeeById(resumeId: string) {
       professionalSummary: row.ProfessionalSummary
         ? String(row.ProfessionalSummary)
         : null,
-      linkedInUrl: row.LinkedInUrl ? String(row.LinkedInUrl) : null,
       publicShareToken: row.PublicShareToken ? String(row.PublicShareToken) : null,
       isPublicLinkActive: Boolean(row.IsPublicLinkActive),
     };

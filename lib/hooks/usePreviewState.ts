@@ -6,8 +6,8 @@ import type {
   Skill, 
   Certification, 
   Achievement, 
-  ResumeProject, 
-  License 
+  Project,
+  License
 } from "@/lib/db/types";
 import type { PersonalDraft } from "@/components/resume/tabs/PersonalTab";
 
@@ -23,7 +23,6 @@ function buildPreviewProfile(
     resumeId,
     jobTitle: null,
     professionalSummary: null,
-    linkedInUrl: null,
     homeAddress: null,
     personalPhone: null,
     personalEmail: null,
@@ -34,7 +33,6 @@ function buildPreviewProfile(
     ...base,
     jobTitle: draft.jobTitle.trim() || null,
     professionalSummary: draft.professionalSummary.trim() || null,
-    linkedInUrl: draft.linkedInUrl.trim() || null,
     homeAddress: draft.homeAddress.trim() || null,
     personalPhone: draft.personalPhone.trim() || null,
     personalEmail: draft.personalEmail.trim() || null,
@@ -50,7 +48,7 @@ export function usePreviewState({
   skills,
   certifications,
   achievements,
-  resumeProjects,
+  projects,
   licenses,
 }: {
   resumeId: string;
@@ -61,13 +59,12 @@ export function usePreviewState({
   skills: Skill[];
   certifications: Certification[];
   achievements: Achievement[];
-  resumeProjects: ResumeProject[];
+  projects: Project[];
   licenses: License[];
 }) {
   const [profileDraft, setProfileDraft] = useState<PersonalDraft>({
     jobTitle:            profile?.jobTitle ?? "",
     professionalSummary: profile?.professionalSummary ?? "",
-    linkedInUrl:         profile?.linkedInUrl ?? "",
     homeAddress:         profile?.homeAddress ?? "",
     personalPhone:       profile?.personalPhone ?? "",
     personalEmail:       profile?.personalEmail ?? "",
@@ -77,7 +74,7 @@ export function usePreviewState({
   const [draftEducation, setDraftEducation] = useState(() => education);
   const [draftSkills, setDraftSkills] = useState(() => skills);
   const [draftAchievements, setDraftAchievements] = useState(() => achievements);
-  const [draftResumeProjects, setDraftResumeProjects] = useState(() => resumeProjects);
+  const [draftProjects, setDraftProjects] = useState(() => projects);
   const [draftLicenses, setDraftLicenses] = useState(() => licenses);
   const [draftCertifications, setDraftCertifications] = useState(() => certifications);
 
@@ -87,10 +84,10 @@ export function usePreviewState({
     setDraftEducation(education);
     setDraftSkills(skills);
     setDraftAchievements(achievements);
-    setDraftResumeProjects(resumeProjects);
+    setDraftProjects(projects);
     setDraftLicenses(licenses);
     setDraftCertifications(certifications);
-  }, [experiences, education, skills, achievements, resumeProjects, licenses, certifications]);
+  }, [experiences, education, skills, achievements, projects, licenses, certifications]);
 
   const previewProfile = useMemo(
     () => buildPreviewProfile(profile, profileDraft, resumeId),
@@ -105,7 +102,7 @@ export function usePreviewState({
       education: draftEducation,
       skills: draftSkills,
       certifications: draftCertifications,
-      resumeProjects: draftResumeProjects,
+      projects: draftProjects,
       licenses: draftLicenses,
       achievements: draftAchievements,
     }),
@@ -116,7 +113,7 @@ export function usePreviewState({
       draftEducation,
       draftSkills,
       draftCertifications,
-      draftResumeProjects,
+      draftProjects,
       draftLicenses,
       draftAchievements,
     ],
@@ -125,7 +122,6 @@ export function usePreviewState({
     setProfileDraft({
       jobTitle: profile?.jobTitle ?? "",
       professionalSummary: profile?.professionalSummary ?? "",
-      linkedInUrl: profile?.linkedInUrl ?? "",
       homeAddress: profile?.homeAddress ?? "",
       personalPhone: profile?.personalPhone ?? "",
       personalEmail: profile?.personalEmail ?? "",
@@ -134,10 +130,10 @@ export function usePreviewState({
     setDraftEducation(education);
     setDraftSkills(skills);
     setDraftAchievements(achievements);
-    setDraftResumeProjects(resumeProjects);
+    setDraftProjects(projects);
     setDraftLicenses(licenses);
     setDraftCertifications(certifications);
-  }, [profile, experiences, education, skills, achievements, resumeProjects, licenses, certifications]);
+  }, [profile, experiences, education, skills, achievements, projects, licenses, certifications]);
 
   return {
     profileDraft,
@@ -150,8 +146,8 @@ export function usePreviewState({
     setDraftSkills,
     draftAchievements,
     setDraftAchievements,
-    draftResumeProjects,
-    setDraftResumeProjects,
+    draftProjects,
+    setDraftProjects,
     draftLicenses,
     setDraftLicenses,
     draftCertifications,

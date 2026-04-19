@@ -7,7 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 export type PersonalDraft = {
   jobTitle: string;
   professionalSummary: string;
-  linkedInUrl: string;
   homeAddress: string;
   personalPhone: string;
   personalEmail: string;
@@ -83,17 +82,6 @@ export function PersonalTab({
           />
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="pt-linkedin" className="text-[12px] text-[#6B7280]">LinkedIn URL (optional)</Label>
-          <Input
-            id="pt-linkedin"
-            type="url"
-            value={data.linkedInUrl}
-            disabled={disabled}
-            onChange={(e) => onChange("linkedInUrl", e.target.value)}
-            placeholder="https://www.linkedin.com/in/..."
-          />
-        </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">

@@ -88,7 +88,7 @@ export function useResumeEditor({
   ]);
 
   const handleSubmitFinal = useCallback(async () => {
-    if (!isLocked || hasUnsavedChanges || isSubmitting) return;
+    if (isSubmitting) return;
     setIsSubmitting(true);
     try {
       await submitForApprovalAction(resumeId);

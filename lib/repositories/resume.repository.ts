@@ -15,13 +15,13 @@ import {
   getEducationByResumeId,
   getSkillsByResumeId,
   getCertificationsByResumeId,
-  getResumeProjectsByResumeId,
+  getProjectsByResumeId,
   mapWorkExperience,
   mapEducation,
   mapSkill,
   mapCertification,
   mapAchievement,
-  mapResumeProject,
+  mapProject,
   mapLicense,
   resolveAchievementsTableName,
 } from "@/lib/repositories/sections.repository";
@@ -51,9 +51,8 @@ async function mapProfile(row: Record<string, unknown>): Promise<ResumeProfile |
   if (row.ProfileId == null) {
     return null;
   }
-  const [summary, linkedin, address, phone, email] = await Promise.all([
+  const [summary, address, phone, email] = await Promise.all([
     row.ProfessionalSummary == null ? null : decryptData(String(row.ProfessionalSummary)),
-    row.LinkedInUrl == null ? null : decryptData(String(row.LinkedInUrl)),
     row.HomeAddress == null ? null : decryptData(String(row.HomeAddress)),
     row.PersonalPhone == null ? null : decryptData(String(row.PersonalPhone)),
     row.PersonalEmail == null ? null : decryptData(String(row.PersonalEmail)),
@@ -64,7 +63,6 @@ async function mapProfile(row: Record<string, unknown>): Promise<ResumeProfile |
     resumeId: String(row.ProfileResumeId),
     jobTitle: row.JobTitle == null ? null : String(row.JobTitle),
     professionalSummary: summary,
-    linkedInUrl: linkedin,
     homeAddress: address,
     personalPhone: phone,
     personalEmail: email,
@@ -100,7 +98,6 @@ export async function getResumeByEmployeeId(
         CAST(p.ResumeId AS NVARCHAR(36)) AS ProfileResumeId,
         p.ProfessionalSummary,
         p.JobTitle,
-        p.LinkedInUrl,
         p.HomeAddress,
         p.PersonalPhone,
         p.PersonalEmail,
@@ -150,7 +147,6 @@ export async function getResumeById(
         CAST(p.ResumeId AS NVARCHAR(36)) AS ProfileResumeId,
         p.ProfessionalSummary,
         p.JobTitle,
-        p.LinkedInUrl,
         p.HomeAddress,
         p.PersonalPhone,
         p.PersonalEmail,
@@ -466,7 +462,6 @@ export async function updateResumeProfile(
       sql.NVarChar(sql.MAX),
       await optEncStr(data.professionalSummary, 65535),
     );
-    request.input("linkedInUrl", sql.NVarChar(500), await optEncStr(data.linkedInUrl, 500));
     request.input("homeAddress", sql.NVarChar(500), await optEncStr(data.homeAddress, 500));
     request.input("personalPhone", sql.NVarChar(50), await optEncStr(data.personalPhone, 50));
     request.input(
@@ -480,7 +475,6 @@ export async function updateResumeProfile(
       SET
         JobTitle = @jobTitle,
         ProfessionalSummary = @professionalSummary,
-        LinkedInUrl = @linkedInUrl,
         HomeAddress = @homeAddress,
         PersonalPhone = @personalPhone,
         PersonalEmail = @personalEmail,
@@ -545,7 +539,6 @@ export async function getFullResumeForPdf(
         CAST(p.ResumeId AS NVARCHAR(36)) AS ProfileResumeId,
         p.ProfessionalSummary,
         p.JobTitle,
-        p.LinkedInUrl,
         p.HomeAddress,
         p.PersonalPhone,
         p.PersonalEmail,
@@ -566,7 +559,7 @@ export async function getFullResumeForPdf(
         getEducationByResumeId(resumeId),
         getSkillsByResumeId(resumeId),
         getCertificationsByResumeId(resumeId),
-        getResumeProjectsByResumeId(resumeId),
+        getProjectsByResumeId(resumeId),
       ]);
 
     return {
@@ -579,7 +572,7 @@ export async function getFullResumeForPdf(
       education: (educationRows || []).filter((e) => e.isVisibleOnResume),
       skills: (skillRows || []).filter((s) => s.isVisibleOnResume),
       certifications: (certRows || []).filter((c) => c.isVisibleOnResume),
-      resumeProjects: (projectRows || []).filter((p) => p.isVisibleOnResume),
+      projects: (projectRows || []).filter((p) => p.isVisibleOnResume),
       achievements: [],
       licenses: []
     };
@@ -618,7 +611,6 @@ export async function getResumeAllDataForEditor(resumeId: string) {
         CAST(p.ResumeId AS NVARCHAR(36)) AS ProfileResumeId,
         p.ProfessionalSummary,
         p.JobTitle,
-        p.LinkedInUrl,
         p.HomeAddress,
         p.PersonalPhone,
         p.PersonalEmail,
@@ -637,7 +629,7 @@ export async function getResumeAllDataForEditor(resumeId: string) {
       -- 2: Education
       SELECT
         CAST(Id AS NVARCHAR(36)) AS Id, CAST(ResumeId AS NVARCHAR(36)) AS ResumeId,
-        InstitutionName, Degree, FieldOfStudy, StartYear, EndYear, IsOngoing, GPA, SortOrder, IsVisibleOnResume
+        InstitutionName, Degree, DegreeType, Specialization, StartYear, EndYear, IsOngoing, SortOrder, IsVisibleOnResume
       FROM dbo.Education WHERE ResumeId = @resumeId ORDER BY SortOrder ASC;
 
       -- 3: Skills
@@ -649,7 +641,7 @@ export async function getResumeAllDataForEditor(resumeId: string) {
       -- 4: Certifications
       SELECT
         CAST(Id AS NVARCHAR(36)) AS Id, CAST(ResumeId AS NVARCHAR(36)) AS ResumeId,
-        CertificationName, IssuingOrganization, IssueDate, ExpirationDate, CredentialId, CredentialUrl, SortOrder, IsVisibleOnResume
+        CertificationName, IssuingOrganization, IssueDate, ExpirationDate, CredentialId, SortOrder, IsVisibleOnResume
       FROM dbo.Certifications WHERE ResumeId = @resumeId ORDER BY SortOrder ASC;
 
       -- 5: Achievements
@@ -658,10 +650,9 @@ export async function getResumeAllDataForEditor(resumeId: string) {
         : `SELECT 1 AS _Dummy WHERE 1=0;`
       }
 
-      -- 6: ResumeProjects
       SELECT
         CAST(Id AS NVARCHAR(36)) AS Id, CAST(ResumeId AS NVARCHAR(36)) AS ResumeId,
-        ProjectName, ClientName, RoleTitle, ProjectValue, Description, SortOrder, IsVisibleOnResume
+        ProjectName, Industry, Role, ProjectValue, Year, ExpandedTitle, Description, SortOrder, IsVisibleOnResume
       FROM dbo.ResumeProjects WHERE ResumeId = @resumeId ORDER BY SortOrder ASC;
 
       -- 7: Licenses
@@ -682,7 +673,7 @@ export async function getResumeAllDataForEditor(resumeId: string) {
       skills: (rs[3] || []).map(mapSkill),
       certifications: (rs[4] || []).map(mapCertification),
       achievements: (rs[5] || []).map(mapAchievement),
-      resumeProjects: (rs[6] || []).map(mapResumeProject),
+      projects: (rs[6] || []).map(mapProject),
       licenses: (rs[7] || []).map(mapLicense),
     };
   });

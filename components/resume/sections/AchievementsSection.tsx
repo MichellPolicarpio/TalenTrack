@@ -79,16 +79,25 @@ function AchievementCard({
   const [saving, startSave] = useTransition();
 
   function update(patch: Partial<AchievementInput>) {
-    setForm((f) => ({ ...f, ...patch }));
-    onDraftChange(item.id, {
-      year: patch.year,
-      title: patch.title,
-      organization: patch.organization,
-      description: patch.description,
-    });
+    const nextForm = { ...form, ...patch };
+    setForm(nextForm);
+    
+    // Create a precise draft patch to avoid undefined values in drafted state
+    const draftPatch: Partial<Achievement> = {};
+    if (patch.year !== undefined) draftPatch.year = patch.year;
+    if (patch.title !== undefined) draftPatch.title = patch.title;
+    if (patch.organization !== undefined) draftPatch.organization = patch.organization;
+    if (patch.description !== undefined) draftPatch.description = patch.description;
+
+    onDraftChange(item.id, draftPatch);
+    
     if (!dirty) {
       setDirty(true);
-      onDirtyChange?.(true, handleSave);
+      const isValid = !!nextForm.title.trim();
+      onDirtyChange?.(true, () => {
+        if (isValid) handleSave();
+        else toast.error("Please fill the Title.");
+      });
     }
   }
 
@@ -169,15 +178,28 @@ function AchievementCard({
 
       <div className="flex-1 space-y-3">
         <div className="flex flex-col gap-1.5">
-          <Label className="text-[12px] text-[#6B7280]">Title</Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-[12px] text-[#6B7280]">Title *</Label>
+            <span className="text-[11px] text-[#9CA3AF] tabular-nums">{form.title.length}/200</span>
+          </div>
           <Input
             value={form.title}
             onChange={(e) => update({ title: e.target.value })}
             disabled={disabled}
+            className="text-[11pt] font-semibold"
           />
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1.5">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div className="flex flex-col gap-1.5 md:col-span-3">
+            <Label className="text-[12px] text-[#6B7280]">Organization</Label>
+            <Input
+              value={form.organization ?? ""}
+              onChange={(e) => update({ organization: e.target.value || null })}
+              disabled={disabled}
+              placeholder="e.g. University"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5 md:col-span-1">
             <Label className="text-[12px] text-[#6B7280]">Year</Label>
             <Input
               type="number"
@@ -188,38 +210,17 @@ function AchievementCard({
               disabled={disabled}
             />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label className="text-[12px] text-[#6B7280]">Organization</Label>
-            <Input
-              value={form.organization ?? ""}
-              onChange={(e) => update({ organization: e.target.value || null })}
-              disabled={disabled}
-            />
-          </div>
         </div>
         <div className="flex flex-col gap-1.5">
           <Label className="text-[12px] text-[#6B7280]">Description</Label>
           <Textarea
-            rows={3}
+            rows={2}
             value={form.description ?? ""}
             onChange={(e) => update({ description: e.target.value || null })}
             disabled={disabled}
+            className="text-[10pt]"
           />
         </div>
-        {dirty && !disabled && (
-          <div className="flex gap-2 pt-1">
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={handleCancel}
-              className="gap-1.5"
-            >
-              <X className="size-3.5" />
-              Cancel
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -261,29 +262,39 @@ function AchievementForm({
   }
 
   useEffect(() => {
-    const isDirty = !!form.title.trim();
-    onDirtyChange?.(isDirty, handleSubmit);
+    const isDirty = !!form.title.trim() || !!form.year || !!form.organization || !!form.description;
+    const isValid = !!form.title.trim();
+    onDirtyChange?.(isDirty, () => {
+      if (isValid) handleSubmit();
+      else toast.error("Title is required.");
+    });
   }, [form]);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-2">
         <Label htmlFor="ach-title">Title *</Label>
-        <Input id="ach-title" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
+        <Input 
+          id="ach-title" 
+          value={form.title} 
+          onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} 
+          placeholder="e.g. Employee of the Year"
+        />
       </div>
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="ach-year">Year</Label>
-        <Input id="ach-year" type="number" min={1950} max={2099} value={form.year ?? ""} onChange={(e) => setForm((f) => ({ ...f, year: e.target.value ? Number(e.target.value) : null }))} />
-      </div>
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="ach-org">Organization</Label>
-        <Input id="ach-org" value={form.organization ?? ""} onChange={(e) => setForm((f) => ({ ...f, organization: e.target.value || null }))} />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="flex flex-col gap-2 md:col-span-3">
+          <Label htmlFor="ach-org">Organization</Label>
+          <Input id="ach-org" value={form.organization ?? ""} onChange={(e) => setForm((f) => ({ ...f, organization: e.target.value || null }))} placeholder="e.g. Acme Corp" />
+        </div>
+        <div className="flex flex-col gap-2 md:col-span-1">
+          <Label htmlFor="ach-year">Year</Label>
+          <Input id="ach-year" type="number" min={1950} max={2099} value={form.year ?? ""} onChange={(e) => setForm((f) => ({ ...f, year: e.target.value ? Number(e.target.value) : null }))} />
+        </div>
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="ach-desc">Description</Label>
-        <Textarea id="ach-desc" rows={3} value={form.description ?? ""} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value || null }))} />
+        <Textarea id="ach-desc" rows={2} value={form.description ?? ""} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value || null }))} placeholder="Describe your achievement..." />
       </div>
-      {/* Internal Save button removed in favor of global header button */}
     </div>
   );
 }
@@ -351,34 +362,22 @@ export function AchievementsSection({
       <DndContext id={`achievements-${resumeId}`} sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
           <div className="flex flex-col">
-            {items.length === 0 ? (
-              <button
-                type="button"
-                disabled={disabled}
-                onClick={() => { if (!disabled) setOpen(true); }}
-                className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-transparent text-[13px] font-medium text-neutral-500 transition-colors hover:border-[#F17A28]/50 hover:text-[#F17A28] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Plus className="size-4" />
-                Add New Entry
-              </button>
-            ) : (
-              items.map((item) => (
-                <AchievementCard
-                  key={item.id}
-                  item={item}
-                  resumeId={resumeId}
-                  onDelete={handleDelete}
-                  onToggleVisibility={handleToggleVisibility}
-                  onDraftChange={handleDraftChange}
-                  onPersisted={onPersisted}
-                  onDirtyChange={(isDirty, saveFn) => {
-                    setLocalDirty(isDirty);
-                    setActiveSave(() => saveFn);
-                  }}
-                  disabled={disabled || pending}
-                />
-              ))
-            )}
+            {items.map((item) => (
+              <AchievementCard
+                key={item.id}
+                item={item}
+                resumeId={resumeId}
+                onDelete={handleDelete}
+                onToggleVisibility={handleToggleVisibility}
+                onDraftChange={handleDraftChange}
+                onPersisted={onPersisted}
+                onDirtyChange={(isDirty, saveFn) => {
+                  setLocalDirty(isDirty);
+                  setActiveSave(() => saveFn);
+                }}
+                disabled={disabled || pending}
+              />
+            ))}
           </div>
         </SortableContext>
       </DndContext>

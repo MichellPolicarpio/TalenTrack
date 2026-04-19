@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   ChevronLeft,
   ChevronRight,
@@ -265,9 +265,9 @@ function SidebarBody(
       </div>
 
       {/* ── Footer — user row ─────────────────────────────────────────── */}
-      <div className="shrink-0 border-t border-sidebar-border/60">
+      <div className="shrink-0">
         {collapsed ? (
-          <div className="flex flex-col items-center gap-3 py-4">
+          <div className="flex flex-col items-center gap-3 border-t border-sidebar-border/60 py-4">
             <div
               title={`${userName}\n${userEmail}\n${roleLabel}`}
               className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary"
@@ -287,7 +287,34 @@ function SidebarBody(
             </button>
           </div>
         ) : (
-          <div className="flex items-center gap-3 px-3.5 py-3.5">
+          <>
+            <div className="flex flex-col items-center gap-1 px-4 pt-6 pb-3">
+              <motion.div
+                animate={{ 
+                  y: [0, -6, 0],
+                  scale: [1, 1.03, 1]
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                <Image
+                  src="/BrindleyLogo.png"
+                  alt="Brindley Logo"
+                  width={170}
+                  height={44}
+                  className="h-11 w-auto object-contain"
+                  priority
+                />
+              </motion.div>
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-sidebar-foreground">
+                Powered By <span className="text-[#E87722]">BE</span>
+              </span>
+            </div>
+            <div className="h-px border-t border-sidebar-border/60" />
+            <div className="flex items-center gap-3 px-3.5 py-3.5">
             {/* Avatar */}
             <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary">
               <span className="text-[11px] font-bold leading-none text-primary-foreground">
@@ -314,7 +341,8 @@ function SidebarBody(
               <LogOut className="size-[15px]" />
             </button>
           </div>
-        )}
+        </>
+      )}
       </div>
 
     </div>

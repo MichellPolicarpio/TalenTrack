@@ -38,7 +38,6 @@ const REMINDER_OPTIONS: { value: ReminderMonthsOption; label: string }[] = [
 const initialForm: ProfileFormValues = {
   jobTitle: "",
   professionalSummary: "",
-  linkedInUrl: "",
   reminderMonths: 6,
   personalEmail: "",
   personalPhone: "",
@@ -137,19 +136,6 @@ export function OnboardingWizard({ resumeId }: OnboardingWizardProps) {
                 maxLength={500}
                 rows={5}
                 placeholder="Brief overview of your experience and goals"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="linkedIn">LinkedIn URL (optional)</Label>
-              <Input
-                id="linkedIn"
-                type="url"
-                value={form.linkedInUrl}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, linkedInUrl: e.target.value }))
-                }
-                placeholder="https://www.linkedin.com/in/..."
-                autoComplete="url"
               />
             </div>
             <div className="flex flex-col gap-3">

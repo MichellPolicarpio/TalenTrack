@@ -1,5 +1,5 @@
 import { ProjectsSection } from "@/components/resume/sections/ProjectsSection";
-import type { ResumeProject } from "@/lib/db/types";
+import type { Project } from "@/lib/db/types";
 
 export function ProjectsTab({
   resumeId,
@@ -10,8 +10,8 @@ export function ProjectsTab({
   headerActions,
 }: {
   resumeId: string;
-  initial: ResumeProject[];
-  onItemsChange?: (items: ResumeProject[]) => void;
+  initial: Project[];
+  onItemsChange?: (items: Project[]) => void;
   onPersisted?: () => void;
   disabled: boolean;
   headerActions?: React.ReactNode;

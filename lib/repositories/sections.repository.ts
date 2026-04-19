@@ -10,8 +10,8 @@ import type {
   CertificationInput,
   Achievement,
   AchievementInput,
-  ResumeProject,
-  ResumeProjectInput,
+  Project,
+  ProjectInput,
   License,
   LicenseInput,
   LicenseStatus,
@@ -43,11 +43,11 @@ export function mapEducation(row: Record<string, unknown>): Education {
     resumeId: String(row.ResumeId),
     institutionName: String(row.InstitutionName),
     degree: String(row.Degree),
-    fieldOfStudy: row.FieldOfStudy == null ? null : String(row.FieldOfStudy),
+    degreeType: row.DegreeType == null ? null : String(row.DegreeType),
+    specialization: row.Specialization == null ? null : String(row.Specialization),
     startYear: row.StartYear == null ? null : Number(row.StartYear),
     endYear: row.EndYear == null ? null : Number(row.EndYear),
     isOngoing: Boolean(row.IsOngoing),
-    gpa: row.GPA == null ? null : Number(row.GPA),
     sortOrder: Number(row.SortOrder),
     isVisibleOnResume: row.IsVisibleOnResume == null ? true : Boolean(row.IsVisibleOnResume),
   };
@@ -75,7 +75,6 @@ export function mapCertification(row: Record<string, unknown>): Certification {
     expirationDate:
       row.ExpirationDate == null ? null : new Date(row.ExpirationDate as string),
     credentialId: row.CredentialId == null ? null : String(row.CredentialId),
-    credentialUrl: row.CredentialUrl == null ? null : String(row.CredentialUrl),
     sortOrder: Number(row.SortOrder),
     isVisibleOnResume: row.IsVisibleOnResume == null ? true : Boolean(row.IsVisibleOnResume),
   };
@@ -94,14 +93,16 @@ export function mapAchievement(row: Record<string, unknown>): Achievement {
   };
 }
 
-export function mapResumeProject(row: Record<string, unknown>): ResumeProject {
+export function mapProject(row: Record<string, unknown>): Project {
   return {
     id: String(row.Id),
     resumeId: String(row.ResumeId),
     projectName: String(row.ProjectName),
-    clientName: row.ClientName == null ? null : String(row.ClientName),
-    roleTitle: row.RoleTitle == null ? null : String(row.RoleTitle),
+    industry: row.Industry == null ? null : String(row.Industry),
+    role: row.Role == null ? null : String(row.Role),
     projectValue: row.ProjectValue == null ? null : String(row.ProjectValue),
+    year: row.Year == null ? null : Number(row.Year),
+    expandedTitle: row.ExpandedTitle == null ? null : String(row.ExpandedTitle),
     description: row.Description == null ? null : String(row.Description),
     sortOrder: Number(row.SortOrder),
     isVisibleOnResume:
@@ -300,8 +301,8 @@ export async function getEducationByResumeId(
       SELECT
         CAST(Id AS NVARCHAR(36)) AS Id,
         CAST(ResumeId AS NVARCHAR(36)) AS ResumeId,
-        InstitutionName, Degree, FieldOfStudy,
-        StartYear, EndYear, IsOngoing, GPA, SortOrder, IsVisibleOnResume
+        InstitutionName, Degree, DegreeType, Specialization,
+        StartYear, EndYear, IsOngoing, SortOrder, IsVisibleOnResume
       FROM dbo.Education
       WHERE ResumeId = @resumeId
       ORDER BY SortOrder ASC
@@ -321,20 +322,20 @@ export async function upsertEducation(
       req.input("resumeId", sql.UniqueIdentifier, resumeId);
       req.input("institutionName", sql.NVarChar(200), data.institutionName);
       req.input("degree", sql.NVarChar(200), data.degree);
-      req.input("fieldOfStudy", sql.NVarChar(200), data.fieldOfStudy);
+      req.input("degreeType", sql.NVarChar(100), data.degreeType);
+      req.input("specialization", sql.NVarChar(200), data.specialization);
       req.input("startYear", sql.SmallInt, data.startYear);
       req.input("endYear", sql.SmallInt, data.endYear);
       req.input("isOngoing", sql.Bit, data.isOngoing ? 1 : 0);
-      req.input("gpa", sql.Decimal(4, 2), data.gpa);
       await req.query(`
         UPDATE dbo.Education SET
           InstitutionName = @institutionName,
           Degree = @degree,
-          FieldOfStudy = @fieldOfStudy,
+          DegreeType = @degreeType,
+          Specialization = @specialization,
           StartYear = @startYear,
           EndYear = @endYear,
           IsOngoing = @isOngoing,
-          GPA = @gpa,
           UpdatedAt = SYSUTCDATETIME()
         WHERE Id = @id AND ResumeId = @resumeId
       `);
@@ -343,20 +344,20 @@ export async function upsertEducation(
       req.input("resumeId", sql.UniqueIdentifier, resumeId);
       req.input("institutionName", sql.NVarChar(200), data.institutionName);
       req.input("degree", sql.NVarChar(200), data.degree);
-      req.input("fieldOfStudy", sql.NVarChar(200), data.fieldOfStudy);
+      req.input("degreeType", sql.NVarChar(100), data.degreeType);
+      req.input("specialization", sql.NVarChar(200), data.specialization);
       req.input("startYear", sql.SmallInt, data.startYear);
       req.input("endYear", sql.SmallInt, data.endYear);
       req.input("isOngoing", sql.Bit, data.isOngoing ? 1 : 0);
-      req.input("gpa", sql.Decimal(4, 2), data.gpa);
       await req.query(`
         INSERT INTO dbo.Education (
-          Id, ResumeId, InstitutionName, Degree, FieldOfStudy,
-          StartYear, EndYear, IsOngoing, GPA,
+          Id, ResumeId, InstitutionName, Degree, DegreeType, Specialization,
+          StartYear, EndYear, IsOngoing,
           SortOrder, CreatedAt, UpdatedAt
         )
         VALUES (
-          NEWID(), @resumeId, @institutionName, @degree, @fieldOfStudy,
-          @startYear, @endYear, @isOngoing, @gpa,
+          NEWID(), @resumeId, @institutionName, @degree, @degreeType, @specialization,
+          @startYear, @endYear, @isOngoing,
           (SELECT ISNULL(MAX(SortOrder), 0) + 1 FROM dbo.Education WHERE ResumeId = @resumeId),
           SYSUTCDATETIME(), SYSUTCDATETIME()
         )
@@ -481,7 +482,7 @@ export async function getCertificationsByResumeId(
         CAST(ResumeId AS NVARCHAR(36)) AS ResumeId,
         CertificationName, IssuingOrganization,
         IssueDate, ExpirationDate,
-        CredentialId, CredentialUrl, SortOrder, IsVisibleOnResume
+        CredentialId, SortOrder, IsVisibleOnResume
       FROM dbo.Certifications
       WHERE ResumeId = @resumeId
       ORDER BY SortOrder ASC
@@ -504,7 +505,6 @@ export async function upsertCertification(
       req.input("issueDate", sql.Date, data.issueDate ? new Date(data.issueDate) : null);
       req.input("expirationDate", sql.Date, data.expirationDate ? new Date(data.expirationDate) : null);
       req.input("credentialId", sql.NVarChar(200), data.credentialId);
-      req.input("credentialUrl", sql.NVarChar(500), data.credentialUrl);
       await req.query(`
         UPDATE dbo.Certifications SET
           CertificationName = @certificationName,
@@ -512,7 +512,6 @@ export async function upsertCertification(
           IssueDate = @issueDate,
           ExpirationDate = @expirationDate,
           CredentialId = @credentialId,
-          CredentialUrl = @credentialUrl,
           UpdatedAt = SYSUTCDATETIME()
         WHERE Id = @id AND ResumeId = @resumeId
       `);
@@ -524,16 +523,15 @@ export async function upsertCertification(
       req.input("issueDate", sql.Date, data.issueDate ? new Date(data.issueDate) : null);
       req.input("expirationDate", sql.Date, data.expirationDate ? new Date(data.expirationDate) : null);
       req.input("credentialId", sql.NVarChar(200), data.credentialId);
-      req.input("credentialUrl", sql.NVarChar(500), data.credentialUrl);
       await req.query(`
         INSERT INTO dbo.Certifications (
           Id, ResumeId, CertificationName, IssuingOrganization,
-          IssueDate, ExpirationDate, CredentialId, CredentialUrl,
+          IssueDate, ExpirationDate, CredentialId,
           SortOrder, CreatedAt, UpdatedAt
         )
         VALUES (
           NEWID(), @resumeId, @certificationName, @issuingOrganization,
-          @issueDate, @expirationDate, @credentialId, @credentialUrl,
+          @issueDate, @expirationDate, @credentialId,
           (SELECT ISNULL(MAX(SortOrder), 0) + 1 FROM dbo.Certifications WHERE ResumeId = @resumeId),
           SYSUTCDATETIME(), SYSUTCDATETIME()
         )
@@ -689,9 +687,9 @@ export async function reorderAchievements(
 
 // ─── Resume projects (relevant project experience) ────────────────────────────
 
-export async function getResumeProjectsByResumeId(
+export async function getProjectsByResumeId(
   resumeId: string,
-): Promise<ResumeProject[]> {
+): Promise<Project[]> {
   return runWithPool(async (pool) => {
     const req = pool.request();
     req.input("resumeId", sql.UniqueIdentifier, resumeId);
@@ -699,76 +697,84 @@ export async function getResumeProjectsByResumeId(
       SELECT
         CAST(Id AS NVARCHAR(36)) AS Id,
         CAST(ResumeId AS NVARCHAR(36)) AS ResumeId,
-        ProjectName, ClientName, RoleTitle, ProjectValue, Description,
+        ProjectName, Industry, Role, ProjectValue, Year, ExpandedTitle, Description,
         SortOrder, IsVisibleOnResume
       FROM dbo.ResumeProjects
       WHERE ResumeId = @resumeId
       ORDER BY SortOrder ASC
     `);
-    return (result.recordset as Record<string, unknown>[]).map(mapResumeProject);
+    return (result.recordset as Record<string, unknown>[]).map(mapProject);
   });
 }
 
-export async function upsertResumeProject(
+export async function upsertProject(
   resumeId: string,
-  data: ResumeProjectInput,
-): Promise<ResumeProject> {
+  data: ProjectInput,
+): Promise<Project> {
   return runWithPool(async (pool) => {
     if (data.id) {
       const req = pool.request();
       req.input("id", sql.UniqueIdentifier, data.id);
       req.input("resumeId", sql.UniqueIdentifier, resumeId);
       req.input("projectName", sql.NVarChar(300), data.projectName);
-      req.input("clientName", sql.NVarChar(200), data.clientName);
-      req.input("roleTitle", sql.NVarChar(200), data.roleTitle);
+      req.input("industry", sql.NVarChar(200), data.industry);
+      req.input("role", sql.NVarChar(200), data.role);
       req.input("projectValue", sql.NVarChar(120), data.projectValue);
+      req.input("year", sql.SmallInt, data.year);
+      req.input("expandedTitle", sql.NVarChar(500), data.expandedTitle);
       req.input("description", sql.NVarChar(sql.MAX), data.description);
       const result = await req.query(`
         UPDATE dbo.ResumeProjects SET
           ProjectName = @projectName,
-          ClientName = @clientName,
-          RoleTitle = @roleTitle,
+          Industry = @industry,
+          Role = @role,
           ProjectValue = @projectValue,
+          Year = @year,
+          ExpandedTitle = @expandedTitle,
           Description = @description,
           UpdatedAt = SYSUTCDATETIME()
         OUTPUT 
           CAST(inserted.Id AS NVARCHAR(36)) AS Id,
           CAST(inserted.ResumeId AS NVARCHAR(36)) AS ResumeId,
-          inserted.ProjectName, inserted.ClientName, inserted.RoleTitle, 
-          inserted.ProjectValue, inserted.Description, inserted.SortOrder, inserted.IsVisibleOnResume
+          inserted.ProjectName, inserted.Industry, inserted.Role, 
+          inserted.ProjectValue, inserted.Year, inserted.ExpandedTitle,
+          inserted.Description, inserted.SortOrder, inserted.IsVisibleOnResume
         WHERE Id = @id AND ResumeId = @resumeId
       `);
-      return mapResumeProject(result.recordset[0]);
+      return mapProject(result.recordset[0]);
     } else {
       const req = pool.request();
       req.input("resumeId", sql.UniqueIdentifier, resumeId);
       req.input("projectName", sql.NVarChar(300), data.projectName);
-      req.input("clientName", sql.NVarChar(200), data.clientName);
-      req.input("roleTitle", sql.NVarChar(200), data.roleTitle);
+      req.input("industry", sql.NVarChar(200), data.industry);
+      req.input("role", sql.NVarChar(200), data.role);
       req.input("projectValue", sql.NVarChar(120), data.projectValue);
+      req.input("year", sql.SmallInt, data.year);
+      req.input("expandedTitle", sql.NVarChar(500), data.expandedTitle);
       req.input("description", sql.NVarChar(sql.MAX), data.description);
       const result = await req.query(`
         INSERT INTO dbo.ResumeProjects (
-          Id, ResumeId, ProjectName, ClientName, RoleTitle, ProjectValue, Description,
+          Id, ResumeId, ProjectName, Industry, Role, ProjectValue, Year, ExpandedTitle, Description,
           SortOrder, CreatedAt, UpdatedAt
         )
         OUTPUT 
           CAST(inserted.Id AS NVARCHAR(36)) AS Id,
           CAST(inserted.ResumeId AS NVARCHAR(36)) AS ResumeId,
-          inserted.ProjectName, inserted.ClientName, inserted.RoleTitle, 
-          inserted.ProjectValue, inserted.Description, inserted.SortOrder, inserted.IsVisibleOnResume
+          inserted.ProjectName, inserted.Industry, inserted.Role, 
+          inserted.ProjectValue, inserted.Year, inserted.ExpandedTitle,
+          inserted.Description, inserted.SortOrder, inserted.IsVisibleOnResume
         VALUES (
-          NEWID(), @resumeId, @projectName, @clientName, @roleTitle, @projectValue, @description,
+          NEWID(), @resumeId, @projectName, @industry, @role, @projectValue, @year, @expandedTitle, @description,
           (SELECT ISNULL(MAX(SortOrder), 0) + 1 FROM dbo.ResumeProjects WHERE ResumeId = @resumeId),
           SYSUTCDATETIME(), SYSUTCDATETIME()
         )
       `);
-      return mapResumeProject(result.recordset[0]);
+      return mapProject(result.recordset[0]);
     }
   });
 }
 
-export async function deleteResumeProject(
+export async function deleteProject(
   id: string,
   resumeId: string,
 ): Promise<void> {
@@ -782,7 +788,7 @@ export async function deleteResumeProject(
   });
 }
 
-export async function reorderResumeProjects(
+export async function reorderProjects(
   items: ReorderItem[],
 ): Promise<void> {
   return runWithPool(async (pool) => {
