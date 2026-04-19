@@ -10,7 +10,7 @@ import {
   getEducationByResumeId,
   getSkillsByResumeId,
   getCertificationsByResumeId,
-  getResumeProjectsByResumeId,
+  getProjectsByResumeId,
   getLicensesByResumeId,
   getAchievementsByResumeId,
 } from "@/lib/repositories/sections.repository";
@@ -50,7 +50,7 @@ export default async function HrReviewPage({
     getEducationByResumeId(resumeId),
     getSkillsByResumeId(resumeId),
     getCertificationsByResumeId(resumeId),
-    getResumeProjectsByResumeId(resumeId),
+    getProjectsByResumeId(resumeId),
     getLicensesByResumeId(resumeId),
     getAchievementsByResumeId(resumeId),
   ]);
