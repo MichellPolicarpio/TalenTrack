@@ -174,7 +174,7 @@ export function HistoryClient({ snapshots }: HistoryClientProps) {
                       education={selectedFull.snapshotData.education}
                       skills={selectedFull.snapshotData.skills}
                       certifications={selectedFull.snapshotData.certifications}
-                      resumeProjects={selectedFull.snapshotData.resumeProjects}
+                      projects={selectedFull.snapshotData.projects}
                       licenses={selectedFull.snapshotData.licenses}
                       achievements={selectedFull.snapshotData.achievements}
                     />
