@@ -462,11 +462,11 @@ export async function updateResumeProfile(
       sql.NVarChar(sql.MAX),
       await optEncStr(data.professionalSummary, 65535),
     );
-    request.input("homeAddress", sql.NVarChar(500), await optEncStr(data.homeAddress, 500));
-    request.input("personalPhone", sql.NVarChar(50), await optEncStr(data.personalPhone, 50));
+    request.input("homeAddress", sql.NVarChar(sql.MAX), await optEncStr(data.homeAddress, 500));
+    request.input("personalPhone", sql.NVarChar(sql.MAX), await optEncStr(data.personalPhone, 50));
     request.input(
       "personalEmail",
-      sql.NVarChar(320),
+      sql.NVarChar(sql.MAX),
       await optEncStr(data.personalEmail, 320),
     );
 
