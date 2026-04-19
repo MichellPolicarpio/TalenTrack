@@ -98,12 +98,12 @@ const TABS: readonly {
 }[] = [
   { value: "personal", label: "Personal Info", icon: User },
   { value: "experience", label: "Experience", icon: Briefcase },
+  { value: "licenses", label: "Licenses", icon: Award },
+  { value: "certifications", label: "Certifications", icon: BadgeCheck },
   { value: "education", label: "Education", icon: GraduationCap },
   { value: "skills", label: "Skills", icon: Sparkles },
-  { value: "certifications", label: "Certifications", icon: BadgeCheck },
-  { value: "licenses", label: "Licenses", icon: Award },
-  { value: "achievements", label: "Achievements", icon: Trophy },
   { value: "projects", label: "Projects", icon: FolderKanban },
+  { value: "achievements", label: "Achievements", icon: Trophy },
 ] as const;
 
 // ─── Zoom constants ───────────────────────────────────────────────────────────
@@ -531,24 +531,40 @@ export function ResumeEditorClient({
                         />
                       </TabsContent>
 
+                      {/* ── Licenses ── */}
+                      <TabsContent value="licenses" className="mt-0 border-none p-0 outline-none">
+                        <LicensesTab
+                          resumeId={resumeId}
+                          initial={draftLicenses}
+                          onItemsChange={setDraftLicenses}
+                          onPersisted={onSectionPersisted}
+                          disabled={isLocked}
+                          headerActions={headerActions}
+                          onAddingChange={setIsAddingLicense}
+                          onNewDraftChange={setNewLicenseDraft}
+                        />
+                      </TabsContent>
+
+                      {/* ── Certifications ── */}
+                      <TabsContent value="certifications" className="mt-0 border-none p-0 outline-none">
+                        <CertificationsTab
+                          resumeId={resumeId}
+                          initial={draftCertifications}
+                          onItemsChange={setDraftCertifications}
+                          onPersisted={onSectionPersisted}
+                          disabled={isLocked}
+                          headerActions={headerActions}
+                          onAddingChange={setIsAddingCert}
+                          onNewDraftChange={setNewCertDraft}
+                        />
+                      </TabsContent>
+
                       {/* ── Education ── */}
                       <TabsContent value="education" className="mt-0 border-none p-0 outline-none">
                         <EducationTab
                           resumeId={resumeId}
                           initial={draftEducation}
                           onItemsChange={setDraftEducation}
-                          onPersisted={onSectionPersisted}
-                          disabled={isLocked}
-                          headerActions={headerActions}
-                        />
-                      </TabsContent>
-
-                      {/* ── Projects ── */}
-                      <TabsContent value="projects" className="mt-0 border-none p-0 outline-none">
-                        <ProjectsTab
-                          resumeId={resumeId}
-                          initial={draftProjects}
-                          onItemsChange={setDraftProjects}
                           onPersisted={onSectionPersisted}
                           disabled={isLocked}
                           headerActions={headerActions}
@@ -567,17 +583,15 @@ export function ResumeEditorClient({
                         />
                       </TabsContent>
 
-                      {/* ── Certifications ── */}
-                      <TabsContent value="certifications" className="mt-0 border-none p-0 outline-none">
-                        <CertificationsTab
+                      {/* ── Projects ── */}
+                      <TabsContent value="projects" className="mt-0 border-none p-0 outline-none">
+                        <ProjectsTab
                           resumeId={resumeId}
-                          initial={draftCertifications}
-                          onItemsChange={setDraftCertifications}
+                          initial={draftProjects}
+                          onItemsChange={setDraftProjects}
                           onPersisted={onSectionPersisted}
                           disabled={isLocked}
                           headerActions={headerActions}
-                          onAddingChange={setIsAddingCert}
-                          onNewDraftChange={setNewCertDraft}
                         />
                       </TabsContent>
 
@@ -590,19 +604,6 @@ export function ResumeEditorClient({
                           onPersisted={onSectionPersisted}
                           disabled={isLocked}
                           headerActions={headerActions}
-                        />
-                      </TabsContent>
-
-                      <TabsContent value="licenses" className="mt-0 border-none p-0 outline-none">
-                        <LicensesTab
-                          resumeId={resumeId}
-                          initial={draftLicenses}
-                          onItemsChange={setDraftLicenses}
-                          onPersisted={onSectionPersisted}
-                          disabled={isLocked}
-                          headerActions={headerActions}
-                          onAddingChange={setIsAddingLicense}
-                          onNewDraftChange={setNewLicenseDraft}
                         />
                       </TabsContent>
                     </div>

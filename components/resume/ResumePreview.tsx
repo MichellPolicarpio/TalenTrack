@@ -24,6 +24,7 @@ export type ResumePreviewProps = {
   licenses: License[];
   achievements: Achievement[];
   className?: string;
+  style?: React.CSSProperties;
   activeTab?: string;
   isAddingCert?: boolean;
   isAddingLicense?: boolean;
