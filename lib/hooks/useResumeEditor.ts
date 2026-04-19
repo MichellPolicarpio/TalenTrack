@@ -57,7 +57,6 @@ export function useResumeEditor({
       const { approvalInvalidated } = await saveProfileAction(resumeId, {
         jobTitle:            profileDraft.jobTitle.trim(),
         professionalSummary: profileDraft.professionalSummary.trim(),
-        linkedInUrl:         profileDraft.linkedInUrl.trim() || null,
         homeAddress:         profileDraft.homeAddress.trim() || null,
         personalPhone:       profileDraft.personalPhone.trim() || null,
         personalEmail:       profileDraft.personalEmail.trim() || null,

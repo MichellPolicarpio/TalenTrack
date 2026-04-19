@@ -78,7 +78,6 @@ export async function saveResumeProfile(
   await updateResumeProfile(resumeId, {
     jobTitle: formData.jobTitle.trim(),
     professionalSummary: formData.professionalSummary.trim(),
-    linkedInUrl: emptyToNull(formData.linkedInUrl),
     homeAddress: emptyToNull(formData.homeAddress),
     personalPhone: emptyToNull(formData.personalPhone),
     personalEmail: emptyToNull(formData.personalEmail),
