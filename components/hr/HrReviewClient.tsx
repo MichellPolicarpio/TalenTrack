@@ -15,7 +15,7 @@ import type {
   Education,
   License,
   ResumeProfile,
-  ResumeProject,
+  Project,
   ResumeStatus,
   Skill,
   WorkExperience,
@@ -64,7 +64,7 @@ export type HrReviewClientProps = {
   education: Education[];
   skills: Skill[];
   certifications: Certification[];
-  resumeProjects: ResumeProject[];
+  resumeProjects: Project[];
   licenses: License[];
   achievements: Achievement[];
   auditLog: AuditLogEntry[];
@@ -238,7 +238,7 @@ export function HrReviewClient({
                     education={edu}
                     skills={sk}
                     certifications={cert}
-                    resumeProjects={proj}
+                    projects={proj}
                     licenses={licenses}
                     achievements={ach}
                   />
