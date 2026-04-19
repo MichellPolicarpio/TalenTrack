@@ -102,8 +102,8 @@ const TABS: readonly {
   { value: "certifications", label: "Certifications", icon: BadgeCheck },
   { value: "education", label: "Education", icon: GraduationCap },
   { value: "skills", label: "Skills", icon: Sparkles },
-  { value: "projects", label: "Projects", icon: FolderKanban },
   { value: "achievements", label: "Achievements", icon: Trophy },
+  { value: "projects", label: "Projects", icon: FolderKanban },
 ] as const;
 
 // ─── Zoom constants ───────────────────────────────────────────────────────────
@@ -583,24 +583,24 @@ export function ResumeEditorClient({
                         />
                       </TabsContent>
 
-                      {/* ── Projects ── */}
-                      <TabsContent value="projects" className="mt-0 border-none p-0 outline-none">
-                        <ProjectsTab
-                          resumeId={resumeId}
-                          initial={draftProjects}
-                          onItemsChange={setDraftProjects}
-                          onPersisted={onSectionPersisted}
-                          disabled={isLocked}
-                          headerActions={headerActions}
-                        />
-                      </TabsContent>
-
                       {/* ── Achievements ── */}
                       <TabsContent value="achievements" className="mt-0 border-none p-0 outline-none">
                         <AchievementsTab
                           resumeId={resumeId}
                           initial={draftAchievements}
                           onItemsChange={setDraftAchievements}
+                          onPersisted={onSectionPersisted}
+                          disabled={isLocked}
+                          headerActions={headerActions}
+                        />
+                      </TabsContent>
+
+                      {/* ── Projects ── */}
+                      <TabsContent value="projects" className="mt-0 border-none p-0 outline-none">
+                        <ProjectsTab
+                          resumeId={resumeId}
+                          initial={draftProjects}
+                          onItemsChange={setDraftProjects}
                           onPersisted={onSectionPersisted}
                           disabled={isLocked}
                           headerActions={headerActions}
