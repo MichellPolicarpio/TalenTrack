@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 import { useDashboard } from "@/lib/context/dashboard-context";
 import { ResumeStatus } from "@/lib/db/types";
 
@@ -161,7 +162,7 @@ export function AppTopBar({
                 }
               >
                 <User className="size-4 text-sidebar-foreground/70" />
-                <span className="text-[13px] font-medium">Ver Perfil</span>
+                <span className="text-[13px] font-medium">View Profile</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 render={
@@ -172,18 +173,21 @@ export function AppTopBar({
                 }
               >
                 <Settings className="size-4 text-sidebar-foreground/70" />
-                <span className="text-[13px] font-medium">Configuración</span>
+                <span className="text-[13px] font-medium">Settings</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="-mx-1.5 my-1.5" />
               <DropdownMenuItem disabled className="flex items-center gap-2.5 px-2 py-2 opacity-60">
                 <Moon className="size-4 text-sidebar-foreground/70" />
-                <span className="text-[13px] font-medium">Modo Oscuro</span>
+                <span className="text-[13px] font-medium">Dark Mode</span>
                 <span className="ml-auto text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Off</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="-mx-1.5 my-1.5" />
-              <DropdownMenuItem className="flex items-center gap-2.5 px-2 py-2 text-red-600 focus:bg-red-50 focus:text-red-700 cursor-pointer">
+              <DropdownMenuItem 
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="flex items-center gap-2.5 px-2 py-2 text-red-600 focus:bg-red-50 focus:text-red-700 cursor-pointer"
+              >
                 <LogOut className="size-4" />
-                <span className="text-[13px] font-medium">Cerrar Sesión</span>
+                <span className="text-[13px] font-medium">Log out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

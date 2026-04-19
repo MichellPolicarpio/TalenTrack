@@ -68,7 +68,7 @@ export async function approveResumeAction(resumeId: string): Promise<void> {
       employeeId: ownerResume.resume.employeeId,
       resumeId,
       type: "APPROVED",
-      message: "Tu currículum fue aprobado.",
+      message: "Your resume was approved.",
     });
   }
 
@@ -96,7 +96,7 @@ export async function requestChangesAction(
       employeeId: ownerResume.resume.employeeId,
       resumeId,
       type: "NEEDS_CHANGES",
-      message: `HR solicitó cambios: ${preview}`,
+      message: `HR requested changes: ${preview}`,
     });
   }
 

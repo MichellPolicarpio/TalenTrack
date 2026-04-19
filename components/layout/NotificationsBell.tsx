@@ -17,15 +17,15 @@ import {
 const POLL_MS = 45_000;
 
 function typeLabel(type: string): string {
-  if (type === "NEEDS_CHANGES") return "Cambios solicitados";
-  if (type === "APPROVED") return "Aprobado";
+  if (type === "NEEDS_CHANGES") return "Changes requested";
+  if (type === "APPROVED") return "Approved";
   return type;
 }
 
 function formatShort(iso: string): string {
   try {
     const d = new Date(iso);
-    return d.toLocaleString("es-MX", {
+    return d.toLocaleString("en-US", {
       month: "short",
       day: "numeric",
       hour: "2-digit",
@@ -87,8 +87,8 @@ export function NotificationsBell({
           "relative flex size-9 items-center justify-center rounded-lg text-sidebar-foreground transition-colors hover:bg-sidebar-accent/50",
           open && "bg-sidebar-accent/50",
         )}
-        aria-label="Notificaciones"
-        title="Notificaciones"
+        aria-label="Notifications"
+        title="Notifications"
       >
         <Bell className="size-[18px]" />
         {unread > 0 ? (
@@ -105,7 +105,7 @@ export function NotificationsBell({
         >
           <div className="flex items-center justify-between border-b border-topbar-border/60 px-3 pb-2 pt-0.5">
             <p className="text-[12px] font-semibold text-sidebar-accent-foreground">
-              Notificaciones
+              Notifications
             </p>
             <Button
               type="button"
@@ -126,14 +126,14 @@ export function NotificationsBell({
               ) : (
                 <CheckCheck className="size-3" />
               )}
-              Marcar leídas
+              Mark all as read
             </Button>
           </div>
 
           <div className="max-h-[min(70vh,320px)] overflow-y-auto">
             {snapshot.items.length === 0 ? (
               <p className="px-3 py-6 text-center text-[12px] text-muted-foreground">
-                No hay notificaciones.
+                No notifications.
               </p>
             ) : (
               <ul className="py-1">
@@ -178,7 +178,7 @@ export function NotificationsBell({
                         {n.message}
                       </p>
                       <p className="mt-1 text-[10px] font-medium text-primary">
-                        Ver currículum y comentarios →
+                        View resume and comments →
                       </p>
                     </Link>
                   </li>
