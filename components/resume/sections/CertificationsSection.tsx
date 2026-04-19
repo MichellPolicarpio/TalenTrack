@@ -237,11 +237,13 @@ function CertForm({
   onDone,
   onPersisted,
   onDirtyChange,
+  onFormChange,
 }: {
   resumeId: string;
   onDone: () => void;
   onPersisted?: () => void;
   onDirtyChange?: (isDirty: boolean, saveFn: () => void) => void;
+  onFormChange?: (form: CertificationInput) => void;
 }) {
   const [form, setForm] = useState<CertificationInput>(emptyForm);
   const [pending, startTransition] = useTransition();
@@ -264,6 +266,10 @@ function CertForm({
     const isDirty = !!form.certificationName.trim();
     onDirtyChange?.(isDirty, handleSubmit);
   }, [form]);
+
+  useEffect(() => {
+    onFormChange?.(form);
+  }, [form, onFormChange]);
 
   return (
     <div className="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
@@ -301,6 +307,8 @@ export function CertificationsSection({
   onPersisted,
   disabled = false,
   headerActions,
+  onAddingChange,
+  onNewDraftChange,
 }: {
   resumeId: string;
   initial: Certification[];
@@ -308,6 +316,8 @@ export function CertificationsSection({
   onPersisted?: () => void;
   disabled?: boolean;
   headerActions?: React.ReactNode;
+  onAddingChange?: (isAdding: boolean) => void;
+  onNewDraftChange?: (draft: CertificationInput | null) => void;
 }) {
   const {
     items,
@@ -331,26 +341,33 @@ export function CertificationsSection({
     removeAction: removeCertification,
     reorderAction: reorderCertificationsAction,
     headerActions,
+    onAddingChange,
   });
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) onNewDraftChange?.(null);
+  };
 
   return (
     <SectionShell
       title="Certifications"
       addLabel="Add"
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={handleOpenChange}
       disabled={disabled}
       headerActions={hijackedActions}
       form={
         <CertForm
           key="new"
           resumeId={resumeId}
-          onDone={() => setOpen(false)}
+          onDone={() => handleOpenChange(false)}
           onPersisted={onPersisted}
           onDirtyChange={(isDirty, saveFn) => {
             setLocalDirty(isDirty);
             setActiveSave(() => saveFn);
           }}
+          onFormChange={onNewDraftChange}
         />
       }
     >

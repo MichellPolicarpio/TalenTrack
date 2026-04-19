@@ -8,6 +8,8 @@ export function CertificationsTab({
   onPersisted,
   disabled,
   headerActions,
+  onAddingChange,
+  onNewDraftChange,
 }: {
   resumeId: string;
   initial: Certification[];
@@ -15,6 +17,8 @@ export function CertificationsTab({
   onPersisted?: () => void;
   disabled: boolean;
   headerActions?: React.ReactNode;
+  onAddingChange?: (isAdding: boolean) => void;
+  onNewDraftChange?: (draft: Certification | null) => void;
 }) {
   return (
     <CertificationsSection
@@ -24,6 +28,8 @@ export function CertificationsTab({
       onPersisted={onPersisted}
       disabled={disabled}
       headerActions={headerActions}
+      onAddingChange={onAddingChange}
+      onNewDraftChange={onNewDraftChange}
     />
   );
 }

@@ -8,6 +8,8 @@ export function LicensesTab({
   onPersisted,
   disabled,
   headerActions,
+  onAddingChange,
+  onNewDraftChange,
 }: {
   resumeId: string;
   initial: License[];
@@ -15,6 +17,8 @@ export function LicensesTab({
   onPersisted?: () => void;
   disabled: boolean;
   headerActions?: React.ReactNode;
+  onAddingChange?: (isAdding: boolean) => void;
+  onNewDraftChange?: (draft: License | null) => void;
 }) {
   return (
     <LicensesSection
@@ -24,6 +28,8 @@ export function LicensesTab({
       onPersisted={onPersisted}
       disabled={disabled}
       headerActions={headerActions}
+      onAddingChange={onAddingChange}
+      onNewDraftChange={onNewDraftChange}
     />
   );
 }

@@ -70,24 +70,34 @@ export function AppTopBar({
   const isSettingsRoute = pathname.startsWith("/dashboard/settings");
   const isHrRoute = pathname.startsWith("/dashboard/hr");
   const isHistoryRoute = pathname.startsWith("/dashboard/history");
+  const isResumeRoute = pathname === "/dashboard/resume" || pathname === "/dashboard";
   const { activeResumeStatus, editorActions } = useDashboard();
   const activeTab = activeResumeStatus ? resolveActiveTab(activeResumeStatus) : null;
 
   return (
-    <div className="hidden h-[75px] shrink-0 items-center gap-4 border-b border-topbar-border bg-topbar px-5 md:flex">
+    <div className="hidden relative h-[75px] shrink-0 items-center justify-between border-b border-topbar-border bg-topbar px-5 md:flex">
       {/* Left: app label */}
-      {isAboutRoute || isSettingsRoute || isHistoryRoute ? (
-        <div className="min-w-0 shrink-0">
-          <p className="truncate text-[18px] font-black tracking-tight text-sidebar-accent-foreground">
-            {isAboutRoute ? "About" : isSettingsRoute ? "Settings" : "CV History"}
+      <div className="flex shrink-0 items-center">
+        {isAboutRoute || isSettingsRoute || isHistoryRoute || isResumeRoute ? (
+          <div className="min-w-0 shrink-0">
+            <p className="truncate text-[18px] font-black tracking-tight text-sidebar-accent-foreground">
+              {isAboutRoute ? "About" : isSettingsRoute ? "Settings" : isHistoryRoute ? "Resume History" : "My Resume"}
+            </p>
+          </div>
+        ) : isHrRoute ? (
+          <p className="shrink-0 text-[18px] font-black tracking-tight text-primary">
+            HR Management
           </p>
-        </div>
-      ) : isHrRoute ? (
-        <p className="shrink-0 text-[18px] font-black tracking-tight text-primary">
-          HR Administration
-        </p>
-      ) : activeResumeStatus ? (
-        <div className="flex h-full min-w-0 items-stretch gap-6">
+        ) : (
+          <p className="shrink-0 text-[18px] font-black tracking-tight text-sidebar-label/40">
+            TalentTrack
+          </p>
+        )}
+      </div>
+
+      {/* Center: Status Tabs (absolute centering) */}
+      {activeResumeStatus && (
+        <div className="absolute left-1/2 top-0 flex h-full -translate-x-1/2 items-stretch gap-6">
           {STATUS_TABS.map((tab) => {
             const isActive = tab.key === activeTab;
             return (
@@ -109,14 +119,7 @@ export function AppTopBar({
             );
           })}
         </div>
-      ) : (
-        <p className="shrink-0 text-[18px] font-black tracking-tight text-sidebar-label/40">
-          TalentTrack
-        </p>
       )}
-
-      {/* Spacer */}
-      <div className="flex-1" />
 
       {/* Right: Actions or User profile */}
       <div className="flex shrink-0 items-center gap-4">

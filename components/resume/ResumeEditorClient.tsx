@@ -183,6 +183,11 @@ export function ResumeEditorClient({
     router.refresh();
   }, [bumpLastSaved, router]);
 
+  const [isAddingCert, setIsAddingCert] = useState(false);
+  const [isAddingLicense, setIsAddingLicense] = useState(false);
+  const [newCertDraft, setNewCertDraft] = useState<any>(null);
+  const [newLicenseDraft, setNewLicenseDraft] = useState<any>(null);
+
   const {
     profileDraft,
     setProfileDraft,
@@ -360,7 +365,16 @@ export function ResumeEditorClient({
   }, [downloading, employeeName]);
 
   // ── On-screen preview (no ref — PDF uses dedicated off-screen instance below) ──
-  const previewContent = <ResumePreview {...previewProps} activeTab={activeTab} />;
+  const previewContent = (
+    <ResumePreview
+      {...previewProps}
+      activeTab={activeTab}
+      isAddingCert={isAddingCert}
+      isAddingLicense={isAddingLicense}
+      newCertDraft={newCertDraft}
+      newLicenseDraft={newLicenseDraft}
+    />
+  );
 
   return (
     <>
@@ -375,7 +389,15 @@ export function ResumeEditorClient({
         className="pointer-events-none fixed top-0 isolate"
         style={{ left: -10000, width: 816 }}
       >
-        <ResumePreview ref={previewRef} {...previewProps} activeTab={activeTab} />
+        <ResumePreview
+          ref={previewRef}
+          {...previewProps}
+          activeTab={activeTab}
+          isAddingCert={isAddingCert}
+          isAddingLicense={isAddingLicense}
+          newCertDraft={newCertDraft}
+          newLicenseDraft={newLicenseDraft}
+        />
       </div>
 
       <div className="flex h-full flex-col">
@@ -554,6 +576,8 @@ export function ResumeEditorClient({
                           onPersisted={onSectionPersisted}
                           disabled={isLocked}
                           headerActions={headerActions}
+                          onAddingChange={setIsAddingCert}
+                          onNewDraftChange={setNewCertDraft}
                         />
                       </TabsContent>
 
@@ -577,6 +601,8 @@ export function ResumeEditorClient({
                           onPersisted={onSectionPersisted}
                           disabled={isLocked}
                           headerActions={headerActions}
+                          onAddingChange={setIsAddingLicense}
+                          onNewDraftChange={setNewLicenseDraft}
                         />
                       </TabsContent>
                     </div>

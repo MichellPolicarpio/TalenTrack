@@ -66,14 +66,14 @@ function mainNavItems(role: UserRole): NavItem[] {
     },
     {
       href: "/dashboard/history",
-      label: "CV History",
+      label: "Resume History",
       icon: <History className="size-[17px] shrink-0" />,
     },
   ];
   if (role === "HR_Revisor" || role === "Admin") {
     items.push({
       href: "/dashboard/hr/queue",
-      label: "HR Queue",
+      label: "HR Management",
       icon: <ClipboardList className="size-[17px] shrink-0" />,
     });
     items.push({

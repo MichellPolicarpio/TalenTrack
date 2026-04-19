@@ -300,11 +300,13 @@ function LicenseForm({
   onDone,
   onPersisted,
   onDirtyChange,
+  onFormChange,
 }: {
   resumeId: string;
   onDone: () => void;
   onPersisted?: () => void;
   onDirtyChange?: (isDirty: boolean, saveFn: () => void) => void;
+  onFormChange?: (form: LicenseInput) => void;
 }) {
   const [form, setForm] = useState<LicenseInput>(emptyForm);
   const [pending, startTransition] = useTransition();
@@ -329,6 +331,10 @@ function LicenseForm({
     const isDirty = !!form.licenseType && !!form.jurisdiction;
     onDirtyChange?.(isDirty, handleSubmit);
   }, [form]);
+
+  useEffect(() => {
+    onFormChange?.(form);
+  }, [form, onFormChange]);
 
   return (
     <div className="relative flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-5 pr-24 shadow-sm">
@@ -393,6 +399,8 @@ export function LicensesSection({
   onPersisted,
   disabled = false,
   headerActions,
+  onAddingChange,
+  onNewDraftChange,
 }: {
   resumeId: string;
   initial: License[];
@@ -400,6 +408,8 @@ export function LicensesSection({
   onPersisted?: () => void;
   disabled?: boolean;
   headerActions?: React.ReactNode;
+  onAddingChange?: (isAdding: boolean) => void;
+  onNewDraftChange?: (draft: LicenseInput | null) => void;
 }) {
   const {
     items,
@@ -423,26 +433,33 @@ export function LicensesSection({
     removeAction: removeLicense,
     reorderAction: reorderLicensesAction,
     headerActions,
+    onAddingChange,
   });
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) onNewDraftChange?.(null);
+  };
 
   return (
     <SectionShell
       title="Licenses"
       addLabel="Add"
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={handleOpenChange}
       disabled={disabled}
       headerActions={hijackedActions}
       form={
         <LicenseForm
           key="new"
           resumeId={resumeId}
-          onDone={() => setOpen(false)}
+          onDone={() => handleOpenChange(false)}
           onPersisted={onPersisted}
           onDirtyChange={(isDirty, saveFn) => {
             setLocalDirty(isDirty);
             setActiveSave(() => saveFn);
           }}
+          onFormChange={onNewDraftChange}
         />
       }
     >

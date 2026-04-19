@@ -24,8 +24,11 @@ export type ResumePreviewProps = {
   licenses: License[];
   achievements: Achievement[];
   className?: string;
-  style?: React.CSSProperties;
   activeTab?: string;
+  isAddingCert?: boolean;
+  isAddingLicense?: boolean;
+  newCertDraft?: any;
+  newLicenseDraft?: any;
 };
 
 /** Brand orange aligned with Brindley logo artwork */
@@ -115,6 +118,10 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
       className,
       style,
       activeTab,
+      isAddingCert,
+      isAddingLicense,
+      newCertDraft,
+      newLicenseDraft,
     },
     ref,
   ) {
@@ -139,13 +146,35 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
     const visibleLicenses = licenses.filter((l) => l.isVisibleOnResume);
     const visibleAchievements = achievements.filter((a) => a.isVisibleOnResume);
 
+    // Merge in-progress drafts for real-time preview (TD-09)
+    const finalVisibleCerts = [...visibleCerts];
+    if (newCertDraft && newCertDraft.certificationName?.trim()) {
+      finalVisibleCerts.push({
+        ...newCertDraft,
+        id: "new-draft-id",
+        isVisibleOnResume: true,
+        issueDate: newCertDraft.issueDate ? new Date(newCertDraft.issueDate) : null,
+        expirationDate: newCertDraft.expirationDate ? new Date(newCertDraft.expirationDate) : null,
+      } as any);
+    }
+
+    const finalVisibleLicenses = [...visibleLicenses];
+    if (newLicenseDraft && newLicenseDraft.licenseType?.trim()) {
+      finalVisibleLicenses.push({
+        ...newLicenseDraft,
+        id: "new-draft-lic-id",
+        isVisibleOnResume: true,
+        expirationDate: newLicenseDraft.expirationDate ? new Date(newLicenseDraft.expirationDate) : null,
+      } as any);
+    }
+
     const hasBodyContent =
       visibleExp.length > 0 ||
       visibleEdu.length > 0 ||
       visibleSkills.length > 0 ||
-      visibleCerts.length > 0 ||
+      finalVisibleCerts.length > 0 ||
       visibleProjects.length > 0 ||
-      visibleLicenses.length > 0 ||
+      finalVisibleLicenses.length > 0 ||
       visibleAchievements.length > 0;
 
     const sidebarCerts = visibleCerts.slice(0, 5);
@@ -174,7 +203,7 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
         {/* ─── PAGE 1 ─── */}
         <div
           ref={page1Ref}
-          className="resume-page-sheet relative mx-auto flex h-[1056px] w-[816px] min-w-[816px] flex-col overflow-hidden bg-white shadow-2xl"
+          className="resume-page-sheet relative mx-auto flex h-[1056px] w-[816px] min-w-[816px] flex-col overflow-hidden bg-white shadow-[0_0_120px_rgba(0,0,0,0.06),0_0_60px_rgba(0,0,0,0.04),0_0_20px_rgba(0,0,0,0.03)]"
           style={{
             fontFamily: 'var(--font-tw-cen), "Tw Cen MT", "Tw Cen MT Condensed", "Century Gothic", system-ui, -apple-system, "Segoe UI", sans-serif',
             fontSize: "11pt",
@@ -245,39 +274,45 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
                   </p>
                 </section>
 
-                {visibleLicenses.length > 0 || visibleCerts.length > 0 ? (
+                {finalVisibleLicenses.length > 0 || finalVisibleCerts.length > 0 || isAddingCert || isAddingLicense ? (
                   <section className="mb-4">
-                    <LeftSectionTitle>Licenses / Certifications</LeftSectionTitle>
+                    <LeftSectionTitle>
+                      {(finalVisibleLicenses.length > 0 || isAddingLicense) && (finalVisibleCerts.length > 0 || isAddingCert)
+                        ? "Licenses / Certifications"
+                        : finalVisibleLicenses.length > 0 || isAddingLicense
+                        ? "Licenses"
+                        : "Certifications"}
+                    </LeftSectionTitle>
                     <ul className="space-y-2">
-                      {/* --- Licenses --- */}
-                      {visibleLicenses.map((lic) => (
-                        <li key={lic.id} className="flex gap-2 text-[11pt] text-[#000000]">
-                          <span className="shrink-0 font-bold" style={{ color: ORANGE }}>•</span>
-                          <div className="flex-1">
-                            <p className="font-bold leading-tight">
-                              {[lic.licenseType, lic.jurisdiction, lic.status]
-                                .filter(Boolean)
-                                .join(" | ")}
-                            </p>
-                            {lic.licenseNumber ? (
-                              <p className="text-[10pt] opacity-85">No. {lic.licenseNumber}</p>
-                            ) : null}
-                          </div>
-                        </li>
-                      ))}
-                      
-                      {/* --- Certifications --- */}
-                      {visibleCerts.map((cert) => (
-                        <li key={cert.id} className="flex gap-2 text-[11pt] text-[#000000]">
-                          <span className="shrink-0 font-bold" style={{ color: ORANGE }}>•</span>
-                          <div className="flex-1">
-                            <p className="font-bold leading-tight">{cert.certificationName}</p>
-                            {cert.issuingOrganization ? (
-                              <p className="text-[10pt] opacity-85">{cert.issuingOrganization}</p>
-                            ) : null}
-                          </div>
-                        </li>
-                      ))}
+                       {/* --- Licenses --- */}
+                       {finalVisibleLicenses.map((lic) => (
+                         <li key={lic.id} className="flex gap-2 text-[11pt] text-[#000000]">
+                           <span className="shrink-0 font-bold" style={{ color: ORANGE }}>•</span>
+                           <div className="flex-1">
+                             <p className="font-bold leading-tight">
+                               {[lic.licenseType, lic.jurisdiction, lic.status]
+                                 .filter(Boolean)
+                                 .join(" | ")}
+                             </p>
+                             {lic.licenseNumber ? (
+                               <p className="text-[10pt] opacity-85">No. {lic.licenseNumber}</p>
+                             ) : null}
+                           </div>
+                         </li>
+                       ))}
+                       
+                       {/* --- Certifications --- */}
+                       {finalVisibleCerts.map((cert) => (
+                         <li key={cert.id} className="flex gap-2 text-[11pt] text-[#000000]">
+                           <span className="shrink-0 font-bold" style={{ color: ORANGE }}>•</span>
+                           <div className="flex-1">
+                             <p className="font-bold leading-tight">{cert.certificationName}</p>
+                             {cert.issuingOrganization ? (
+                               <p className="text-[10pt] opacity-85">{cert.issuingOrganization}</p>
+                             ) : null}
+                           </div>
+                         </li>
+                       ))}
                     </ul>
                   </section>
                 ) : null}
@@ -466,7 +501,7 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
         {/* ─── PAGE 2 (Independent) ─── */}
         <div
           ref={page2Ref}
-          className="resume-page-sheet relative mx-auto flex h-[1056px] w-[816px] min-w-[816px] flex-col overflow-hidden bg-white shadow-2xl"
+          className="resume-page-sheet relative mx-auto flex h-[1056px] w-[816px] min-w-[816px] flex-col overflow-hidden bg-white shadow-[0_0_120px_rgba(0,0,0,0.06),0_0_60px_rgba(0,0,0,0.04),0_0_20px_rgba(0,0,0,0.03)]"
           style={{
             fontFamily: 'var(--font-tw-cen), "Tw Cen MT", "Tw Cen MT Condensed", "Century Gothic", system-ui, -apple-system, "Segoe UI", sans-serif',
             fontSize: "11pt",
