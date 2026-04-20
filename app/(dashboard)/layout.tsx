@@ -55,12 +55,7 @@ export default async function DashboardGroupLayout({
   return (
     <DashboardProvider>
       <div className="flex h-screen w-full overflow-hidden bg-background">
-        <AppSidebar 
-          userName={userName} 
-          userEmail={userEmail} 
-          role={role} 
-          notificationsInitial={notificationsInitial}
-        />
+        <AppSidebar userName={userName} userEmail={userEmail} role={role} />
 
         {/* Content column: TopBar (desktop) + scrollable page area */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">

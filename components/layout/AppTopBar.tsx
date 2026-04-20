@@ -77,78 +77,69 @@ export function AppTopBar({
 
   return (
     <div className="hidden relative h-[75px] shrink-0 items-center justify-between border-b border-topbar-border bg-topbar px-5 md:flex">
-      {/* Left Area: Brand/Title */}
-      <div className="flex flex-1 items-center min-w-0">
+      {/* Left: app label */}
+      <div className="flex shrink-0 items-center">
         {isAboutRoute || isSettingsRoute || isHistoryRoute || isResumeRoute ? (
-          <div className="min-w-0">
+          <div className="min-w-0 shrink-0">
             <p className="truncate text-[18px] font-black tracking-tight text-sidebar-accent-foreground">
               {isAboutRoute ? "About" : isSettingsRoute ? "Settings" : isHistoryRoute ? "Resume History" : "My Resume"}
             </p>
           </div>
         ) : isHrRoute ? (
-          <p className="truncate text-[18px] font-black tracking-tight text-primary">
+          <p className="shrink-0 text-[18px] font-black tracking-tight text-primary">
             HR Management
           </p>
         ) : (
-          <p className="truncate text-[18px] font-black tracking-tight text-sidebar-label/40">
+          <p className="shrink-0 text-[18px] font-black tracking-tight text-sidebar-label/40">
             TalentTrack
           </p>
         )}
       </div>
 
-      {/* Center Area: Status Tabs (Now relative and part of flex flow) */}
-      <div className="flex flex-1 justify-center items-center">
-        {activeResumeStatus && (
-          <div className={cn(
-            "flex h-full items-stretch gap-6 px-4 transition-all",
-            // Solo mostrar los tabs completos si la pantalla es lo suficientemente ancha
-            "hidden lg:flex"
-          )}>
-            {STATUS_TABS.map((tab) => {
-              const isActive = tab.key === activeTab;
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  className={cn(
-                    "relative flex items-center text-[13px] font-medium tracking-[0.01em] transition-colors whitespace-nowrap",
-                    isActive
-                      ? "text-sidebar-accent-foreground"
-                      : "text-sidebar-foreground/60 hover:text-sidebar-foreground",
-                  )}
-                >
-                  {tab.label}
-                  {isActive && (
-                    <span className="absolute inset-x-0 -bottom-[3px] h-[2px] rounded-full bg-primary" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      {/* Center: Status Tabs (absolute centering) */}
+      {activeResumeStatus && (
+        <div className="absolute left-1/2 top-0 flex h-full -translate-x-1/2 items-stretch gap-6">
+          {STATUS_TABS.map((tab) => {
+            const isActive = tab.key === activeTab;
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                className={cn(
+                  "relative flex items-center text-[13px] font-medium tracking-[0.01em] transition-colors",
+                  isActive
+                    ? "text-sidebar-accent-foreground"
+                    : "text-sidebar-foreground/60 hover:text-sidebar-foreground",
+                )}
+              >
+                {tab.label}
+                {isActive && (
+                  <span className="absolute inset-x-0 -bottom-[1px] h-[2px] rounded-full bg-primary" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
-      {/* Right Area: Actions + Profile */}
-      <div className="flex flex-1 items-center justify-end gap-4 min-w-0">
+      {/* Right: Actions or User profile */}
+      <div className="flex shrink-0 items-center gap-4">
         <div className="flex items-center gap-3 border-l border-topbar-border pl-4">
           {notificationsInitial && (
-            <div className="shrink-0">
-              <NotificationsBell initial={notificationsInitial} />
-            </div>
+            <NotificationsBell initial={notificationsInitial} />
           )}
 
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <button className="flex shrink-0 items-center gap-2.5 rounded-full border-0 bg-white px-2 py-1.5 shadow-sm transition-all hover:shadow-md hover:ring-1 hover:ring-primary/10 active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-primary/30 sm:px-3" />
+                <button className="flex shrink-0 items-center gap-3 rounded-full border border-sidebar-border bg-white/60 px-3 py-1.5 transition-all hover:bg-sidebar-accent/50 hover:shadow-md active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-primary/30" />
               }
             >
-              {/* Only show name/role on XL screens to avoid overlaps on tablets */}
-              <div className="hidden flex-col items-end xl:flex">
+              <div className="flex flex-col items-end">
                 <p className="text-[12px] font-bold text-sidebar-accent-foreground leading-none">{userName}</p>
                 <p className="text-[10px] font-medium text-sidebar-foreground/50 mt-1 uppercase tracking-tight">{roleLabel}</p>
               </div>
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sidebar-accent font-bold text-sidebar-accent-foreground shadow-sm ring-2 ring-white transition-all">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sidebar-accent/80 font-bold text-sidebar-accent-foreground shadow-sm ring-2 ring-sidebar-border group-hover:ring-primary/30 group-hover:shadow-primary/20 transition-all">
                 {initials}
               </div>
             </DropdownMenuTrigger>

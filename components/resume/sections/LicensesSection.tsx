@@ -111,12 +111,6 @@ function LicenseCard({
   const [form, setForm] = useState<LicenseInput>(initial);
   const [dirty, setDirty] = useState(false);
   const [saving, startSave] = useTransition();
-  const [showValidation, setShowValidation] = useState(false);
-
-  const typeEmpty = showValidation && !form.licenseType;
-  const jurisdictionEmpty = showValidation && !form.jurisdiction;
-  const numberEmpty = showValidation && !form.licenseNumber?.trim();
-  const expirationEmpty = showValidation && !form.isRetired && !form.expirationDate;
 
   const currentStatus = getStatus(form.isRetired, form.expirationDate);
 
@@ -145,20 +139,11 @@ function LicenseCard({
   }, [form, dirty]);
 
   function handleSave() {
-    const isInvalid = !form.licenseType || !form.jurisdiction || !form.licenseNumber?.trim() || (!form.isRetired && !form.expirationDate);
-    
-    if (isInvalid) {
-      setShowValidation(true);
-      toast.error("Please fill in all required fields.");
-      return;
-    }
-
     startSave(async () => {
       try {
         await saveLicense(resumeId, form);
         toast.success("License saved.");
         setDirty(false);
-        setShowValidation(false);
         onDirtyChange?.(false, () => {});
         onPersisted?.();
       } catch {
@@ -185,7 +170,7 @@ function LicenseCard({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "group relative flex items-start gap-3 rounded-xl border border-neutral-200 bg-white p-4 transition-all hover:border-neutral-300 hover:shadow-md sm:gap-4 sm:p-5",
+        "group relative flex items-start gap-4 rounded-xl border border-neutral-200 bg-white p-5 transition-all hover:border-neutral-300 hover:shadow-md",
         isDragging && "z-50 opacity-50",
         !item.isVisibleOnResume && "opacity-60 bg-neutral-50/50",
       )}
@@ -194,7 +179,7 @@ function LicenseCard({
         <StatusBadge status={currentStatus} />
       </div>
 
-      <div className="flex shrink-0 flex-col items-center justify-center gap-2 border-r border-neutral-100 pr-3 sm:gap-3 sm:pr-4">
+      <div className="flex shrink-0 flex-col items-center justify-center gap-3 border-r border-neutral-100 pr-4">
         <button
           type="button"
           onClick={() => onToggleVisibility(item.id, !item.isVisibleOnResume)}
@@ -219,7 +204,7 @@ function LicenseCard({
           type="button"
           {...attributes}
           {...listeners}
-          className="cursor-grab rounded-md p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 focus:outline-none"
+          className="cursor-grab text-neutral-400 transition-colors hover:text-neutral-600 focus:outline-none"
           aria-label="Drag to reorder"
         >
           <GripVertical className="size-4" />
@@ -227,7 +212,7 @@ function LicenseCard({
       </div>
 
       <div className="flex-1 space-y-3 pr-20">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
             <Label className="text-[12px] text-[#6B7280]">License Type *</Label>
             <Select
@@ -235,7 +220,7 @@ function LicenseCard({
               onValueChange={(v) => update({ licenseType: v || "" })}
               disabled={disabled}
             >
-              <SelectTrigger className={typeEmpty ? "border-red-400" : ""}>
+              <SelectTrigger>
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
               <SelectContent>
@@ -252,7 +237,7 @@ function LicenseCard({
               onValueChange={(v) => update({ jurisdiction: v || "" })}
               disabled={disabled}
             >
-              <SelectTrigger className={jurisdictionEmpty ? "border-red-400" : ""}>
+              <SelectTrigger>
                 <SelectValue placeholder="State" />
               </SelectTrigger>
               <SelectContent>
@@ -264,31 +249,25 @@ function LicenseCard({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 items-end sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3 items-end">
           <div className="flex flex-col gap-1.5">
-            <Label className="text-[12px] text-[#6B7280]">
-              License Number <span className="text-red-500">*</span>
-            </Label>
+            <Label className="text-[12px] text-[#6B7280]">License Number</Label>
             <Input
               value={form.licenseNumber ?? ""}
               onChange={(e) => update({ licenseNumber: e.target.value || null })}
               placeholder="e.g. 123456"
               disabled={disabled}
-              className={numberEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
             />
           </div>
 
           <div className="flex items-end gap-3">
             <div className="flex-1 flex flex-col gap-1.5">
-              <Label className="text-[12px] text-[#6B7280]">
-                Expiration Date {!form.isRetired && <span className="text-red-500">*</span>}
-              </Label>
+              <Label className="text-[12px] text-[#6B7280]">Expiration Date</Label>
               <Input
                 type="date"
                 value={form.expirationDate || ""}
                 onChange={(e) => update({ expirationDate: e.target.value || null })}
                 disabled={disabled || form.isRetired}
-                className={expirationEmpty ? "border-red-400" : ""}
               />
             </div>
             <div className="flex items-center gap-2 pb-2">
@@ -302,6 +281,7 @@ function LicenseCard({
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );
@@ -330,24 +310,10 @@ function LicenseForm({
 }) {
   const [form, setForm] = useState<LicenseInput>(emptyForm);
   const [pending, startTransition] = useTransition();
-  const [showValidation, setShowValidation] = useState(false);
-
-  const typeEmpty = showValidation && !form.licenseType;
-  const jurisdictionEmpty = showValidation && !form.jurisdiction;
-  const numberEmpty = showValidation && !form.licenseNumber?.trim();
-  const expirationEmpty = showValidation && !form.isRetired && !form.expirationDate;
 
   const currentStatus = getStatus(form.isRetired, form.expirationDate);
 
   function handleSubmit() {
-    const isInvalid = !form.licenseType || !form.jurisdiction || !form.licenseNumber?.trim() || (!form.isRetired && !form.expirationDate);
-
-    if (isInvalid) {
-      setShowValidation(true);
-      toast.error("Please fill in all required fields.");
-      return;
-    }
-
     startTransition(async () => {
       try {
         await saveLicense(resumeId, form);
@@ -362,7 +328,7 @@ function LicenseForm({
   }
 
   useEffect(() => {
-    const isDirty = !!form.licenseType || !!form.jurisdiction || !!form.licenseNumber?.trim() || !!form.expirationDate || form.isRetired;
+    const isDirty = !!form.licenseType && !!form.jurisdiction;
     onDirtyChange?.(isDirty, handleSubmit);
   }, [form]);
 
@@ -375,11 +341,11 @@ function LicenseForm({
       <div className="absolute top-5 right-5">
         <StatusBadge status={currentStatus} />
       </div>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-2">
-          <Label className="text-[13px] font-semibold text-neutral-700">License Type *</Label>
+          <Label>License Type *</Label>
           <Select value={form.licenseType} onValueChange={(v) => setForm((f) => ({ ...f, licenseType: v || "" }))}>
-            <SelectTrigger className={typeEmpty ? "border-red-400" : ""}>
+            <SelectTrigger>
               <SelectValue placeholder="Select type" />
             </SelectTrigger>
             <SelectContent>
@@ -390,9 +356,9 @@ function LicenseForm({
           </Select>
         </div>
         <div className="flex flex-col gap-2">
-          <Label className="text-[13px] font-semibold text-neutral-700">Jurisdiction *</Label>
+          <Label>Jurisdiction *</Label>
           <Select value={form.jurisdiction} onValueChange={(v) => setForm((f) => ({ ...f, jurisdiction: v || "" }))}>
-            <SelectTrigger className={jurisdictionEmpty ? "border-red-400" : ""}>
+            <SelectTrigger>
               <SelectValue placeholder="Select state" />
             </SelectTrigger>
             <SelectContent>
@@ -404,33 +370,16 @@ function LicenseForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 items-end sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-4 items-end">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="lic-num" className="text-[13px] font-semibold text-neutral-700">
-            License Number <span className="text-red-500">*</span>
-          </Label>
-          <Input 
-            id="lic-num" 
-            value={form.licenseNumber ?? ""} 
-            onChange={(e) => setForm((f) => ({ ...f, licenseNumber: e.target.value || null }))} 
-            placeholder="e.g. 123456" 
-            className={numberEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
-          />
+          <Label htmlFor="lic-num">License Number</Label>
+          <Input id="lic-num" value={form.licenseNumber ?? ""} onChange={(e) => setForm((f) => ({ ...f, licenseNumber: e.target.value || null }))} placeholder="e.g. 123456" />
         </div>
 
         <div className="flex items-end gap-3">
           <div className="flex-1 flex flex-col gap-2">
-            <Label htmlFor="lic-exp" className="text-[13px] font-semibold text-neutral-700">
-              Expiration Date {!form.isRetired && <span className="text-red-500">*</span>}
-            </Label>
-            <Input 
-              id="lic-exp" 
-              type="date" 
-              value={form.expirationDate || ""} 
-              onChange={(e) => setForm((f) => ({ ...f, expirationDate: e.target.value || null }))} 
-              disabled={form.isRetired} 
-              className={expirationEmpty ? "border-red-400" : ""}
-            />
+            <Label htmlFor="lic-exp">Expiration Date</Label>
+            <Input id="lic-exp" type="date" value={form.expirationDate || ""} onChange={(e) => setForm((f) => ({ ...f, expirationDate: e.target.value || null }))} disabled={form.isRetired} />
           </div>
           <div className="flex items-center gap-2 pb-2">
             <Checkbox id="lic-retired" checked={form.isRetired} onCheckedChange={(checked) => setForm((f) => ({ ...f, isRetired: Boolean(checked) }))} />

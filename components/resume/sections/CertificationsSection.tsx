@@ -80,12 +80,6 @@ function CertCard({
   const [form, setForm] = useState<CertificationInput>(initial);
   const [dirty, setDirty] = useState(false);
   const [saving, startSave] = useTransition();
-  const [showValidation, setShowValidation] = useState(false);
-
-  const nameEmpty = showValidation && !form.certificationName.trim();
-  const issueDateEmpty = showValidation && !form.issueDate;
-  const expirationEmpty = showValidation && !form.expirationDate;
-  const credentialIdEmpty = showValidation && !form.credentialId?.trim();
 
   function update(patch: Partial<CertificationInput>) {
     const nextForm = { ...form, ...patch };
@@ -112,20 +106,11 @@ function CertCard({
   }, [form, dirty]);
 
   function handleSave() {
-    const isInvalid = !form.certificationName.trim() || !form.issueDate || !form.expirationDate || !form.credentialId?.trim();
-    
-    if (isInvalid) {
-      setShowValidation(true);
-      toast.error("Please fill in all required fields.");
-      return;
-    }
-
     startSave(async () => {
       try {
         await saveCertification(resumeId, form);
         toast.success("Certification saved.");
         setDirty(false);
-        setShowValidation(false);
         onDirtyChange?.(false, () => {});
         onPersisted?.();
       } catch {
@@ -152,12 +137,12 @@ function CertCard({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "group relative flex items-start gap-3 rounded-xl border border-neutral-200 bg-white p-4 transition-all hover:border-neutral-300 hover:shadow-md sm:gap-4 sm:p-5",
+        "group relative flex items-start gap-4 rounded-xl border border-neutral-200 bg-white p-5 transition-all hover:border-neutral-300 hover:shadow-md",
         isDragging && "z-50 opacity-50",
         !item.isVisibleOnResume && "opacity-60 bg-neutral-50/50",
       )}
     >
-      <div className="flex shrink-0 flex-col items-center justify-center gap-2 border-r border-neutral-100 pr-3 sm:gap-3 sm:pr-4">
+      <div className="flex shrink-0 flex-col items-center justify-center gap-3 border-r border-neutral-100 pr-4">
         <button
           type="button"
           onClick={() => onToggleVisibility(item.id, !item.isVisibleOnResume)}
@@ -182,7 +167,7 @@ function CertCard({
           type="button"
           {...attributes}
           {...listeners}
-          className="cursor-grab rounded-md p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 focus:outline-none"
+          className="cursor-grab text-neutral-400 transition-colors hover:text-neutral-600 focus:outline-none"
           aria-label="Drag to reorder"
         >
           <GripVertical className="size-4" />
@@ -191,14 +176,11 @@ function CertCard({
 
       <div className="flex-1 space-y-3">
         <div className="flex flex-col gap-1.5">
-          <Label className="text-[12px] text-[#6B7280]">
-            Certification Name <span className="text-red-500">*</span>
-          </Label>
+          <Label className="text-[12px] text-[#6B7280]">Certification Name</Label>
           <Input
             value={form.certificationName}
             onChange={(e) => update({ certificationName: e.target.value })}
             disabled={disabled}
-            className={nameEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
           />
         </div>
         <div className="flex flex-col gap-1.5">
@@ -211,39 +193,30 @@ function CertCard({
         </div>
         <div className="flex gap-3">
           <div className="flex flex-1 flex-col gap-1.5">
-            <Label className="text-[12px] text-[#6B7280]">
-              Issue Date <span className="text-red-500">*</span>
-            </Label>
+            <Label className="text-[12px] text-[#6B7280]">Issue Date</Label>
             <Input
               type="date"
               value={form.issueDate ?? ""}
               onChange={(e) => update({ issueDate: e.target.value || null })}
               disabled={disabled}
-              className={issueDateEmpty ? "border-red-400" : ""}
             />
           </div>
           <div className="flex flex-1 flex-col gap-1.5">
-            <Label className="text-[12px] text-[#6B7280]">
-              Expiration Date <span className="text-red-500">*</span>
-            </Label>
+            <Label className="text-[12px] text-[#6B7280]">Expiration Date</Label>
             <Input
               type="date"
               value={form.expirationDate ?? ""}
               onChange={(e) => update({ expirationDate: e.target.value || null })}
               disabled={disabled}
-              className={expirationEmpty ? "border-red-400" : ""}
             />
           </div>
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label className="text-[12px] text-[#6B7280]">
-            Certification Number or ID <span className="text-red-500">*</span>
-          </Label>
+          <Label className="text-[12px] text-[#6B7280]">Certification Number or ID</Label>
           <Input
             value={form.credentialId ?? ""}
             onChange={(e) => update({ credentialId: e.target.value || null })}
             disabled={disabled}
-            className={credentialIdEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
           />
         </div>
       </div>
@@ -274,29 +247,14 @@ function CertForm({
 }) {
   const [form, setForm] = useState<CertificationInput>(emptyForm);
   const [pending, startTransition] = useTransition();
-  const [showValidation, setShowValidation] = useState(false);
-
-  const nameEmpty = showValidation && !form.certificationName.trim();
-  const issueDateEmpty = showValidation && !form.issueDate;
-  const expirationEmpty = showValidation && !form.expirationDate;
-  const credentialIdEmpty = showValidation && !form.credentialId?.trim();
 
   function handleSubmit() {
-    const isInvalid = !form.certificationName.trim() || !form.issueDate || !form.expirationDate || !form.credentialId?.trim();
-
-    if (isInvalid) {
-      setShowValidation(true);
-      toast.error("Please fill in all required fields.");
-      return;
-    }
-
     startTransition(async () => {
       try {
         await saveCertification(resumeId, form);
         toast.success("Certification saved.");
         onPersisted?.();
         onDirtyChange?.(false, () => {});
-        setShowValidation(false);
         onDone();
       } catch {
         toast.error("Could not save.");
@@ -305,7 +263,7 @@ function CertForm({
   }
 
   useEffect(() => {
-    const isDirty = !!form.certificationName.trim() || !!form.issueDate || !!form.expirationDate || !!form.credentialId?.trim();
+    const isDirty = !!form.certificationName.trim();
     onDirtyChange?.(isDirty, handleSubmit);
   }, [form]);
 
@@ -314,58 +272,28 @@ function CertForm({
   }, [form, onFormChange]);
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:gap-4 sm:p-5">
+    <div className="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-2">
-        <Label htmlFor="cert-name" className="text-[13px] font-semibold text-neutral-700">
-          Certification name <span className="text-red-500">*</span>
-        </Label>
-        <Input 
-          id="cert-name" 
-          value={form.certificationName} 
-          onChange={(e) => setForm((f) => ({ ...f, certificationName: e.target.value }))}
-          className={nameEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
-        />
+        <Label htmlFor="cert-name">Certification name *</Label>
+        <Input id="cert-name" value={form.certificationName} onChange={(e) => setForm((f) => ({ ...f, certificationName: e.target.value }))} />
       </div>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="cert-org" className="text-[13px] font-semibold text-neutral-700">Issuing organization</Label>
+        <Label htmlFor="cert-org">Issuing organization</Label>
         <Input id="cert-org" value={form.issuingOrganization ?? ""} onChange={(e) => setForm((f) => ({ ...f, issuingOrganization: e.target.value || null }))} />
       </div>
       <div className="flex gap-3">
         <div className="flex flex-1 flex-col gap-2">
-          <Label htmlFor="cert-issue" className="text-[13px] font-semibold text-neutral-700">
-            Issue date <span className="text-red-500">*</span>
-          </Label>
-          <Input 
-            id="cert-issue" 
-            type="date" 
-            value={form.issueDate ?? ""} 
-            onChange={(e) => setForm((f) => ({ ...f, issueDate: e.target.value || null }))}
-            className={issueDateEmpty ? "border-red-400" : ""}
-          />
+          <Label htmlFor="cert-issue">Issue date</Label>
+          <Input id="cert-issue" type="date" value={form.issueDate ?? ""} onChange={(e) => setForm((f) => ({ ...f, issueDate: e.target.value || null }))} />
         </div>
         <div className="flex flex-1 flex-col gap-2">
-          <Label htmlFor="cert-exp" className="text-[13px] font-semibold text-neutral-700">
-            Expiration date <span className="text-red-500">*</span>
-          </Label>
-          <Input 
-            id="cert-exp" 
-            type="date" 
-            value={form.expirationDate ?? ""} 
-            onChange={(e) => setForm((f) => ({ ...f, expirationDate: e.target.value || null }))}
-            className={expirationEmpty ? "border-red-400" : ""}
-          />
+          <Label htmlFor="cert-exp">Expiration date</Label>
+          <Input id="cert-exp" type="date" value={form.expirationDate ?? ""} onChange={(e) => setForm((f) => ({ ...f, expirationDate: e.target.value || null }))} />
         </div>
       </div>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="cert-id" className="text-[13px] font-semibold text-neutral-700">
-          Certification Number or ID <span className="text-red-500">*</span>
-        </Label>
-        <Input 
-          id="cert-id" 
-          value={form.credentialId ?? ""} 
-          onChange={(e) => setForm((f) => ({ ...f, credentialId: e.target.value || null }))}
-          className={credentialIdEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
-        />
+        <Label htmlFor="cert-id">Certification Number or ID</Label>
+        <Input id="cert-id" value={form.credentialId ?? ""} onChange={(e) => setForm((f) => ({ ...f, credentialId: e.target.value || null }))} />
       </div>
       {/* Internal Save button removed in favor of global header button */}
     </div>

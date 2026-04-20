@@ -70,15 +70,6 @@ function ProjectCard({
   const [form, setForm] = useState<ProjectInput>(initial);
   const [dirty, setDirty] = useState(false);
   const [saving, startSave] = useTransition();
-  const [showValidation, setShowValidation] = useState(false);
-
-  const projectNameEmpty = showValidation && !form.projectName.trim();
-  const industryEmpty = showValidation && !form.industry?.trim();
-  const roleEmpty = showValidation && !form.role?.trim();
-  const yearEmpty = showValidation && !form.year;
-  const projectValueEmpty = showValidation && !form.projectValue?.trim();
-  const expandedTitleEmpty = showValidation && !form.expandedTitle?.trim();
-  const descriptionEmpty = showValidation && !form.description?.trim();
 
   function update(patch: Partial<ProjectInput>) {
     const nextForm = { ...form, ...patch };
@@ -97,20 +88,11 @@ function ProjectCard({
   }, [form, dirty]);
 
   function handleSave() {
-    const isInvalid = !form.projectName.trim() || !form.industry?.trim() || !form.role?.trim() || !form.year || !form.projectValue?.trim() || !form.expandedTitle?.trim() || !form.description?.trim();
-    
-    if (isInvalid) {
-      setShowValidation(true);
-      toast.error("Please fill in all required fields.");
-      return;
-    }
-
     startSave(async () => {
       try {
         const updated = await saveProject(resumeId, form);
         toast.success("Project saved.");
         setDirty(false);
-        setShowValidation(false);
         onDraftChange(item.id, updated);
         onDirtyChange?.(false, () => {});
         onPersisted?.();
@@ -125,13 +107,13 @@ function ProjectCard({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "group relative flex items-start gap-3 rounded-xl border border-neutral-200 bg-white p-4 transition-all hover:border-neutral-300 hover:shadow-md sm:gap-4 sm:p-5",
+        "group relative flex items-start gap-4 rounded-xl border border-neutral-200 bg-white p-5 transition-all hover:border-neutral-300 hover:shadow-md",
         isDragging && "z-50 opacity-50",
         !item.isVisibleOnResume && "opacity-60 bg-neutral-50/50",
       )}
     >
       {/* Left controls column — identical to CertCard */}
-      <div className="flex shrink-0 flex-col items-center justify-center gap-2 border-r border-neutral-100 pr-3 sm:gap-3 sm:pr-4">
+      <div className="flex shrink-0 flex-col items-center justify-center gap-3 border-r border-neutral-100 pr-4">
         <button
           type="button"
           onClick={() => onToggleVisibility(item.id, !item.isVisibleOnResume)}
@@ -156,7 +138,7 @@ function ProjectCard({
           type="button"
           {...attributes}
           {...listeners}
-          className="cursor-grab rounded-md p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 focus:outline-none"
+          className="cursor-grab text-neutral-400 transition-colors hover:text-neutral-600 focus:outline-none"
           aria-label="Drag to reorder"
         >
           <GripVertical className="size-4" />
@@ -166,98 +148,74 @@ function ProjectCard({
       {/* Fields — same label/input style as CertCard */}
       <div className="flex-1 space-y-3">
         <div className="flex flex-col gap-1.5">
-          <Label className="text-[12px] text-[#6B7280]">
-            Project Name <span className="text-red-500">*</span>
-          </Label>
+          <Label className="text-[12px] text-[#6B7280]">Project Name</Label>
           <Input
             value={form.projectName}
             onChange={(e) => update({ projectName: e.target.value })}
             disabled={disabled}
-            className={projectNameEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
           />
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="flex flex-col gap-1.5">
-            <Label className="text-[12px] text-[#6B7280]">
-              Industry <span className="text-red-500">*</span>
-            </Label>
+            <Label className="text-[12px] text-[#6B7280]">Industry</Label>
             <Input
               value={form.industry ?? ""}
               onChange={(e) => update({ industry: e.target.value || null })}
               disabled={disabled}
               placeholder="e.g. Oil & Gas"
-              className={industryEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label className="text-[12px] text-[#6B7280]">
-              Role <span className="text-red-500">*</span>
-            </Label>
+            <Label className="text-[12px] text-[#6B7280]">Role</Label>
             <Input
               value={form.role ?? ""}
               onChange={(e) => update({ role: e.target.value || null })}
               disabled={disabled}
               placeholder="e.g. Mechanical Supervisor"
-              className={roleEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label className="text-[12px] text-[#6B7280]">
-              Year <span className="text-red-500">*</span>
-            </Label>
+            <Label className="text-[12px] text-[#6B7280]">Year</Label>
             <Input
               type="number"
               value={form.year ?? ""}
               onChange={(e) => update({ year: e.target.value ? parseInt(e.target.value) : null })}
               disabled={disabled}
               placeholder="YYYY"
-              className={yearEmpty ? "border-red-400" : ""}
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <Label className="text-[12px] text-[#6B7280]">
-              Project Value <span className="text-red-500">*</span>
-            </Label>
+            <Label className="text-[12px] text-[#6B7280]">Project Value</Label>
             <Input
               value={form.projectValue ?? ""}
               onChange={(e) => update({ projectValue: e.target.value || null })}
               disabled={disabled}
               placeholder="e.g. $18.5B MDD"
-              className={projectValueEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label className="text-[12px] text-[#6B7280]">
-              Expanded Title <span className="text-red-500">*</span>
-            </Label>
+            <Label className="text-[12px] text-[#6B7280]">Expanded Title</Label>
             <Input
               value={form.expandedTitle ?? ""}
               onChange={(e) => update({ expandedTitle: e.target.value || null })}
               disabled={disabled}
               placeholder="e.g. Sub-category or scope detail"
-              className={expandedTitleEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
             />
           </div>
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label className="text-[12px] text-[#6B7280]">
-            Description <span className="text-red-500">*</span>
-          </Label>
+          <Label className="text-[12px] text-[#6B7280]">Description</Label>
           <Textarea
             rows={3}
             value={form.description ?? ""}
             onChange={(e) => update({ description: e.target.value || null })}
             disabled={disabled}
             placeholder="Brief summary of achievements..."
-            className={cn(
-              "min-h-[100px]",
-              descriptionEmpty ? "border-red-400 focus-visible:ring-red-400" : ""
-            )}
           />
         </div>
       </div>
@@ -290,25 +248,9 @@ function ProjectForm({
 }) {
   const [form, setForm] = useState<ProjectInput>(emptyForm);
   const [pending, startTransition] = useTransition();
-  const [showValidation, setShowValidation] = useState(false);
-
-  const projectNameEmpty = showValidation && !form.projectName.trim();
-  const industryEmpty = showValidation && !form.industry?.trim();
-  const roleEmpty = showValidation && !form.role?.trim();
-  const yearEmpty = showValidation && !form.year;
-  const projectValueEmpty = showValidation && !form.projectValue?.trim();
-  const expandedTitleEmpty = showValidation && !form.expandedTitle?.trim();
-  const descriptionEmpty = showValidation && !form.description?.trim();
 
   function handleSubmit() {
-    const isInvalid = !form.projectName.trim() || !form.industry?.trim() || !form.role?.trim() || !form.year || !form.projectValue?.trim() || !form.expandedTitle?.trim() || !form.description?.trim();
-
-    if (isInvalid) {
-      setShowValidation(true);
-      toast.error("Please fill in all required fields.");
-      return;
-    }
-
+    if (!form.projectName.trim()) return;
     startTransition(async () => {
       try {
         const newItem = await saveProject(resumeId, form);
@@ -316,7 +258,6 @@ function ProjectForm({
         onAdded?.(newItem);
         onPersisted?.();
         onDirtyChange?.(false, () => {});
-        setShowValidation(false);
         onDone();
       } catch {
         toast.error("Could not save.");
@@ -325,106 +266,82 @@ function ProjectForm({
   }
 
   useEffect(() => {
-    const isDirty = !!form.projectName.trim() || !!form.industry?.trim() || !!form.role?.trim() || !!form.year || !!form.projectValue?.trim() || !!form.expandedTitle?.trim() || !!form.description?.trim();
+    const isDirty = !!form.projectName.trim();
     onDirtyChange?.(isDirty, handleSubmit);
   }, [form]);
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:gap-4 sm:p-5">
+    <div className="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-2">
-        <Label htmlFor="rp-name" className="text-[13px] font-semibold text-neutral-700">
-          Project name <span className="text-red-500">*</span>
-        </Label>
+        <Label htmlFor="rp-name">Project name *</Label>
         <Input
           id="rp-name"
           value={form.projectName}
           onChange={(e) => setForm((f) => ({ ...f, projectName: e.target.value }))}
           placeholder="e.g. Dos Bocas New Refinery"
-          className={projectNameEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
         />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="rp-industry" className="text-[13px] font-semibold text-neutral-700">
-            Industry <span className="text-red-500">*</span>
-          </Label>
+          <Label htmlFor="rp-industry">Industry</Label>
           <Input
             id="rp-industry"
             value={form.industry ?? ""}
             onChange={(e) => setForm((f) => ({ ...f, industry: e.target.value || null }))}
             placeholder="e.g. Oil & Gas"
-            className={industryEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="rp-role" className="text-[13px] font-semibold text-neutral-700">
-            Role <span className="text-red-500">*</span>
-          </Label>
+          <Label htmlFor="rp-role">Role</Label>
           <Input
             id="rp-role"
             value={form.role ?? ""}
             onChange={(e) => setForm((f) => ({ ...f, role: e.target.value || null }))}
             placeholder="e.g. Manager"
-            className={roleEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="rp-year" className="text-[13px] font-semibold text-neutral-700">
-            Year <span className="text-red-500">*</span>
-          </Label>
+          <Label htmlFor="rp-year">Year</Label>
           <Input
             id="rp-year"
             type="number"
             value={form.year ?? ""}
             onChange={(e) => setForm((f) => ({ ...f, year: e.target.value ? parseInt(e.target.value) : null }))}
             placeholder="YYYY"
-            className={yearEmpty ? "border-red-400" : ""}
           />
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="rp-value" className="text-[13px] font-semibold text-neutral-700">
-            Project Value <span className="text-red-500">*</span>
-          </Label>
+          <Label htmlFor="rp-value">Project Value</Label>
           <Input
             id="rp-value"
             value={form.projectValue ?? ""}
             onChange={(e) => setForm((f) => ({ ...f, projectValue: e.target.value || null }))}
             placeholder="e.g. $18.5B"
-            className={projectValueEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="rp-expanded" className="text-[13px] font-semibold text-neutral-700">
-            Expanded Title <span className="text-red-500">*</span>
-          </Label>
+          <Label htmlFor="rp-expanded">Expanded Title</Label>
           <Input
             id="rp-expanded"
             value={form.expandedTitle ?? ""}
             onChange={(e) => setForm((f) => ({ ...f, expandedTitle: e.target.value || null }))}
             placeholder="Additional context..."
-            className={expandedTitleEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
           />
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="rp-desc" className="text-[13px] font-semibold text-neutral-700">
-          Description <span className="text-red-500">*</span>
-        </Label>
+        <Label htmlFor="rp-desc">Description</Label>
         <Textarea
           id="rp-desc"
           rows={3}
           value={form.description ?? ""}
           onChange={(e) => setForm((f) => ({ ...f, description: e.target.value || null }))}
           placeholder="Scope and achievements..."
-          className={cn(
-            "min-h-[120px]",
-            descriptionEmpty ? "border-red-400 focus-visible:ring-red-400" : ""
-          )}
         />
       </div>
     </div>

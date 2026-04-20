@@ -66,7 +66,7 @@ export function MonthYearPicker({ value, onChange, disabled, className }: MonthY
       <PopoverTrigger
         disabled={disabled}
         className={cn(
-          "flex h-8 w-full items-center justify-between rounded-lg border border-input bg-card px-3 text-sm font-medium text-neutral-950 shadow-sm transition-colors hover:bg-sidebar-accent/30 focus-visible:ring-2 focus-visible:ring-primary/30 disabled:text-foreground disabled:opacity-50 outline-none dark:text-white dark:disabled:text-muted-foreground",
+          "flex h-8 w-full items-center justify-between rounded-lg border border-input bg-card px-3 text-sm font-medium shadow-sm transition-colors hover:bg-sidebar-accent/30 focus-visible:ring-2 focus-visible:ring-primary/30 disabled:opacity-50 outline-none",
           !value && "text-muted-foreground",
           className
         )}

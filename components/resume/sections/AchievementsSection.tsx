@@ -139,12 +139,12 @@ function AchievementCard({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "group relative flex items-start gap-3 rounded-xl border border-neutral-200 bg-white p-4 transition-all hover:border-neutral-300 hover:shadow-md sm:gap-4 sm:p-5",
+        "group relative flex items-start gap-4 rounded-xl border border-neutral-200 bg-white p-5 transition-all hover:border-neutral-300 hover:shadow-md",
         isDragging && "z-50 opacity-50",
         !item.isVisibleOnResume && "opacity-60 bg-neutral-50/50",
       )}
     >
-      <div className="flex shrink-0 flex-col items-center justify-center gap-2 border-r border-neutral-100 pr-3 sm:gap-3 sm:pr-4">
+      <div className="flex shrink-0 flex-col items-center justify-center gap-3 border-r border-neutral-100 pr-4">
         <button
           type="button"
           onClick={() => onToggleVisibility(item.id, !item.isVisibleOnResume)}
@@ -169,7 +169,7 @@ function AchievementCard({
           type="button"
           {...attributes}
           {...listeners}
-          className="cursor-grab rounded-md p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 focus:outline-none"
+          className="cursor-grab text-neutral-400 transition-colors hover:text-neutral-600 focus:outline-none"
           aria-label="Drag to reorder"
         >
           <GripVertical className="size-4" />
@@ -271,7 +271,7 @@ function AchievementForm({
   }, [form]);
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:gap-4 sm:p-5">
+    <div className="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-2">
         <Label htmlFor="ach-title">Title *</Label>
         <Input 

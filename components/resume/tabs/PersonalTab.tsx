@@ -28,10 +28,9 @@ export function PersonalTab({
   headerActions
 }: PersonalTabProps) {
   const jobTitleEmpty = showValidation && !data.jobTitle.trim();
-  const summaryEmpty = showValidation && !data.professionalSummary.trim();
 
   return (
-    <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-top-2 duration-300 sm:gap-6">
+    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-top-2 duration-300">
       <div className="flex items-center justify-between">
         <h2 className="text-[18px] font-semibold text-[#111827]">Personal Information</h2>
         <div className="flex items-center gap-3">
@@ -65,9 +64,7 @@ export function PersonalTab({
 
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <Label htmlFor="pt-summary" className="text-[12px] text-[#6B7280]">
-              Professional Summary <span className="text-red-500">*</span>
-            </Label>
+            <Label htmlFor="pt-summary" className="text-[12px] text-[#6B7280]">Professional Summary</Label>
             <span className="text-[11px] text-[#9CA3AF] tabular-nums">
               {data.professionalSummary.length}/450
             </span>
@@ -82,11 +79,7 @@ export function PersonalTab({
               onChange("professionalSummary", e.target.value.slice(0, 450))
             }
             placeholder="Brief description of your experience and career goals"
-            className={summaryEmpty ? "border-red-400 focus-visible:ring-red-400 min-h-[120px]" : "min-h-[120px]"}
           />
-          {summaryEmpty && (
-            <p className="text-[12px] text-red-500">Professional summary is required.</p>
-          )}
         </div>
 
 
