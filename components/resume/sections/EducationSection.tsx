@@ -16,7 +16,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { cn } from "@/lib/utils";
+import { cn, formatTitleCase } from "@/lib/utils";
 import {
   GripVertical,
   Trash2,
@@ -336,11 +336,13 @@ function EducationForm({
   onDone,
   onPersisted,
   onDirtyChange,
+  onFormChange,
 }: {
   resumeId: string;
   onDone: () => void;
   onPersisted?: () => void;
   onDirtyChange?: (isDirty: boolean, saveFn: () => void) => void;
+  onFormChange?: (draft: any | null) => void;
 }) {
   const [form, setForm] = useState<EducationInput>(emptyForm);
   const [pending, startTransition] = useTransition();
@@ -383,6 +385,7 @@ function EducationForm({
       if (isValid) handleSubmit();
       else toast.error("Please fill all mandatory fields.");
     });
+    onFormChange?.(form);
   }, [form]);
 
   return (
@@ -396,7 +399,7 @@ function EducationForm({
           id="ed-inst" 
           maxLength={45} 
           value={form.institutionName} 
-          onChange={(e) => setForm((f) => ({ ...f, institutionName: e.target.value.slice(0, 45) }))} 
+          onChange={(e) => setForm((f) => ({ ...f, institutionName: formatTitleCase(e.target.value.slice(0, 45)) }))} 
           className={institutionEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
         />
       </div>
@@ -424,7 +427,7 @@ function EducationForm({
           <Input 
             id="ed-degree" 
             value={form.degree} 
-            onChange={(e) => setForm((f) => ({ ...f, degree: e.target.value }))} 
+            onChange={(e) => setForm((f) => ({ ...f, degree: formatTitleCase(e.target.value) }))} 
             placeholder="e.g. Civil Engineering"
             className={degreeEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
           />
@@ -434,7 +437,7 @@ function EducationForm({
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
         <div className="flex flex-col gap-2 md:col-span-2">
           <Label htmlFor="ed-field">Specialization (optional)</Label>
-          <Input id="ed-field" value={form.specialization ?? ""} onChange={(e) => setForm((f) => ({ ...f, specialization: e.target.value || null }))} placeholder="e.g. AI" />
+          <Input id="ed-field" value={form.specialization ?? ""} onChange={(e) => setForm((f) => ({ ...f, specialization: formatTitleCase(e.target.value || null) }))} placeholder="e.g. AI" />
         </div>
         <div className="flex flex-col gap-2 md:col-span-1">
           <Label htmlFor="ed-start" className="text-neutral-500">Start <span className="text-red-500">*</span></Label>
@@ -469,6 +472,10 @@ export function EducationSection({
   onPersisted,
   disabled = false,
   headerActions,
+  onActivateEdit,
+  isAdding,
+  onAddingChange,
+  onNewDraftChange,
 }: {
   resumeId: string;
   initial: Education[];
@@ -476,6 +483,10 @@ export function EducationSection({
   onPersisted?: () => void;
   disabled?: boolean;
   headerActions?: React.ReactNode;
+  onActivateEdit?: () => void;
+  isAdding?: boolean;
+  onAddingChange?: (isAdding: boolean) => void;
+  onNewDraftChange?: (draft: any | null) => void;
 }) {
   const {
     items,
@@ -499,16 +510,25 @@ export function EducationSection({
     removeAction: removeEducation,
     reorderAction: reorderEducationAction,
     headerActions,
+    isAdding,
+    onAddingChange,
   });
+  
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    onAddingChange?.(isOpen);
+    if (!isOpen) onNewDraftChange?.(null);
+  };
 
   return (
     <SectionShell
       title="Education"
       addLabel="Add"
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={handleOpenChange}
       disabled={disabled}
       headerActions={hijackedActions}
+      onActivateEdit={onActivateEdit}
       form={
         <EducationForm
           key="new"
@@ -519,6 +539,7 @@ export function EducationSection({
             setLocalDirty(isDirty);
             setActiveSave(() => saveFn);
           }}
+          onFormChange={onNewDraftChange}
         />
       }
     >

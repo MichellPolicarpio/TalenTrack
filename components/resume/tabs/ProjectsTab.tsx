@@ -10,6 +10,8 @@ export function ProjectsTab({
   headerActions,
   onAddingChange,
   onNewDraftChange,
+  onActivateEdit,
+  isAdding,
 }: {
   resumeId: string;
   initial: Project[];
@@ -19,6 +21,8 @@ export function ProjectsTab({
   headerActions?: React.ReactNode;
   onAddingChange?: (isAdding: boolean) => void;
   onNewDraftChange?: (draft: any | null) => void;
+  onActivateEdit?: () => void;
+  isAdding?: boolean;
 }) {
   return (
     <ProjectsSection
@@ -30,6 +34,8 @@ export function ProjectsTab({
       headerActions={headerActions}
       onAddingChange={onAddingChange}
       onNewDraftChange={onNewDraftChange}
+      onActivateEdit={onActivateEdit}
+      isAdding={isAdding}
     />
   );
 }

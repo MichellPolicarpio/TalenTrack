@@ -27,6 +27,7 @@ export function useGenericSection<T extends GenericSectionItem>({
   reorderAction,
   headerActions,
   onAddingChange,
+  isAdding,
 }: {
   resumeId: string;
   tableName: "WorkExperiences" | "Education" | "Skills" | "Certifications" | "Achievements" | "ResumeProjects" | "Licenses";
@@ -37,6 +38,7 @@ export function useGenericSection<T extends GenericSectionItem>({
   reorderAction: (resumeId: string, items: ReorderItem[]) => Promise<void>;
   headerActions?: React.ReactNode;
   onAddingChange?: (isAdding: boolean) => void;
+  isAdding?: boolean;
 }) {
   const [items, setItems] = useState<T[]>(initial);
   const [open, setOpen] = useState(false);
@@ -53,6 +55,13 @@ export function useGenericSection<T extends GenericSectionItem>({
   useEffect(() => {
     onAddingChange?.(open);
   }, [open, onAddingChange]);
+
+  // Sync open state with external isAdding prop
+  useEffect(() => {
+    if (isAdding !== undefined) {
+      setOpen(isAdding);
+    }
+  }, [isAdding]);
 
   const hijackedActions = useMemo(() => {
     if (!React.isValidElement(headerActions)) return headerActions;

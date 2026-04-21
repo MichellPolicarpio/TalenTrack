@@ -14,6 +14,7 @@ export type SectionShellProps = {
   onOpenChange: (open: boolean) => void;
   disabled?: boolean;
   headerActions?: React.ReactNode;
+  onActivateEdit?: () => void;
 };
 
 export function SectionShell({
@@ -26,6 +27,7 @@ export function SectionShell({
   onOpenChange,
   disabled = false,
   headerActions,
+  onActivateEdit,
 }: SectionShellProps) {
   const formRef = useRef<HTMLDivElement>(null);
 
@@ -46,7 +48,10 @@ export function SectionShell({
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={() => onOpenChange(true)}
+                onClick={() => {
+                  if (disabled && onActivateEdit) onActivateEdit();
+                  onOpenChange(true);
+                }}
                 className="h-9 gap-1.5 rounded-lg border-primary/30 px-4 text-[13px] font-medium text-primary shadow-sm hover:bg-sidebar-accent/50 hover:text-primary"
               >
                 <Plus className="size-3.5" aria-hidden />
@@ -81,7 +86,10 @@ export function SectionShell({
 
       <button
         type="button"
-        onClick={() => onOpenChange(true)}
+        onClick={() => {
+          if (disabled && onActivateEdit) onActivateEdit();
+          onOpenChange(true);
+        }}
         className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-transparent text-[13px] font-medium text-neutral-500 transition-colors hover:border-primary/50 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Plus className="size-4" />

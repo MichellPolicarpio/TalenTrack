@@ -196,10 +196,34 @@ export function ResumeEditorClient({
   const [isAddingLicense, setIsAddingLicense] = useState(false);
   const [isAddingProject, setIsAddingProject] = useState(false);
   const [isAddingSkill, setIsAddingSkill] = useState(false);
+  const [isAddingExperience, setIsAddingExperience] = useState(false);
+  const [isAddingEducation, setIsAddingEducation] = useState(false);
+  const [isAddingAchievement, setIsAddingAchievement] = useState(false);
   const [newCertDraft, setNewCertDraft] = useState<any>(null);
   const [newLicenseDraft, setNewLicenseDraft] = useState<any>(null);
   const [newProjectDraft, setNewProjectDraft] = useState<any>(null);
   const [newSkillDraft, setNewSkillDraft] = useState<any>(null);
+  const [newExperienceDraft, setNewExperienceDraft] = useState<any>(null);
+  const [newEducationDraft, setNewEducationDraft] = useState<any>(null);
+  const [newAchievementDraft, setNewAchievementDraft] = useState<any>(null);
+  
+  // Logic to close all adding forms - defined BEFORE useResumeEditor to avoid TDZ
+  const resetAddingStates = useCallback(() => {
+    setIsAddingCert(false);
+    setIsAddingLicense(false);
+    setIsAddingProject(false);
+    setIsAddingSkill(false);
+    setIsAddingExperience(false);
+    setIsAddingEducation(false);
+    setIsAddingAchievement(false);
+    setNewExperienceDraft(null);
+    setNewEducationDraft(null);
+    setNewAchievementDraft(null);
+    setNewCertDraft(null);
+    setNewLicenseDraft(null);
+    setNewProjectDraft(null);
+    setNewSkillDraft(null);
+  }, []);
 
   const {
     profileDraft,
@@ -253,6 +277,7 @@ export function ResumeEditorClient({
     setHasUnsavedChanges,
     resetDrafts,
     bumpLastSaved,
+    onCancel: resetAddingStates,
   });
 
   const [isSubmitConfirmOpen, setIsSubmitConfirmOpen] = useState(false);
@@ -513,7 +538,11 @@ export function ResumeEditorClient({
                     {/* Scrollable Form Content */}
                     <div 
                       className="flex-1 overflow-y-auto px-4 pb-8 scroll-smooth sm:px-6"
-                      onPointerDownCapture={() => isLocked && triggerEditHint()}
+                      onPointerDownCapture={(e) => {
+                        // If we're locked but clicking a button (like "Add New Entry"), don't show the hint
+                        const isActionButton = (e.target as HTMLElement).closest("button");
+                        if (isLocked && !isActionButton) triggerEditHint();
+                      }}
                     >
                       {/* Mobile preview button */}
                       <div className="mb-4 flex items-center justify-end lg:hidden">
@@ -554,6 +583,10 @@ export function ResumeEditorClient({
                           onPersisted={onSectionPersisted}
                           disabled={isLocked}
                           headerActions={headerActions}
+                          onActivateEdit={handleEdit}
+                          onAddingChange={setIsAddingExperience}
+                          isAdding={isAddingExperience}
+                          onNewDraftChange={setNewExperienceDraft}
                         />
                       </TabsContent>
 
@@ -568,6 +601,8 @@ export function ResumeEditorClient({
                           headerActions={headerActions}
                           onAddingChange={setIsAddingLicense}
                           onNewDraftChange={setNewLicenseDraft}
+                          onActivateEdit={handleEdit}
+                          isAdding={isAddingLicense}
                         />
                       </TabsContent>
 
@@ -582,6 +617,8 @@ export function ResumeEditorClient({
                           headerActions={headerActions}
                           onAddingChange={setIsAddingCert}
                           onNewDraftChange={setNewCertDraft}
+                          onActivateEdit={handleEdit}
+                          isAdding={isAddingCert}
                         />
                       </TabsContent>
 
@@ -594,6 +631,10 @@ export function ResumeEditorClient({
                           onPersisted={onSectionPersisted}
                           disabled={isLocked}
                           headerActions={headerActions}
+                          onActivateEdit={handleEdit}
+                          onAddingChange={setIsAddingEducation}
+                          isAdding={isAddingEducation}
+                          onNewDraftChange={setNewEducationDraft}
                         />
                       </TabsContent>
 
@@ -608,6 +649,8 @@ export function ResumeEditorClient({
                           headerActions={headerActions}
                           onAddingChange={setIsAddingSkill}
                           onNewDraftChange={setNewSkillDraft}
+                          onActivateEdit={handleEdit}
+                          isAdding={isAddingSkill}
                         />
                       </TabsContent>
 
@@ -620,6 +663,10 @@ export function ResumeEditorClient({
                           onPersisted={onSectionPersisted}
                           disabled={isLocked}
                           headerActions={headerActions}
+                          onActivateEdit={handleEdit}
+                          onAddingChange={setIsAddingAchievement}
+                          isAdding={isAddingAchievement}
+                          onNewDraftChange={setNewAchievementDraft}
                         />
                       </TabsContent>
 
@@ -634,6 +681,8 @@ export function ResumeEditorClient({
                           headerActions={headerActions}
                           onAddingChange={setIsAddingProject}
                           onNewDraftChange={setNewProjectDraft}
+                          onActivateEdit={handleEdit}
+                          isAdding={isAddingProject}
                         />
                       </TabsContent>
                     </div>
@@ -759,6 +808,10 @@ export function ResumeEditorClient({
                     <ResumePreview
                       {...previewProps}
                       activeTab={activeTab}
+                      isAddingCert={isAddingCert}
+                      isAddingExperience={isAddingExperience}
+                      isAddingEducation={isAddingEducation}
+                      isAddingAchievement={isAddingAchievement}
                       isAddingLicense={isAddingLicense}
                       isAddingProject={isAddingProject}
                       isAddingSkill={isAddingSkill}
@@ -766,6 +819,9 @@ export function ResumeEditorClient({
                       newLicenseDraft={newLicenseDraft}
                       newProjectDraft={newProjectDraft}
                       newSkillDraft={newSkillDraft}
+                      newExperienceDraft={newExperienceDraft}
+                      newEducationDraft={newEducationDraft}
+                      newAchievementDraft={newAchievementDraft}
                     />
                   </div>
                 </div>
@@ -857,6 +913,10 @@ export function ResumeEditorClient({
                   {...previewProps}
                   className="w-full"
                   activeTab={activeTab}
+                  isAddingCert={isAddingCert}
+                  isAddingExperience={isAddingExperience}
+                  isAddingEducation={isAddingEducation}
+                  isAddingAchievement={isAddingAchievement}
                   isAddingLicense={isAddingLicense}
                   isAddingProject={isAddingProject}
                   isAddingSkill={isAddingSkill}
@@ -864,6 +924,9 @@ export function ResumeEditorClient({
                   newLicenseDraft={newLicenseDraft}
                   newProjectDraft={newProjectDraft}
                   newSkillDraft={newSkillDraft}
+                  newExperienceDraft={newExperienceDraft}
+                  newEducationDraft={newEducationDraft}
+                  newAchievementDraft={newAchievementDraft}
                   disableScrollIntoView={activeTab === "personal"}
                 />
                 </div>

@@ -10,6 +10,8 @@ export function CertificationsTab({
   headerActions,
   onAddingChange,
   onNewDraftChange,
+  onActivateEdit,
+  isAdding,
 }: {
   resumeId: string;
   initial: Certification[];
@@ -19,6 +21,7 @@ export function CertificationsTab({
   headerActions?: React.ReactNode;
   onAddingChange?: (isAdding: boolean) => void;
   onNewDraftChange?: (draft: CertificationInput | null) => void;
+  onActivateEdit?: () => void;
 }) {
   return (
     <CertificationsSection
@@ -30,6 +33,8 @@ export function CertificationsTab({
       headerActions={headerActions}
       onAddingChange={onAddingChange}
       onNewDraftChange={onNewDraftChange}
+      onActivateEdit={onActivateEdit}
+      isAdding={isAdding}
     />
   );
 }

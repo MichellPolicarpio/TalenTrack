@@ -16,7 +16,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { cn } from "@/lib/utils";
+import { cn, formatTitleCase } from "@/lib/utils";
 import {
   GripVertical,
   Trash2,
@@ -49,16 +49,6 @@ function toDateStr(d: Date | null): string | null {
   return d ? (d.toISOString().split("T")[0] ?? null) : null;
 }
 
-function formatTitleCase(val: string): string {
-  return val
-    .split(/(\s+)/)
-    .map((word) =>
-      word.trim().length > 0
-        ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        : word
-    )
-    .join("");
-}
 
 function WorkExperienceCard({
   item,
@@ -310,11 +300,13 @@ function WorkExperienceForm({
   onDone,
   onPersisted,
   onDirtyChange,
+  onFormChange,
 }: {
   resumeId: string;
   onDone: () => void;
   onPersisted?: () => void;
   onDirtyChange?: (isDirty: boolean, saveFn: () => void) => void;
+  onFormChange?: (draft: any | null) => void;
 }) {
   const [form, setForm] = useState<WorkExperienceInput>(emptyForm);
   const [pending, startTransition] = useTransition();
@@ -346,6 +338,7 @@ function WorkExperienceForm({
   useEffect(() => {
     const isDirty = !!form.companyName.trim() || !!form.jobTitle.trim();
     onDirtyChange?.(isDirty, handleSubmit);
+    onFormChange?.(form);
   }, [form]);
 
   return (
@@ -401,7 +394,6 @@ function WorkExperienceForm({
     </div>
   );
 }
-
 export function WorkExperienceSection({
   resumeId,
   initial,
@@ -409,6 +401,10 @@ export function WorkExperienceSection({
   onPersisted,
   disabled = false,
   headerActions,
+  onActivateEdit,
+  isAdding,
+  onAddingChange,
+  onNewDraftChange,
 }: {
   resumeId: string;
   initial: WorkExperience[];
@@ -416,6 +412,10 @@ export function WorkExperienceSection({
   onPersisted?: () => void;
   disabled?: boolean;
   headerActions?: React.ReactNode;
+  onActivateEdit?: () => void;
+  isAdding?: boolean;
+  onAddingChange?: (isAdding: boolean) => void;
+  onNewDraftChange?: (draft: any | null) => void;
 }) {
   const {
     items,
@@ -439,7 +439,15 @@ export function WorkExperienceSection({
     removeAction: removeWorkExperience,
     reorderAction: reorderWorkExperiencesAction,
     headerActions,
+    isAdding,
+    onAddingChange,
   });
+  
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    onAddingChange?.(isOpen);
+    if (!isOpen) onNewDraftChange?.(null);
+  };
 
   return (
     <SectionShell
@@ -447,8 +455,9 @@ export function WorkExperienceSection({
       addLabel="Add"
       open={open}
       disabled={disabled}
-      onOpenChange={setOpen}
+      onOpenChange={handleOpenChange}
       headerActions={hijackedActions}
+      onActivateEdit={onActivateEdit}
       form={
         <WorkExperienceForm
           key="new"
@@ -459,6 +468,7 @@ export function WorkExperienceSection({
             setLocalDirty(isDirty);
             setActiveSave(() => saveFn);
           }}
+          onFormChange={onNewDraftChange}
         />
       }
     >

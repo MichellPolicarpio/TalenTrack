@@ -432,6 +432,8 @@ export function ProjectsSection({
   headerActions,
   onAddingChange,
   onNewDraftChange,
+  onActivateEdit,
+  isAdding,
 }: {
   resumeId: string;
   initial: Project[];
@@ -441,6 +443,8 @@ export function ProjectsSection({
   headerActions?: React.ReactNode;
   onAddingChange?: (isAdding: boolean) => void;
   onNewDraftChange?: (draft: any | null) => void;
+  onActivateEdit?: () => void;
+  isAdding?: boolean;
 }) {
   const {
     items,
@@ -465,6 +469,7 @@ export function ProjectsSection({
     removeAction: removeProject,
     reorderAction: reorderProjectsAction,
     headerActions,
+    isAdding,
   });
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -482,6 +487,7 @@ export function ProjectsSection({
       onOpenChange={handleOpenChange}
       disabled={disabled}
       headerActions={hijackedActions}
+      onActivateEdit={onActivateEdit}
       form={
         <ProjectForm
           key="new"

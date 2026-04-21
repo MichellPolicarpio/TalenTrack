@@ -8,6 +8,10 @@ export function AchievementsTab({
   onPersisted,
   disabled,
   headerActions,
+  onActivateEdit,
+  isAdding,
+  onAddingChange,
+  onNewDraftChange,
 }: {
   resumeId: string;
   initial: Achievement[];
@@ -15,6 +19,10 @@ export function AchievementsTab({
   onPersisted?: () => void;
   disabled: boolean;
   headerActions?: React.ReactNode;
+  onActivateEdit?: () => void;
+  isAdding?: boolean;
+  onAddingChange?: (adding: boolean) => void;
+  onNewDraftChange?: (draft: any | null) => void;
 }) {
   return (
     <AchievementsSection
@@ -24,6 +32,10 @@ export function AchievementsTab({
       onPersisted={onPersisted}
       disabled={disabled}
       headerActions={headerActions}
+      onActivateEdit={onActivateEdit}
+      isAdding={isAdding}
+      onAddingChange={onAddingChange}
+      onNewDraftChange={onNewDraftChange}
     />
   );
 }

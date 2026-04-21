@@ -26,6 +26,7 @@
 
 # Nested app bundle (not part of this repo)
 /TalentTrack-App-main/
+/Survbe-refactorized-main/
 
 # debug
 npm-debug.log*

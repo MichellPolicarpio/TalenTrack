@@ -442,6 +442,8 @@ export function LicensesSection({
   headerActions,
   onAddingChange,
   onNewDraftChange,
+  onActivateEdit,
+  isAdding,
 }: {
   resumeId: string;
   initial: License[];
@@ -451,6 +453,8 @@ export function LicensesSection({
   headerActions?: React.ReactNode;
   onAddingChange?: (isAdding: boolean) => void;
   onNewDraftChange?: (draft: LicenseInput | null) => void;
+  onActivateEdit?: () => void;
+  isAdding?: boolean;
 }) {
   const {
     items,
@@ -475,6 +479,7 @@ export function LicensesSection({
     reorderAction: reorderLicensesAction,
     headerActions,
     onAddingChange,
+    isAdding,
   });
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -490,6 +495,7 @@ export function LicensesSection({
       onOpenChange={handleOpenChange}
       disabled={disabled}
       headerActions={hijackedActions}
+      onActivateEdit={onActivateEdit}
       form={
         <LicenseForm
           key="new"

@@ -10,6 +10,8 @@ export function LicensesTab({
   headerActions,
   onAddingChange,
   onNewDraftChange,
+  onActivateEdit,
+  isAdding,
 }: {
   resumeId: string;
   initial: License[];
@@ -19,6 +21,7 @@ export function LicensesTab({
   headerActions?: React.ReactNode;
   onAddingChange?: (isAdding: boolean) => void;
   onNewDraftChange?: (draft: LicenseInput | null) => void;
+  onActivateEdit?: () => void;
 }) {
   return (
     <LicensesSection
@@ -30,6 +33,8 @@ export function LicensesTab({
       headerActions={headerActions}
       onAddingChange={onAddingChange}
       onNewDraftChange={onNewDraftChange}
+      onActivateEdit={onActivateEdit}
+      isAdding={isAdding}
     />
   );
 }

@@ -342,6 +342,8 @@ export function CertificationsSection({
   headerActions,
   onAddingChange,
   onNewDraftChange,
+  onActivateEdit,
+  isAdding,
 }: {
   resumeId: string;
   initial: Certification[];
@@ -351,6 +353,8 @@ export function CertificationsSection({
   headerActions?: React.ReactNode;
   onAddingChange?: (isAdding: boolean) => void;
   onNewDraftChange?: (draft: CertificationInput | null) => void;
+  onActivateEdit?: () => void;
+  isAdding?: boolean;
 }) {
   const {
     items,
@@ -375,6 +379,7 @@ export function CertificationsSection({
     reorderAction: reorderCertificationsAction,
     headerActions,
     onAddingChange,
+    isAdding,
   });
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -390,6 +395,7 @@ export function CertificationsSection({
       onOpenChange={handleOpenChange}
       disabled={disabled}
       headerActions={hijackedActions}
+      onActivateEdit={onActivateEdit}
       form={
         <CertForm
           key="new"

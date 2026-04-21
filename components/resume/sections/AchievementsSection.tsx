@@ -247,11 +247,13 @@ function AchievementForm({
   onDone,
   onPersisted,
   onDirtyChange,
+  onFormChange,
 }: {
   resumeId: string;
   onDone: () => void;
   onPersisted?: () => void;
   onDirtyChange?: (isDirty: boolean, saveFn: () => void) => void;
+  onFormChange?: (draft: any | null) => void;
 }) {
   const [form, setForm] = useState<AchievementInput>(emptyForm);
   const [pending, startTransition] = useTransition();
@@ -285,6 +287,7 @@ function AchievementForm({
       if (isValid) handleSubmit();
       else toast.error("Title is required.");
     });
+    onFormChange?.(form);
   }, [form]);
 
   return (
@@ -324,6 +327,10 @@ export function AchievementsSection({
   onPersisted,
   disabled = false,
   headerActions,
+  onActivateEdit,
+  isAdding,
+  onAddingChange,
+  onNewDraftChange,
 }: {
   resumeId: string;
   initial: Achievement[];
@@ -331,6 +338,10 @@ export function AchievementsSection({
   onPersisted?: () => void;
   disabled?: boolean;
   headerActions?: React.ReactNode;
+  onActivateEdit?: () => void;
+  isAdding?: boolean;
+  onAddingChange?: (isAdding: boolean) => void;
+  onNewDraftChange?: (draft: any | null) => void;
 }) {
   const {
     items,
@@ -354,16 +365,25 @@ export function AchievementsSection({
     removeAction: removeAchievement,
     reorderAction: reorderAchievementsAction,
     headerActions,
+    isAdding,
+    onAddingChange,
   });
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    onAddingChange?.(isOpen);
+    if (!isOpen) onNewDraftChange?.(null);
+  };
 
   return (
     <SectionShell
       title="Achievements"
       addLabel="Add"
       open={open}
-      onOpenChange={setOpen}
       disabled={disabled}
+      onOpenChange={handleOpenChange}
       headerActions={hijackedActions}
+      onActivateEdit={onActivateEdit}
       form={
         <AchievementForm
           key="new"
@@ -374,6 +394,7 @@ export function AchievementsSection({
             setLocalDirty(isDirty);
             setActiveSave(() => saveFn);
           }}
+          onFormChange={onNewDraftChange}
         />
       }
     >

@@ -26,14 +26,20 @@ export type ResumePreviewProps = {
   className?: string;
   style?: React.CSSProperties;
   activeTab?: string;
-  isAddingCert?: boolean;
   isAddingLicense?: boolean;
   isAddingProject?: boolean;
   isAddingSkill?: boolean;
+  isAddingExperience?: boolean;
+  isAddingEducation?: boolean;
+  isAddingAchievement?: boolean;
+  isAddingCert?: boolean;
   newCertDraft?: any;
   newLicenseDraft?: any;
   newProjectDraft?: any;
   newSkillDraft?: any;
+  newExperienceDraft?: any;
+  newEducationDraft?: any;
+  newAchievementDraft?: any;
   disableScrollIntoView?: boolean;
 };
 
@@ -110,7 +116,7 @@ function RightSectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
-  function ResumePreview(
+  (
     {
       employeeName,
       profile,
@@ -132,10 +138,16 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
       newLicenseDraft,
       newProjectDraft,
       newSkillDraft,
+      newExperienceDraft,
+      newEducationDraft,
+      newAchievementDraft,
+      isAddingExperience,
+      isAddingEducation,
+      isAddingAchievement,
       disableScrollIntoView = false,
     },
     ref,
-  ) {
+  ) => {
     const [logoOk, setLogoOk] = useState(true);
     const page1Ref = useRef<HTMLDivElement>(null);
     const page2Ref = useRef<HTMLDivElement>(null);
@@ -150,7 +162,24 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
     }, [activeTab, disableScrollIntoView]);
 
     const visibleExp = experiences.filter((e) => e.isVisibleOnResume);
+    const finalVisibleExp = [...visibleExp];
+    if (isAddingExperience && newExperienceDraft && (newExperienceDraft.companyName?.trim() || newExperienceDraft.jobTitle?.trim())) {
+      finalVisibleExp.push({
+        ...newExperienceDraft,
+        id: "new-exp-draft-id",
+        isVisibleOnResume: true,
+      } as any);
+    }
+
     const visibleEdu = education.filter((e) => e.isVisibleOnResume);
+    const finalVisibleEdu = [...visibleEdu];
+    if (isAddingEducation && newEducationDraft && (newEducationDraft.institutionName?.trim() || newEducationDraft.degree?.trim())) {
+      finalVisibleEdu.push({
+        ...newEducationDraft,
+        id: "new-edu-draft-id",
+        isVisibleOnResume: true,
+      } as any);
+    }
     const visibleSkills = skills.filter((s) => s.isVisibleOnResume);
     const finalVisibleSkills = [...visibleSkills];
     if (isAddingSkill && newSkillDraft && newSkillDraft.skillName?.trim()) {
@@ -164,6 +193,14 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
     const visibleProjects = projects.filter((p) => p.isVisibleOnResume);
     const visibleLicenses = licenses.filter((l) => l.isVisibleOnResume);
     const visibleAchievements = achievements.filter((a) => a.isVisibleOnResume);
+    const finalVisibleAchievements = [...visibleAchievements];
+    if (isAddingAchievement && newAchievementDraft && (newAchievementDraft.title?.trim() || newAchievementDraft.organization?.trim())) {
+      finalVisibleAchievements.push({
+        ...newAchievementDraft,
+        id: "new-ach-draft-id",
+        isVisibleOnResume: true,
+      } as any);
+    }
 
     const finalVisibleCerts = [...visibleCerts];
     if (isAddingCert && newCertDraft && newCertDraft.certificationName?.trim()) {
@@ -202,7 +239,7 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
       finalVisibleCerts.length > 0 ||
       finalVisibleProjects.length > 0 ||
       finalVisibleLicenses.length > 0 ||
-      visibleAchievements.length > 0;
+      finalVisibleAchievements.length > 0;
 
     const summaryText = profile?.professionalSummary?.trim() ?? "";
     const summaryDisplay =
@@ -321,15 +358,15 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
                       </section>
                     ) : null}
 
-                    {visibleEdu.length > 0 ? (
+                    {finalVisibleEdu.length > 0 || isAddingEducation ? (
                       <section className="mb-4">
                         <LeftSectionTitle>Education</LeftSectionTitle>
                         <div className="flex flex-col gap-3">
-                          {visibleEdu.map((edu) => (
+                          {finalVisibleEdu.map((edu) => (
                             <div key={edu.id}>
-                              <p className="text-[11pt] font-bold text-[#000000]">{edu.institutionName}</p>
+                              <p className="text-[11pt] font-bold text-[#000000]">{edu.institutionName || "Institution Name"}</p>
                               <p className="text-[11pt] italic text-[#000000]">
-                                {edu.degreeType ? `${edu.degreeType} in ` : ""}{edu.degree}{edu.specialization ? `, ${edu.specialization}` : ""}
+                                {edu.degreeType ? `${edu.degreeType} in ` : ""}{edu.degree || "Degree"}{edu.specialization ? `, ${edu.specialization}` : ""}
                               </p>
                             </div>
                           ))}
@@ -337,15 +374,15 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
                       </section>
                     ) : null}
 
-                    {visibleAchievements.length > 0 ? (
+                    {finalVisibleAchievements.length > 0 || isAddingAchievement ? (
                       <section className="mb-4">
                         <LeftSectionTitle>Achievements</LeftSectionTitle>
                         <ul className="space-y-2">
-                          {visibleAchievements.map((ach) => (
+                          {finalVisibleAchievements.map((ach) => (
                             <li key={ach.id} className="flex gap-2 text-[11pt] text-[#000000]">
                               <span className="shrink-0 font-bold" style={{ color: ORANGE }}>•</span>
                               <div className="flex-1 text-left">
-                                <p className="font-bold leading-tight">{ach.year ? `${ach.year} | ` : ""}{ach.title}</p>
+                                <p className="font-bold leading-tight">{ach.year ? `${ach.year} | ` : ""}{ach.title || "Achievement Title"}</p>
                                 {ach.organization && <p className="text-[10pt] opacity-85 leading-snug">{ach.organization}</p>}
                               </div>
                             </li>
@@ -354,7 +391,7 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
                       </section>
                     ) : null}
 
-                    {finalVisibleSkills.length > 0 ? (
+                    {finalVisibleSkills.length > 0 || isAddingSkill ? (
                       <section className="mb-4">
                         <LeftSectionTitle>Expertise</LeftSectionTitle>
                         <ul className="space-y-1">
@@ -374,12 +411,12 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
                       <section className="mb-5">
                         <RightSectionTitle>Professional Experience</RightSectionTitle>
                         <div className="flex flex-col gap-4">
-                          {visibleExp.map((exp) => {
+                          {finalVisibleExp.map((exp) => {
                             const lines = exp.description ? exp.description.split("\n").map((l) => l.replace(/^[-•]\s*/, "").trim()).filter(Boolean) : [];
                             return (
                               <div key={exp.id}>
                                 <h4 className="mb-0.5 text-[11pt] text-[#000000]">
-                                  {[exp.companyName, exp.jobTitle, formatExpRange(exp)].filter(Boolean).join(" | ")}
+                                  {[exp.companyName || "Company", exp.jobTitle || "Job Title", formatExpRange(exp)].filter(Boolean).join(" | ")}
                                 </h4>
                                 {lines.length > 0 && (
                                   <ul className="space-y-0.5">

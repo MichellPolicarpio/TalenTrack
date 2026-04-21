@@ -16,7 +16,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { cn } from "@/lib/utils";
+import { cn, formatTitleCase } from "@/lib/utils";
 import {
   GripVertical,
   Trash2,
@@ -182,7 +182,7 @@ function SkillCard({
           <Label className="text-[12px] text-[#6B7280]">Skill Name</Label>
           <Input
             value={form.skillName}
-            onChange={(e) => update({ skillName: e.target.value })}
+            onChange={(e) => update({ skillName: formatTitleCase(e.target.value) })}
             disabled={disabled}
             className={cn("h-9", skillEmpty ? "border-red-400 focus-visible:ring-red-400" : "")}
           />
@@ -247,7 +247,7 @@ function SkillForm({
         <Input 
           id="sk-name" 
           value={form.skillName} 
-          onChange={(e) => setForm((f) => ({ ...f, skillName: e.target.value }))} 
+          onChange={(e) => setForm((f) => ({ ...f, skillName: formatTitleCase(e.target.value) }))} 
           className={skillEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
         />
       </div>
@@ -265,6 +265,8 @@ export function SkillsSection({
   headerActions,
   onAddingChange,
   onNewDraftChange,
+  onActivateEdit,
+  isAdding,
 }: {
   resumeId: string;
   initial: Skill[];
@@ -274,6 +276,8 @@ export function SkillsSection({
   headerActions?: React.ReactNode;
   onAddingChange?: (isAdding: boolean) => void;
   onNewDraftChange?: (draft: any | null) => void;
+  onActivateEdit?: () => void;
+  isAdding?: boolean;
 }) {
   const {
     items,
@@ -298,11 +302,20 @@ export function SkillsSection({
     reorderAction: reorderSkillsAction,
     headerActions,
     onAddingChange,
+    isAdding,
   });
 
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
+
   const handleOpenChange = (isOpen: boolean) => {
+    // If user clicks ADD while already open with content, trigger auto-save but stay open
+    if (isOpen && open && hijackedActions?.props?.hasUnsavedChanges && hijackedActions?.props?.onSave) {
+      setIsAutoSaving(true);
+      hijackedActions.props.onSave();
+      return;
+    }
+
     setOpen(isOpen);
-    // useGenericSection already handles onAddingChange if passed in config
     if (!isOpen) onNewDraftChange?.(null);
   };
 
@@ -314,10 +327,19 @@ export function SkillsSection({
       onOpenChange={handleOpenChange}
       disabled={disabled}
       headerActions={hijackedActions}
+      onActivateEdit={onActivateEdit}
       form={
         <SkillForm
+          key="new"
           resumeId={resumeId}
-          onDone={() => setOpen(false)}
+          onDone={() => {
+            if (isAutoSaving) {
+              setIsAutoSaving(false);
+              // Form is already reset internally by SkillForm
+              return;
+            }
+            handleOpenChange(false);
+          }}
           onPersisted={onPersisted}
           onDirtyChange={(isDirty, saveFn) => {
             setLocalDirty(isDirty);

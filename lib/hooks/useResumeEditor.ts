@@ -15,6 +15,7 @@ export function useResumeEditor({
   setHasUnsavedChanges,
   resetDrafts,
   bumpLastSaved,
+  onCancel,
 }: {
   resumeId: string;
   status: ResumeStatus;
@@ -23,6 +24,7 @@ export function useResumeEditor({
   setHasUnsavedChanges: (val: boolean) => void;
   resetDrafts: () => void;
   bumpLastSaved: () => void;
+  onCancel?: () => void;
 }) {
   const [isLocked, setIsLocked] = useState(true);
   const [activeTab, setActiveTab] = useState<string>("personal");
@@ -40,10 +42,11 @@ export function useResumeEditor({
   const handleCancelEdit = useCallback(() => {
     if (isLocked || isPendingReview || isSaving || isSubmitting) return;
     resetDrafts();
+    onCancel?.();
     setHasUnsavedChanges(false);
     setIsLocked(true);
     toast.info("Changes discarded.");
-  }, [isLocked, isPendingReview, isSaving, isSubmitting, resetDrafts, setHasUnsavedChanges]);
+  }, [isLocked, isPendingReview, isSaving, isSubmitting, resetDrafts, setHasUnsavedChanges, onCancel]);
 
   const handleSave = useCallback(async () => {
     if (isLocked || !hasUnsavedChanges || isSaving) return;
