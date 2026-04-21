@@ -79,16 +79,14 @@ export function SectionShell({
         </div>
       ) : null}
 
-      {!disabled && (
-        <button
-          type="button"
-          onClick={() => onOpenChange(true)}
-          className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-transparent text-[13px] font-medium text-neutral-500 transition-colors hover:border-primary/50 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <Plus className="size-4" />
-          {bottomLabel || (addLabel === "Add" ? "Add New Entry" : `Add ${addLabel}`)}
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={() => onOpenChange(true)}
+        className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-transparent text-[13px] font-medium text-neutral-500 transition-colors hover:border-primary/50 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <Plus className="size-4" />
+        {bottomLabel || (addLabel === "Add" ? "Add New Entry" : `Add ${addLabel}`)}
+      </button>
     </section>
   );
 }

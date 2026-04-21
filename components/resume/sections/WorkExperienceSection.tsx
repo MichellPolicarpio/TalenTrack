@@ -49,6 +49,17 @@ function toDateStr(d: Date | null): string | null {
   return d ? (d.toISOString().split("T")[0] ?? null) : null;
 }
 
+function formatTitleCase(val: string): string {
+  return val
+    .split(/(\s+)/)
+    .map((word) =>
+      word.trim().length > 0
+        ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        : word
+    )
+    .join("");
+}
+
 function WorkExperienceCard({
   item,
   resumeId,
@@ -206,7 +217,7 @@ function WorkExperienceCard({
             </Label>
             <Input
               value={form.companyName}
-              onChange={(e) => update({ companyName: e.target.value })}
+              onChange={(e) => update({ companyName: formatTitleCase(e.target.value) })}
               disabled={disabled}
               className={companyEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
             />
@@ -217,7 +228,7 @@ function WorkExperienceCard({
             </Label>
             <Input
               value={form.jobTitle}
-              onChange={(e) => update({ jobTitle: e.target.value })}
+              onChange={(e) => update({ jobTitle: formatTitleCase(e.target.value) })}
               disabled={disabled}
               className={jobTitleEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
             />
@@ -344,7 +355,7 @@ function WorkExperienceForm({
         <Input 
           id="we-company" 
           value={form.companyName} 
-          onChange={(e) => setForm((f) => ({ ...f, companyName: e.target.value }))} 
+          onChange={(e) => setForm((f) => ({ ...f, companyName: formatTitleCase(e.target.value) }))} 
           className={companyEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
         />
       </div>
@@ -353,7 +364,7 @@ function WorkExperienceForm({
         <Input 
           id="we-title" 
           value={form.jobTitle} 
-          onChange={(e) => setForm((f) => ({ ...f, jobTitle: e.target.value }))} 
+          onChange={(e) => setForm((f) => ({ ...f, jobTitle: formatTitleCase(e.target.value) }))} 
           className={jobTitleEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
         />
       </div>

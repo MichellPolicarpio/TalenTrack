@@ -28,6 +28,7 @@ export function PersonalTab({
   headerActions
 }: PersonalTabProps) {
   const jobTitleEmpty = showValidation && !data.jobTitle.trim();
+  const emailInvalid = data.personalEmail.trim().length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.personalEmail);
 
   return (
     <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -94,7 +95,11 @@ export function PersonalTab({
               value={data.personalEmail}
               disabled={disabled}
               onChange={(e) => onChange("personalEmail", e.target.value)}
+              className={emailInvalid ? "border-red-400 focus-visible:ring-red-400" : ""}
             />
+            {emailInvalid && (
+              <p className="text-[12px] text-red-500">Please enter a valid email address.</p>
+            )}
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="pt-phone" className="text-[12px] text-[#6B7280]">Personal Phone</Label>

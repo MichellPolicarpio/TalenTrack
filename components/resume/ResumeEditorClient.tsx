@@ -262,7 +262,24 @@ export function ResumeEditorClient({
 
   const handleProfileChange = useCallback(
     (field: keyof PersonalDraft, value: string) => {
-      setProfileDraft((prev) => ({ ...prev, [field]: value }));
+      let finalValue = value;
+
+      if (field === "jobTitle") {
+        // Title Case: Capitalize first letter of each word, rest lowercase.
+        finalValue = value
+          .split(/(\s+)/)
+          .map((word) =>
+            word.trim().length > 0
+              ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+              : word
+          )
+          .join("");
+      } else if (field === "personalPhone") {
+        // Numbers only: Strip everything that is not a digit.
+        finalValue = value.replace(/\D/g, "");
+      }
+
+      setProfileDraft((prev) => ({ ...prev, [field]: finalValue }));
       setHasUnsavedChanges(true);
     },
     [setProfileDraft, setHasUnsavedChanges],
@@ -628,9 +645,14 @@ export function ResumeEditorClient({
                 {/* Right Header */}
                 <div className="flex shrink-0 w-full min-w-0 flex-wrap items-center justify-center gap-x-4 gap-y-2 border-b border-preview-toolbar-border bg-preview-toolbar px-4 sm:px-6 py-2 min-h-[64px]">
                   {(() => {
-                    const isReadyForSubmission = profileDraft.jobTitle.trim().length > 0 && draftExperiences.length > 0;
+                    const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+                    const isReadyForSubmission = 
+                      profileDraft.jobTitle.trim().length > 0 && 
+                      draftExperiences.length > 0 &&
+                      isValidEmail(profileDraft.personalEmail);
+                    
                     return (status === "DRAFT" || status === "NEEDS_CHANGES") && (
-                      <div title={!isReadyForSubmission ? "Please add your Job Title and at least one Work Experience to submit." : ""}>
+                      <div title={!isReadyForSubmission ? "Please ensure Job Title, Email, and at least one Work Experience are valid." : ""}>
                         <Button
                           type="button"
                           size="sm"
