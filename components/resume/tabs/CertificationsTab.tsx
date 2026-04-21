@@ -22,6 +22,7 @@ export function CertificationsTab({
   onAddingChange?: (isAdding: boolean) => void;
   onNewDraftChange?: (draft: CertificationInput | null) => void;
   onActivateEdit?: () => void;
+  isAdding?: boolean;
 }) {
   return (
     <CertificationsSection

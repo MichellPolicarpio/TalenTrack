@@ -22,6 +22,7 @@ export function LicensesTab({
   onAddingChange?: (isAdding: boolean) => void;
   onNewDraftChange?: (draft: LicenseInput | null) => void;
   onActivateEdit?: () => void;
+  isAdding?: boolean;
 }) {
   return (
     <LicensesSection
