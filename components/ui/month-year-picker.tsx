@@ -18,9 +18,11 @@ const MONTHS = [
 ];
 
 const CURRENT_YEAR = new Date().getFullYear();
-const YEARS = Array.from({ length: CURRENT_YEAR - 1960 + 11 }, (_, i) => 
-  (1960 + i)
-).filter(y => y <= CURRENT_YEAR + 5);
+const START_YEAR = CURRENT_YEAR - 50;
+const END_YEAR = CURRENT_YEAR + 5;
+const YEARS = Array.from({ length: END_YEAR - START_YEAR + 1 }, (_, i) => 
+  (END_YEAR - i)
+);
 
 export function MonthYearPicker({ value, onChange, disabled, className }: MonthYearPickerProps) {
   // Parse value
@@ -77,10 +79,10 @@ export function MonthYearPicker({ value, onChange, disabled, className }: MonthY
         </div>
         <ChevronDown className="size-3.5 shrink-0 text-muted-foreground shadow-none" />
       </PopoverTrigger>
-      <PopoverContent align="center" className="w-[190px] p-0 overflow-hidden border-border bg-popover shadow-xl ring-1 ring-black/5">
+      <PopoverContent align="center" className="w-[210px] p-0 overflow-hidden border-border bg-popover shadow-xl ring-1 ring-black/5">
         <div className="flex h-60">
           {/* Months Column */}
-          <div className="flex flex-1 flex-col overflow-y-auto py-1 scrollbar-none">
+          <div className="flex flex-1 flex-col overflow-y-auto py-1 scrollbar-thin scrollbar-thumb-neutral-200 scrollbar-track-transparent hover:scrollbar-thumb-neutral-300">
             <div className="sticky top-0 bg-popover/95 backdrop-blur px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
               Month
             </div>
@@ -104,7 +106,7 @@ export function MonthYearPicker({ value, onChange, disabled, className }: MonthY
           <div className="w-px bg-border/50" />
 
           {/* Years Column */}
-          <div className="flex flex-1 flex-col overflow-y-auto py-1 scrollbar-none bg-neutral-50/30">
+          <div className="flex flex-1 flex-col overflow-y-auto py-1 bg-neutral-50/30 scrollbar-thin scrollbar-thumb-neutral-200 scrollbar-track-transparent hover:scrollbar-thumb-neutral-300">
             <div className="sticky top-0 bg-neutral-50/95 backdrop-blur px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
               Year
             </div>
