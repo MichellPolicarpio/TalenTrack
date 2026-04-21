@@ -30,6 +30,7 @@ export type ResumePreviewProps = {
   isAddingLicense?: boolean;
   newCertDraft?: any;
   newLicenseDraft?: any;
+  disableScrollIntoView?: boolean;
 };
 
 /** Brand orange aligned with Brindley logo artwork */
@@ -123,6 +124,7 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
       isAddingLicense,
       newCertDraft,
       newLicenseDraft,
+      disableScrollIntoView = false,
     },
     ref,
   ) {
@@ -131,12 +133,13 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
     const page2Ref = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+      if (disableScrollIntoView) return;
       if (activeTab === "projects") {
         page2Ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       } else if (activeTab && activeTab !== "projects") {
         page1Ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }
-    }, [activeTab]);
+    }, [activeTab, disableScrollIntoView]);
 
     // Centralized filtering (TD-08)
     const visibleExp = experiences.filter((e) => e.isVisibleOnResume);

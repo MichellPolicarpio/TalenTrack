@@ -27,7 +27,6 @@ import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EditorActionBar } from "@/components/resume/EditorActionBar";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Toaster } from "@/components/ui/sonner";
 import { StatusBanner } from "@/components/resume/StatusBanner";
 import {
@@ -140,6 +139,7 @@ export function ResumeEditorClient({
   const previewRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(ZOOM_DEFAULT);
   const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
+  const [mobileZoom, setMobileZoom] = useState(60);
   const [downloading, setDownloading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const router = useRouter();
@@ -364,17 +364,6 @@ export function ResumeEditorClient({
     }
   }, [downloading, employeeName]);
 
-  // ── On-screen preview (no ref — PDF uses dedicated off-screen instance below) ──
-  const previewContent = (
-    <ResumePreview
-      {...previewProps}
-      activeTab={activeTab}
-      isAddingCert={isAddingCert}
-      isAddingLicense={isAddingLicense}
-      newCertDraft={newCertDraft}
-      newLicenseDraft={newLicenseDraft}
-    />
-  );
 
   return (
     <>
@@ -491,7 +480,7 @@ export function ResumeEditorClient({
 
                     {/* Scrollable Form Content */}
                     <div 
-                      className="flex-1 overflow-y-auto px-6 pt-3 pb-8 scroll-smooth"
+                      className="flex-1 overflow-y-auto px-4 pt-3 pb-8 scroll-smooth sm:px-6"
                       onPointerDownCapture={() => isLocked && triggerEditHint()}
                     >
                       {/* Mobile preview button */}
@@ -705,7 +694,15 @@ export function ResumeEditorClient({
                       marginBottom: `calc((${zoom / 100} - 1) * 100%)`,
                     }}
                   >
-                    {previewContent}
+                    {/* ── Desktop Preview ── */}
+                    <ResumePreview
+                      {...previewProps}
+                      activeTab={activeTab}
+                      isAddingCert={isAddingCert}
+                      isAddingLicense={isAddingLicense}
+                      newCertDraft={newCertDraft}
+                      newLicenseDraft={newLicenseDraft}
+                    />
                   </div>
                 </div>
               </div>
@@ -714,29 +711,89 @@ export function ResumeEditorClient({
         )}
       </div>
 
-      {/* Mobile preview sheet */}
-      <Sheet open={mobilePreviewOpen} onOpenChange={setMobilePreviewOpen}>
-        <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle className="flex items-center justify-between">
-              Resume Preview
+      {/* Custom Mobile Preview Overlay (Native Implementation) */}
+      {mobilePreviewOpen && (
+        <div className="fixed inset-0 z-[9999] flex flex-col bg-[#E0DBD4]">
+          {/* Header */}
+          <div className="flex h-16 shrink-0 flex-row items-center justify-between border-b border-preview-toolbar-border bg-preview-toolbar px-4 shadow-sm">
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="size-8 rounded-full"
+                onClick={() => setMobilePreviewOpen(false)}
+              >
+                <ChevronLeft className="size-5" />
+              </Button>
+              <h2 className="text-sm font-bold text-foreground">Preview</h2>
+            </div>
+
+            <div className="flex flex-1 items-center justify-center">
+              <div className="inline-flex items-center gap-0.5 rounded-full border border-preview-toolbar-border bg-white px-1 py-0.5 shadow-sm">
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className="size-7 rounded-full text-preview-toolbar-label"
+                  disabled={mobileZoom <= ZOOM_MIN}
+                  onClick={() => setMobileZoom((z) => Math.max(ZOOM_MIN, z - ZOOM_STEP))}
+                >
+                  <ZoomOut className="size-3.5" />
+                </Button>
+                <span className="min-w-[2.5rem] text-center text-[11px] font-bold tabular-nums">
+                  {mobileZoom}%
+                </span>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className="size-7 rounded-full text-preview-toolbar-label"
+                  disabled={mobileZoom >= ZOOM_MAX}
+                  onClick={() => setMobileZoom((z) => Math.min(ZOOM_MAX, z + ZOOM_STEP))}
+                >
+                  <ZoomIn className="size-3.5" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
               <Button
                 type="button"
                 size="sm"
-                className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+                className="h-8 gap-1.5 rounded-full bg-primary px-3 text-[11px] font-bold text-primary-foreground hover:bg-primary/90"
                 onClick={() => handleExportPdf("download")}
               >
-                <Download className="size-3.5" /> PDF
+                <Download className="size-3.5" />
               </Button>
-            </SheetTitle>
-          </SheetHeader>
-          <div className="mt-4 overflow-auto">
-            <div style={{ transform: "scale(0.42)", transformOrigin: "top left", width: "238%" }}>
-              {previewContent}
             </div>
           </div>
-        </SheetContent>
-      </Sheet>
+
+          {/* Scaled Preview Body */}
+          <div className="flex-1 overflow-auto p-4 pb-20">
+            <div className="flex justify-center">
+              <div 
+                className="origin-top shadow-2xl transition-transform duration-200"
+                style={{ 
+                  width: '816px',
+                  // Scale logic: base on user zoom setting
+                  transform: `scale(${mobileZoom / 100})`, 
+                }}
+              >
+                <ResumePreview
+                  {...previewProps}
+                  activeTab={activeTab}
+                  isAddingCert={isAddingCert}
+                  isAddingLicense={isAddingLicense}
+                  newCertDraft={newCertDraft}
+                  newLicenseDraft={newLicenseDraft}
+                  disableScrollIntoView
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

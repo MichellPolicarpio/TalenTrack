@@ -114,7 +114,7 @@ export function AppTopBar({
               >
                 {tab.label}
                 {isActive && (
-                  <span className="absolute inset-x-0 -bottom-[1px] h-[2px] rounded-full bg-primary" />
+                  <span className="absolute inset-x-0 -bottom-[3px] h-[2px] rounded-full bg-primary" />
                 )}
               </button>
             );
@@ -132,14 +132,14 @@ export function AppTopBar({
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <button className="flex shrink-0 items-center gap-3 rounded-full border border-sidebar-border bg-white/60 px-3 py-1.5 transition-all hover:bg-sidebar-accent/50 hover:shadow-md active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-primary/30" />
+                <button className="flex shrink-0 items-center gap-2.5 rounded-full border-0 bg-white px-2 py-1.5 shadow-sm transition-all hover:shadow-md hover:ring-1 hover:ring-primary/10 active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-primary/30 sm:px-3" />
               }
             >
-              <div className="flex flex-col items-end">
+              <div className="hidden flex-col items-end xl:flex">
                 <p className="text-[12px] font-bold text-sidebar-accent-foreground leading-none">{userName}</p>
                 <p className="text-[10px] font-medium text-sidebar-foreground/50 mt-1 uppercase tracking-tight">{roleLabel}</p>
               </div>
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sidebar-accent/80 font-bold text-sidebar-accent-foreground shadow-sm ring-2 ring-sidebar-border group-hover:ring-primary/30 group-hover:shadow-primary/20 transition-all">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sidebar-accent font-bold text-sidebar-accent-foreground shadow-sm ring-2 ring-white transition-all">
                 {initials}
               </div>
             </DropdownMenuTrigger>

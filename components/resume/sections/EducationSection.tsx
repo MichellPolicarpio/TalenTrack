@@ -98,6 +98,12 @@ function EducationCard({
   const [form, setForm] = useState<EducationInput>(initial);
   const [dirty, setDirty] = useState(false);
   const [saving, startSave] = useTransition();
+  const [showValidation, setShowValidation] = useState(false);
+
+  const institutionEmpty = showValidation && !form.institutionName.trim();
+  const degreeEmpty = showValidation && !form.degree.trim();
+  const degreeTypeEmpty = showValidation && !form.degreeType;
+  const startYearEmpty = showValidation && form.startYear === null;
 
   function update(patch: Partial<EducationInput>) {
     const nextForm = { ...form, ...patch };
@@ -140,7 +146,8 @@ function EducationCard({
                     form.startYear !== null;
 
     if (!isValid) {
-      toast.error("Please fill all mandatory fields (Institution, Major, Level, Start Year).");
+      setShowValidation(true);
+      toast.error("Please fill all mandatory fields.");
       return;
     }
 
@@ -149,6 +156,7 @@ function EducationCard({
         await saveEducation(resumeId, form);
         toast.success("Education saved.");
         setDirty(false);
+        setShowValidation(false);
         onDirtyChange?.(false, () => {});
         onPersisted?.();
       } catch {
@@ -177,12 +185,12 @@ function EducationCard({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "group relative flex items-start gap-4 rounded-xl border border-neutral-200 bg-white p-5 transition-all hover:border-neutral-300 hover:shadow-md",
+        "group relative flex items-start gap-3 rounded-xl border border-neutral-200 bg-white p-4 transition-all hover:border-neutral-300 hover:shadow-md sm:gap-4 sm:p-5",
         isDragging && "z-50 opacity-50",
         !item.isVisibleOnResume && "opacity-60 bg-neutral-50/50",
       )}
     >
-      <div className="flex shrink-0 flex-col items-center justify-center gap-3 border-r border-neutral-100 pr-4">
+      <div className="flex shrink-0 flex-col items-center justify-center gap-2 border-r border-neutral-100 pr-3 sm:gap-3 sm:pr-4">
         <button
           type="button"
           onClick={() => onToggleVisibility(item.id, !item.isVisibleOnResume)}
@@ -207,7 +215,7 @@ function EducationCard({
           type="button"
           {...attributes}
           {...listeners}
-          className="cursor-grab text-neutral-400 transition-colors hover:text-neutral-600 focus:outline-none"
+          className="cursor-grab rounded-md p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 focus:outline-none"
           aria-label="Drag to reorder"
         >
           <GripVertical className="size-4" />
@@ -217,7 +225,7 @@ function EducationCard({
       <div className="flex-1 space-y-3">
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <Label className="text-[12px] text-[#6B7280]">Institution *</Label>
+            <Label className="text-[12px] text-[#6B7280]">Institution <span className="text-red-500">*</span></Label>
             <span className="text-[11px] text-[#9CA3AF] tabular-nums">{form.institutionName.length}/45</span>
           </div>
           <Input
@@ -225,17 +233,18 @@ function EducationCard({
             maxLength={45}
             onChange={(e) => update({ institutionName: e.target.value.slice(0, 45) })}
             disabled={disabled}
+            className={institutionEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
           />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div className="flex flex-col gap-1.5 md:col-span-1">
-            <Label className="text-[12px] text-[#6B7280]">Level *</Label>
+            <Label className="text-[12px] text-[#6B7280]">Level <span className="text-red-500">*</span></Label>
             <Select
               value={form.degreeType ?? ""}
               onValueChange={(v) => update({ degreeType: v })}
               disabled={disabled}
             >
-              <SelectTrigger>
+              <SelectTrigger className={degreeTypeEmpty ? "border-red-400" : ""}>
                 <SelectValue placeholder="Level" />
               </SelectTrigger>
               <SelectContent>
@@ -248,12 +257,13 @@ function EducationCard({
             </Select>
           </div>
           <div className="flex flex-col gap-1.5 md:col-span-3">
-            <Label className="text-[12px] text-[#6B7280]">Major *</Label>
+            <Label className="text-[12px] text-[#6B7280]">Major <span className="text-red-500">*</span></Label>
             <Input
               value={form.degree}
               onChange={(e) => update({ degree: e.target.value })}
               disabled={disabled}
               placeholder="e.g. Civil Engineering"
+              className={degreeEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
             />
           </div>
         </div>
@@ -269,7 +279,7 @@ function EducationCard({
             />
           </div>
           <div className="flex flex-col gap-1.5 md:col-span-1">
-            <Label className="text-[12px] text-[#6B7280]">Start *</Label>
+            <Label className="text-[12px] text-[#6B7280]">Start <span className="text-red-500">*</span></Label>
             <Input
               type="number"
               min={1950}
@@ -277,7 +287,7 @@ function EducationCard({
               value={form.startYear ?? ""}
               onChange={(e) => update({ startYear: e.target.value ? Number(e.target.value) : null })}
               disabled={disabled}
-              className="w-full h-9 text-[11pt]"
+              className={cn("w-full h-9 text-[11pt]", startYearEmpty ? "border-red-400 focus-visible:ring-red-400" : "")}
             />
           </div>
           <div className="flex flex-col gap-1.5 md:col-span-1">
@@ -335,6 +345,12 @@ function EducationForm({
 }) {
   const [form, setForm] = useState<EducationInput>(emptyForm);
   const [pending, startTransition] = useTransition();
+  const [showValidation, setShowValidation] = useState(false);
+
+  const institutionEmpty = showValidation && !form.institutionName.trim();
+  const degreeEmpty = showValidation && !form.degree.trim();
+  const degreeTypeEmpty = showValidation && !form.degreeType;
+  const startYearEmpty = showValidation && form.startYear === null;
 
   function handleSubmit() {
     const isValid = !!form.institutionName.trim() && 
@@ -343,6 +359,7 @@ function EducationForm({
                     form.startYear !== null;
 
     if (!isValid) {
+      setShowValidation(true);
       toast.error("Please fill all mandatory fields.");
       return;
     }
@@ -370,22 +387,28 @@ function EducationForm({
   }, [form]);
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
+    <div className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:gap-4 sm:p-5">
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="ed-inst">Institution *</Label>
+          <Label htmlFor="ed-inst">Institution <span className="text-red-500">*</span></Label>
           <span className="text-[11px] text-[#9CA3AF] tabular-nums">{form.institutionName.length}/45</span>
         </div>
-        <Input id="ed-inst" maxLength={45} value={form.institutionName} onChange={(e) => setForm((f) => ({ ...f, institutionName: e.target.value.slice(0, 45) }))} />
+        <Input 
+          id="ed-inst" 
+          maxLength={45} 
+          value={form.institutionName} 
+          onChange={(e) => setForm((f) => ({ ...f, institutionName: e.target.value.slice(0, 45) }))} 
+          className={institutionEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
+        />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="flex flex-col gap-2 md:col-span-1">
-          <Label htmlFor="ed-type">Level *</Label>
+          <Label htmlFor="ed-type">Level <span className="text-red-500">*</span></Label>
           <Select
             value={form.degreeType ?? ""}
             onValueChange={(v) => setForm((f) => ({ ...f, degreeType: v }))}
           >
-            <SelectTrigger id="ed-type">
+            <SelectTrigger id="ed-type" className={degreeTypeEmpty ? "border-red-400" : ""}>
               <SelectValue placeholder="Level" />
             </SelectTrigger>
             <SelectContent>
@@ -398,12 +421,13 @@ function EducationForm({
           </Select>
         </div>
         <div className="flex flex-col gap-2 md:col-span-3">
-          <Label htmlFor="ed-degree">Major *</Label>
+          <Label htmlFor="ed-degree">Major <span className="text-red-500">*</span></Label>
           <Input 
             id="ed-degree" 
             value={form.degree} 
             onChange={(e) => setForm((f) => ({ ...f, degree: e.target.value }))} 
             placeholder="e.g. Civil Engineering"
+            className={degreeEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
           />
         </div>
       </div>
@@ -414,8 +438,16 @@ function EducationForm({
           <Input id="ed-field" value={form.specialization ?? ""} onChange={(e) => setForm((f) => ({ ...f, specialization: e.target.value || null }))} placeholder="e.g. AI" />
         </div>
         <div className="flex flex-col gap-2 md:col-span-1">
-          <Label htmlFor="ed-start" className="text-neutral-500">Start *</Label>
-          <Input id="ed-start" type="number" min={1950} max={2099} value={form.startYear ?? ""} className="w-full h-9" onChange={(e) => setForm((f) => ({ ...f, startYear: e.target.value ? Number(e.target.value) : null }))} />
+          <Label htmlFor="ed-start" className="text-neutral-500">Start <span className="text-red-500">*</span></Label>
+          <Input 
+            id="ed-start" 
+            type="number" 
+            min={1950} 
+            max={2099} 
+            value={form.startYear ?? ""} 
+            className={cn("w-full h-9", startYearEmpty ? "border-red-400 focus-visible:ring-red-400" : "")} 
+            onChange={(e) => setForm((f) => ({ ...f, startYear: e.target.value ? Number(e.target.value) : null }))} 
+          />
         </div>
         <div className="flex flex-col gap-2 md:col-span-1">
           <Label htmlFor="ed-end" className="text-neutral-500">End</Label>

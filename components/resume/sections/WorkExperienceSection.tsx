@@ -86,6 +86,12 @@ function WorkExperienceCard({
   const [form, setForm] = useState<WorkExperienceInput>(initial);
   const [dirty, setDirty] = useState(false);
   const [saving, startSave] = useTransition();
+  const [showValidation, setShowValidation] = useState(false);
+
+  const companyEmpty = showValidation && !form.companyName.trim();
+  const jobTitleEmpty = showValidation && !form.jobTitle.trim();
+  const startDateEmpty = showValidation && !form.startDate;
+  const descriptionEmpty = showValidation && !form.description?.trim();
 
   function update(patch: Partial<WorkExperienceInput>) {
     const nextForm = { ...form, ...patch };
@@ -115,12 +121,19 @@ function WorkExperienceCard({
   }, [form, dirty]);
 
   function handleSave() {
+    if (!form.companyName.trim() || !form.jobTitle.trim() || !form.startDate || !form.description?.trim()) {
+      setShowValidation(true);
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
     startSave(async () => {
       try {
         await saveWorkExperience(resumeId, form);
         toast.success("Work experience saved.");
         setBaseline(form);
         setDirty(false);
+        setShowValidation(false);
         onDirtyChange?.(false, () => {});
         onPersisted?.();
       } catch {
@@ -149,12 +162,12 @@ function WorkExperienceCard({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "group relative flex items-start gap-4 rounded-xl border border-neutral-200 bg-white p-5 transition-all hover:border-neutral-300 hover:shadow-md",
+        "group relative flex items-start gap-3 rounded-xl border border-neutral-200 bg-white p-4 transition-all hover:border-neutral-300 hover:shadow-md sm:gap-4 sm:p-5",
         isDragging && "z-50 opacity-50",
         !item.isVisibleOnResume && "opacity-60 bg-neutral-50/50",
       )}
     >
-      <div className="flex shrink-0 flex-col items-center justify-center gap-3 border-r border-neutral-100 pr-4">
+      <div className="flex shrink-0 flex-col items-center justify-center gap-2 border-r border-neutral-100 pr-3 sm:gap-3 sm:pr-4">
         <button
           type="button"
           onClick={() => onToggleVisibility(item.id, !item.isVisibleOnResume)}
@@ -179,7 +192,7 @@ function WorkExperienceCard({
           type="button"
           {...attributes}
           {...listeners}
-          className="cursor-grab text-neutral-400 transition-colors hover:text-neutral-600 focus:outline-none"
+          className="cursor-grab rounded-md p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 focus:outline-none"
           aria-label="Drag to reorder"
         >
           <GripVertical className="size-4" />
@@ -189,19 +202,25 @@ function WorkExperienceCard({
       <div className="flex-1 space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
-            <Label className="text-[12px] text-[#6B7280]">Company</Label>
+            <Label className="text-[12px] text-[#6B7280]">
+              Company <span className="text-red-500">*</span>
+            </Label>
             <Input
               value={form.companyName}
               onChange={(e) => update({ companyName: e.target.value })}
               disabled={disabled}
+              className={companyEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label className="text-[12px] text-[#6B7280]">Job Title</Label>
+            <Label className="text-[12px] text-[#6B7280]">
+              Job Title <span className="text-red-500">*</span>
+            </Label>
             <Input
               value={form.jobTitle}
               onChange={(e) => update({ jobTitle: e.target.value })}
               disabled={disabled}
+              className={jobTitleEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
             />
           </div>
         </div>
@@ -215,11 +234,14 @@ function WorkExperienceCard({
         </div>
         <div className="flex gap-3">
           <div className="flex flex-1 flex-col gap-1.5">
-            <Label className="text-[12px] text-[#6B7280]">Start Date</Label>
+            <Label className="text-[12px] text-[#6B7280]">
+              Start Date <span className="text-red-500">*</span>
+            </Label>
             <MonthYearPicker
               value={form.startDate}
               onChange={(v) => update({ startDate: v })}
               disabled={disabled}
+              className={startDateEmpty ? "border-red-400" : ""}
             />
           </div>
           <div className="flex flex-1 flex-col gap-1.5">
@@ -244,12 +266,18 @@ function WorkExperienceCard({
           </Label>
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label className="text-[12px] text-[#6B7280]">Description</Label>
+          <Label className="text-[12px] text-[#6B7280]">
+            Description <span className="text-red-500">*</span>
+          </Label>
           <Textarea
             rows={3}
             value={form.description ?? ""}
             onChange={(e) => update({ description: e.target.value || null })}
             disabled={disabled}
+            className={cn(
+              "min-h-[100px]",
+              descriptionEmpty ? "border-red-400 focus-visible:ring-red-400" : ""
+            )}
           />
         </div>
       </div>
@@ -280,8 +308,18 @@ function WorkExperienceForm({
 }) {
   const [form, setForm] = useState<WorkExperienceInput>(emptyForm);
   const [pending, startTransition] = useTransition();
+  const [showValidation, setShowValidation] = useState(false);
+
+  const companyEmpty = showValidation && !form.companyName.trim();
+  const jobTitleEmpty = showValidation && !form.jobTitle.trim();
 
   function handleSubmit() {
+    if (!form.companyName.trim() || !form.jobTitle.trim()) {
+      setShowValidation(true);
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
     startTransition(async () => {
       try {
         await saveWorkExperience(resumeId, form);
@@ -301,14 +339,24 @@ function WorkExperienceForm({
   }, [form]);
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
+    <div className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:gap-4 sm:p-5">
       <div className="flex flex-col gap-2">
-        <Label htmlFor="we-company">Company *</Label>
-        <Input id="we-company" value={form.companyName} onChange={(e) => setForm((f) => ({ ...f, companyName: e.target.value }))} />
+        <Label htmlFor="we-company">Company <span className="text-red-500">*</span></Label>
+        <Input 
+          id="we-company" 
+          value={form.companyName} 
+          onChange={(e) => setForm((f) => ({ ...f, companyName: e.target.value }))} 
+          className={companyEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
+        />
       </div>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="we-title">Job title *</Label>
-        <Input id="we-title" value={form.jobTitle} onChange={(e) => setForm((f) => ({ ...f, jobTitle: e.target.value }))} />
+        <Label htmlFor="we-title">Job title <span className="text-red-500">*</span></Label>
+        <Input 
+          id="we-title" 
+          value={form.jobTitle} 
+          onChange={(e) => setForm((f) => ({ ...f, jobTitle: e.target.value }))} 
+          className={jobTitleEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
+        />
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="we-location">Location</Label>

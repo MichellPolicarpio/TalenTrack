@@ -80,6 +80,11 @@ function CertCard({
   const [form, setForm] = useState<CertificationInput>(initial);
   const [dirty, setDirty] = useState(false);
   const [saving, startSave] = useTransition();
+  const [showValidation, setShowValidation] = useState(false);
+
+  const nameEmpty = showValidation && !form.certificationName.trim();
+  const orgEmpty = showValidation && !form.issuingOrganization?.trim();
+  const dateEmpty = showValidation && !form.issueDate;
 
   function update(patch: Partial<CertificationInput>) {
     const nextForm = { ...form, ...patch };
@@ -106,11 +111,18 @@ function CertCard({
   }, [form, dirty]);
 
   function handleSave() {
+    if (!form.certificationName.trim() || !form.issuingOrganization?.trim() || !form.issueDate) {
+      setShowValidation(true);
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
     startSave(async () => {
       try {
         await saveCertification(resumeId, form);
         toast.success("Certification saved.");
         setDirty(false);
+        setShowValidation(false);
         onDirtyChange?.(false, () => {});
         onPersisted?.();
       } catch {
@@ -137,12 +149,12 @@ function CertCard({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "group relative flex items-start gap-4 rounded-xl border border-neutral-200 bg-white p-5 transition-all hover:border-neutral-300 hover:shadow-md",
+        "group relative flex items-start gap-3 rounded-xl border border-neutral-200 bg-white p-4 transition-all hover:border-neutral-300 hover:shadow-md sm:gap-4 sm:p-5",
         isDragging && "z-50 opacity-50",
         !item.isVisibleOnResume && "opacity-60 bg-neutral-50/50",
       )}
     >
-      <div className="flex shrink-0 flex-col items-center justify-center gap-3 border-r border-neutral-100 pr-4">
+      <div className="flex shrink-0 flex-col items-center justify-center gap-2 border-r border-neutral-100 pr-3 sm:gap-3 sm:pr-4">
         <button
           type="button"
           onClick={() => onToggleVisibility(item.id, !item.isVisibleOnResume)}
@@ -167,7 +179,7 @@ function CertCard({
           type="button"
           {...attributes}
           {...listeners}
-          className="cursor-grab text-neutral-400 transition-colors hover:text-neutral-600 focus:outline-none"
+          className="cursor-grab rounded-md p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 focus:outline-none"
           aria-label="Drag to reorder"
         >
           <GripVertical className="size-4" />
@@ -176,29 +188,38 @@ function CertCard({
 
       <div className="flex-1 space-y-3">
         <div className="flex flex-col gap-1.5">
-          <Label className="text-[12px] text-[#6B7280]">Certification Name</Label>
+          <Label className="text-[12px] text-[#6B7280]">
+            Certification Name <span className="text-red-500">*</span>
+          </Label>
           <Input
             value={form.certificationName}
             onChange={(e) => update({ certificationName: e.target.value })}
             disabled={disabled}
+            className={nameEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label className="text-[12px] text-[#6B7280]">Issuing Organization</Label>
+          <Label className="text-[12px] text-[#6B7280]">
+            Issuing Organization <span className="text-red-500">*</span>
+          </Label>
           <Input
             value={form.issuingOrganization ?? ""}
             onChange={(e) => update({ issuingOrganization: e.target.value || null })}
             disabled={disabled}
+            className={orgEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
           />
         </div>
         <div className="flex gap-3">
           <div className="flex flex-1 flex-col gap-1.5">
-            <Label className="text-[12px] text-[#6B7280]">Issue Date</Label>
+            <Label className="text-[12px] text-[#6B7280]">
+              Issue Date <span className="text-red-500">*</span>
+            </Label>
             <Input
               type="date"
               value={form.issueDate ?? ""}
               onChange={(e) => update({ issueDate: e.target.value || null })}
               disabled={disabled}
+              className={dateEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
             />
           </div>
           <div className="flex flex-1 flex-col gap-1.5">
@@ -247,8 +268,16 @@ function CertForm({
 }) {
   const [form, setForm] = useState<CertificationInput>(emptyForm);
   const [pending, startTransition] = useTransition();
+  const [showValidation, setShowValidation] = useState(false);
+
+  const nameEmpty = showValidation && !form.certificationName.trim();
 
   function handleSubmit() {
+    if (!form.certificationName.trim()) {
+      setShowValidation(true);
+      toast.error("Please fill in the certification name.");
+      return;
+    }
     startTransition(async () => {
       try {
         await saveCertification(resumeId, form);
@@ -272,10 +301,15 @@ function CertForm({
   }, [form, onFormChange]);
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
+    <div className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:gap-4 sm:p-5">
       <div className="flex flex-col gap-2">
-        <Label htmlFor="cert-name">Certification name *</Label>
-        <Input id="cert-name" value={form.certificationName} onChange={(e) => setForm((f) => ({ ...f, certificationName: e.target.value }))} />
+        <Label htmlFor="cert-name">Certification name <span className="text-red-500">*</span></Label>
+        <Input 
+          id="cert-name" 
+          value={form.certificationName} 
+          onChange={(e) => setForm((f) => ({ ...f, certificationName: e.target.value }))} 
+          className={nameEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
+        />
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="cert-org">Issuing organization</Label>

@@ -81,6 +81,9 @@ function SkillCard({
   const [form, setForm] = useState<SkillInput>(initial);
   const [dirty, setDirty] = useState(false);
   const [saving, startSave] = useTransition();
+  const [showValidation, setShowValidation] = useState(false);
+
+  const skillEmpty = showValidation && !form.skillName.trim();
 
   function update(patch: Partial<SkillInput>) {
     const nextForm = { ...form, ...patch };
@@ -103,12 +106,19 @@ function SkillCard({
   }, [form, dirty]);
 
   function handleSave() {
+    if (!form.skillName.trim()) {
+      setShowValidation(true);
+      toast.error("Please fill in the skill name.");
+      return;
+    }
+
     startSave(async () => {
       try {
         await saveSkill(resumeId, form);
         toast.success("Skill saved.");
         setBaseline(form);
         setDirty(false);
+        setShowValidation(false);
         onDirtyChange?.(false, () => {});
         onPersisted?.();
       } catch {
@@ -131,12 +141,12 @@ function SkillCard({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "group relative flex items-start gap-4 rounded-xl border border-neutral-200 bg-white p-5 transition-all hover:border-neutral-300 hover:shadow-md",
+        "group relative flex items-center gap-3 rounded-xl border border-neutral-200 bg-white p-4 transition-all hover:border-neutral-300 hover:shadow-md sm:gap-4 sm:p-5",
         isDragging && "z-50 opacity-50",
         !item.isVisibleOnResume && "opacity-60 bg-neutral-50/50",
       )}
     >
-      <div className="flex shrink-0 flex-col items-center justify-center gap-3 border-r border-neutral-100 pr-4">
+      <div className="flex shrink-0 flex-col items-center justify-center gap-2 border-r border-neutral-100 pr-3 sm:gap-3 sm:pr-4">
         <button
           type="button"
           onClick={() => onToggleVisibility(item.id, !item.isVisibleOnResume)}
@@ -161,7 +171,7 @@ function SkillCard({
           type="button"
           {...attributes}
           {...listeners}
-          className="cursor-grab text-neutral-400 transition-colors hover:text-neutral-600 focus:outline-none"
+          className="cursor-grab rounded-md p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 focus:outline-none"
           aria-label="Drag to reorder"
         >
           <GripVertical className="size-4" />
@@ -169,12 +179,13 @@ function SkillCard({
       </div>
 
       <div className="flex-1 space-y-3">
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1.5 justify-center">
           <Label className="text-[12px] text-[#6B7280]">Skill Name</Label>
           <Input
             value={form.skillName}
             onChange={(e) => update({ skillName: e.target.value })}
             disabled={disabled}
+            className={cn("h-9", skillEmpty ? "border-red-400 focus-visible:ring-red-400" : "")}
           />
         </div>
       </div>
@@ -199,8 +210,16 @@ function SkillForm({
 }) {
   const [form, setForm] = useState<SkillInput>(emptyForm);
   const [pending, startTransition] = useTransition();
+  const [showValidation, setShowValidation] = useState(false);
+
+  const skillEmpty = showValidation && !form.skillName.trim();
 
   function handleSubmit() {
+    if (!form.skillName.trim()) {
+      setShowValidation(true);
+      toast.error("Please fill in the skill name.");
+      return;
+    }
     startTransition(async () => {
       try {
         await saveSkill(resumeId, form);
@@ -221,10 +240,15 @@ function SkillForm({
   }, [form]);
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
+    <div className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:gap-4 sm:p-5">
       <div className="flex flex-col gap-2">
-        <Label htmlFor="sk-name">Skill name *</Label>
-        <Input id="sk-name" value={form.skillName} onChange={(e) => setForm((f) => ({ ...f, skillName: e.target.value }))} />
+        <Label htmlFor="sk-name">Skill name <span className="text-red-500">*</span></Label>
+        <Input 
+          id="sk-name" 
+          value={form.skillName} 
+          onChange={(e) => setForm((f) => ({ ...f, skillName: e.target.value }))} 
+          className={skillEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
+        />
       </div>
       {/* Internal Save button removed in favor of global header button */}
     </div>
