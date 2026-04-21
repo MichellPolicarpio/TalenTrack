@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useCallback, useMemo, useLayoutEffect, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import {
   Award,
@@ -27,6 +28,14 @@ import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EditorActionBar } from "@/components/resume/EditorActionBar";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Toaster } from "@/components/ui/sonner";
 import { StatusBanner } from "@/components/resume/StatusBanner";
 import {
@@ -185,8 +194,12 @@ export function ResumeEditorClient({
 
   const [isAddingCert, setIsAddingCert] = useState(false);
   const [isAddingLicense, setIsAddingLicense] = useState(false);
+  const [isAddingProject, setIsAddingProject] = useState(false);
+  const [isAddingSkill, setIsAddingSkill] = useState(false);
   const [newCertDraft, setNewCertDraft] = useState<any>(null);
   const [newLicenseDraft, setNewLicenseDraft] = useState<any>(null);
+  const [newProjectDraft, setNewProjectDraft] = useState<any>(null);
+  const [newSkillDraft, setNewSkillDraft] = useState<any>(null);
 
   const {
     profileDraft,
@@ -242,6 +255,8 @@ export function ResumeEditorClient({
     bumpLastSaved,
   });
 
+  const [isSubmitConfirmOpen, setIsSubmitConfirmOpen] = useState(false);
+
   const { tabStripScrollRef, tabStripScroll, scrollTabStrip } = useTabScroll(activeTab);
   const { editorChromeRef, editorChromeHeight } = useEditorChromeHeight();
 
@@ -268,7 +283,7 @@ export function ResumeEditorClient({
           onEdit={handleEdit}
           onSave={handleSave}
           onCancel={handleCancelEdit}
-          onSubmit={handleSubmitFinal}
+          onSubmit={() => setIsSubmitConfirmOpen(true)}
         />
       ) : null,
     [
@@ -480,21 +495,26 @@ export function ResumeEditorClient({
 
                     {/* Scrollable Form Content */}
                     <div 
-                      className="flex-1 overflow-y-auto px-4 pt-3 pb-8 scroll-smooth sm:px-6"
+                      className="flex-1 overflow-y-auto px-4 pb-8 scroll-smooth sm:px-6"
                       onPointerDownCapture={() => isLocked && triggerEditHint()}
                     >
                       {/* Mobile preview button */}
                       <div className="mb-4 flex items-center justify-end lg:hidden">
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setMobilePreviewOpen(true)}
-                          className="gap-1.5"
+                        <motion.div
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
                         >
-                          <Eye className="size-4" />
-                          Preview
-                        </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setMobilePreviewOpen(true)}
+                            className="gap-1.5 border-primary/20 bg-primary/5 text-primary hover:bg-primary/10"
+                          >
+                            <Eye className="size-4" />
+                            Preview
+                          </Button>
+                        </motion.div>
                       </div>
 
                       {/* ── Personal Info ── */}
@@ -569,6 +589,8 @@ export function ResumeEditorClient({
                           onPersisted={onSectionPersisted}
                           disabled={isLocked}
                           headerActions={headerActions}
+                          onAddingChange={setIsAddingSkill}
+                          onNewDraftChange={setNewSkillDraft}
                         />
                       </TabsContent>
 
@@ -593,6 +615,8 @@ export function ResumeEditorClient({
                           onPersisted={onSectionPersisted}
                           disabled={isLocked}
                           headerActions={headerActions}
+                          onAddingChange={setIsAddingProject}
+                          onNewDraftChange={setNewProjectDraft}
                         />
                       </TabsContent>
                     </div>
@@ -608,7 +632,7 @@ export function ResumeEditorClient({
                       type="button"
                       size="sm"
                       disabled={isSubmitting || isSaving}
-                      onClick={handleSubmitFinal}
+                      onClick={() => setIsSubmitConfirmOpen(true)}
                       className="h-8 gap-1.5 rounded-full bg-btn-submit px-4 text-[11px] font-semibold text-white shadow-sm hover:bg-btn-submit/90 disabled:opacity-40"
                     >
                       {isSubmitting ? (
@@ -620,73 +644,83 @@ export function ResumeEditorClient({
                     </Button>
                   )}
                   <div className="inline-flex shrink-0 items-center gap-0.5 rounded-full border border-preview-toolbar-border bg-card px-1 py-0.5 shadow-sm">
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="ghost"
-                      className="size-7 rounded-full text-preview-toolbar-label hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
-                      disabled={zoom <= ZOOM_MIN}
-                      aria-label="Zoom out"
-                      onClick={() => setZoom((z) => Math.max(ZOOM_MIN, z - ZOOM_STEP))}
-                    >
-                      <ZoomOut className="size-4" strokeWidth={2.25} />
-                    </Button>
+                    <motion.div whileTap={{ scale: 0.9 }}>
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        className="size-7 rounded-full text-preview-toolbar-label hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                        disabled={zoom <= ZOOM_MIN}
+                        aria-label="Zoom out"
+                        onClick={() => setZoom((z) => Math.max(ZOOM_MIN, z - ZOOM_STEP))}
+                      >
+                        <ZoomOut className="size-4" strokeWidth={2.25} />
+                      </Button>
+                    </motion.div>
                     <span className="min-w-[2.25rem] px-0.5 text-center text-[10px] font-semibold tabular-nums text-preview-toolbar-label sm:font-medium sm:text-[11px]">
                       {zoom}%
                     </span>
+                    <motion.div whileTap={{ scale: 0.9 }}>
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        className="size-7 rounded-full text-preview-toolbar-label hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                        disabled={zoom >= ZOOM_MAX}
+                        aria-label="Zoom in"
+                        onClick={() => setZoom((z) => Math.min(ZOOM_MAX, z + ZOOM_STEP))}
+                      >
+                        <ZoomIn className="size-4" strokeWidth={2.25} />
+                      </Button>
+                    </motion.div>
+                  </div>
+                  <motion.div whileTap={{ scale: 0.9 }}>
                     <Button
                       type="button"
                       size="icon"
                       variant="ghost"
-                      className="size-7 rounded-full text-preview-toolbar-label hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
-                      disabled={zoom >= ZOOM_MAX}
-                      aria-label="Zoom in"
-                      onClick={() => setZoom((z) => Math.min(ZOOM_MAX, z + ZOOM_STEP))}
+                      className="size-7 shrink-0 rounded-full text-preview-toolbar-label hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                      aria-label="Reset zoom to default"
+                      title="Reset zoom"
+                      onClick={resetPreviewZoom}
                     >
-                      <ZoomIn className="size-4" strokeWidth={2.25} />
+                      <RotateCcw className="size-[16px]" strokeWidth={2.25} />
                     </Button>
-                  </div>
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className="size-7 shrink-0 rounded-full text-preview-toolbar-label hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
-                    aria-label="Reset zoom to default"
-                    title="Reset zoom"
-                    onClick={resetPreviewZoom}
-                  >
-                    <RotateCcw className="size-[16px]" strokeWidth={2.25} />
-                  </Button>
+                  </motion.div>
                   <span className="h-4 w-px bg-preview-toolbar-border" />
                   <div className="flex items-center gap-1">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="size-7 rounded-full text-preview-toolbar-label hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
-                      onClick={() => handleExportPdf("print")}
-                      aria-label="Print"
-                    >
-                      <Printer className="size-[16px]" strokeWidth={2.25} />
-                    </Button>
-                    <Button
-                      type="button"
-                      disabled={downloading}
-                      onClick={() => handleExportPdf("download")}
-                      className="h-7 gap-1.5 rounded-full bg-primary px-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60 text-[11px]"
-                    >
-                      {downloading ? (
-                        <Loader2 className="size-[12px] animate-spin" />
-                      ) : (
-                        <Download className="size-[12px]" />
-                      )}
-                      {downloading ? "Generating…" : "PDF"}
-                    </Button>
+                    <motion.div whileTap={{ scale: 0.9 }}>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="size-7 rounded-full text-preview-toolbar-label hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                        onClick={() => handleExportPdf("print")}
+                        aria-label="Print"
+                      >
+                        <Printer className="size-[16px]" strokeWidth={2.25} />
+                      </Button>
+                    </motion.div>
+                    <motion.div whileTap={{ scale: 0.95 }}>
+                      <Button
+                        type="button"
+                        disabled={downloading}
+                        onClick={() => handleExportPdf("download")}
+                        className="h-7 gap-1.5 rounded-full bg-primary px-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60 text-[11px]"
+                      >
+                        {downloading ? (
+                          <Loader2 className="size-[12px] animate-spin" />
+                        ) : (
+                          <Download className="size-[12px]" />
+                        )}
+                        {downloading ? "Generating…" : "PDF"}
+                      </Button>
+                    </motion.div>
                   </div>
                 </div>
 
                 {/* Scrollable preview canvas */}
-                <div className="flex flex-1 justify-center overflow-auto p-6">
+                <div className="flex flex-1 justify-center overflow-auto p-0">
                   <div
                     style={{
                       transform: `scale(${zoom / 100})`,
@@ -698,10 +732,13 @@ export function ResumeEditorClient({
                     <ResumePreview
                       {...previewProps}
                       activeTab={activeTab}
-                      isAddingCert={isAddingCert}
                       isAddingLicense={isAddingLicense}
+                      isAddingProject={isAddingProject}
+                      isAddingSkill={isAddingSkill}
                       newCertDraft={newCertDraft}
                       newLicenseDraft={newLicenseDraft}
+                      newProjectDraft={newProjectDraft}
+                      newSkillDraft={newSkillDraft}
                     />
                   </div>
                 </div>
@@ -712,88 +749,140 @@ export function ResumeEditorClient({
       </div>
 
       {/* Custom Mobile Preview Overlay (Native Implementation) */}
-      {mobilePreviewOpen && (
-        <div className="fixed inset-0 z-[9999] flex flex-col bg-[#E0DBD4]">
-          {/* Header */}
-          <div className="flex h-16 shrink-0 flex-row items-center justify-between border-b border-preview-toolbar-border bg-preview-toolbar px-4 shadow-sm">
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="size-8 rounded-full"
-                onClick={() => setMobilePreviewOpen(false)}
-              >
-                <ChevronLeft className="size-5" />
-              </Button>
-              <h2 className="text-sm font-bold text-foreground">Preview</h2>
-            </div>
+      <AnimatePresence>
+        {mobilePreviewOpen && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="fixed inset-0 z-[9999] flex flex-col bg-[#E0DBD4]"
+          >
+            {/* Header */}
+            <div className="flex h-16 shrink-0 flex-row items-center justify-between border-b border-preview-toolbar-border bg-preview-toolbar px-4 shadow-sm">
+              <div className="flex items-center gap-2">
+                <motion.div whileTap={{ scale: 0.9 }}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 rounded-full"
+                    onClick={() => setMobilePreviewOpen(false)}
+                  >
+                    <ChevronLeft className="size-5" />
+                  </Button>
+                </motion.div>
+                <h2 className="text-sm font-bold text-foreground">Preview</h2>
+              </div>
 
-            <div className="flex flex-1 items-center justify-center">
-              <div className="inline-flex items-center gap-0.5 rounded-full border border-preview-toolbar-border bg-white px-1 py-0.5 shadow-sm">
+              <div className="flex flex-1 items-center justify-center">
+                <div className="inline-flex items-center gap-0.5 rounded-full border border-preview-toolbar-border bg-white px-1 py-0.5 shadow-sm">
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="size-7 rounded-full text-preview-toolbar-label"
+                    disabled={mobileZoom <= ZOOM_MIN}
+                    onClick={() => setMobileZoom((z) => Math.max(ZOOM_MIN, z - ZOOM_STEP))}
+                  >
+                    <ZoomOut className="size-3.5" />
+                  </Button>
+                  <span className="min-w-[2.5rem] text-center text-[11px] font-bold tabular-nums">
+                    {mobileZoom}%
+                  </span>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="size-7 rounded-full text-preview-toolbar-label"
+                    disabled={mobileZoom >= ZOOM_MAX}
+                    onClick={() => setMobileZoom((z) => Math.min(ZOOM_MAX, z + ZOOM_STEP))}
+                  >
+                    <ZoomIn className="size-3.5" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
                 <Button
                   type="button"
-                  size="icon"
-                  variant="ghost"
-                  className="size-7 rounded-full text-preview-toolbar-label"
-                  disabled={mobileZoom <= ZOOM_MIN}
-                  onClick={() => setMobileZoom((z) => Math.max(ZOOM_MIN, z - ZOOM_STEP))}
+                  size="sm"
+                  className="h-8 gap-1.5 rounded-full bg-primary px-3 text-[11px] font-bold text-primary-foreground hover:bg-primary/90"
+                  onClick={() => handleExportPdf("download")}
                 >
-                  <ZoomOut className="size-3.5" />
-                </Button>
-                <span className="min-w-[2.5rem] text-center text-[11px] font-bold tabular-nums">
-                  {mobileZoom}%
-                </span>
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="ghost"
-                  className="size-7 rounded-full text-preview-toolbar-label"
-                  disabled={mobileZoom >= ZOOM_MAX}
-                  onClick={() => setMobileZoom((z) => Math.min(ZOOM_MAX, z + ZOOM_STEP))}
-                >
-                  <ZoomIn className="size-3.5" />
+                  <Download className="size-3.5" />
                 </Button>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                size="sm"
-                className="h-8 gap-1.5 rounded-full bg-primary px-3 text-[11px] font-bold text-primary-foreground hover:bg-primary/90"
-                onClick={() => handleExportPdf("download")}
-              >
-                <Download className="size-3.5" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Scaled Preview Body */}
-          <div className="flex-1 overflow-auto p-4 pb-20">
-            <div className="flex justify-center">
-              <div 
-                className="origin-top shadow-2xl transition-transform duration-200"
-                style={{ 
-                  width: '816px',
-                  // Scale logic: base on user zoom setting
-                  transform: `scale(${mobileZoom / 100})`, 
-                }}
-              >
-                <ResumePreview
+            {/* Scaled Preview Body */}
+            <div className="flex-1 overflow-auto p-4 pb-20">
+              <div className="flex justify-center">
+                <div 
+                  className="origin-top shadow-2xl transition-transform duration-200"
+                  style={{ 
+                    width: '816px',
+                    // Scale logic: base on user zoom setting
+                    transform: `scale(${mobileZoom / 100})`, 
+                  }}
+                >
+                  <ResumePreview
                   {...previewProps}
+                  className="w-full"
                   activeTab={activeTab}
-                  isAddingCert={isAddingCert}
                   isAddingLicense={isAddingLicense}
+                  isAddingProject={isAddingProject}
+                  isAddingSkill={isAddingSkill}
                   newCertDraft={newCertDraft}
                   newLicenseDraft={newLicenseDraft}
-                  disableScrollIntoView
+                  newProjectDraft={newProjectDraft}
+                  newSkillDraft={newSkillDraft}
+                  disableScrollIntoView={activeTab === "personal"}
                 />
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <Dialog open={isSubmitConfirmOpen} onOpenChange={setIsSubmitConfirmOpen}>
+        <DialogContent className="sm:max-w-[440px]">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Send className="size-5" />
+              </div>
+              <DialogTitle className="text-xl">Ready to Submit?</DialogTitle>
+            </div>
+            <DialogDescription className="pt-3 text-[14px] leading-relaxed text-neutral-600">
+              Once you submit your resume, it will be <span className="font-bold text-neutral-900">locked for review</span> by the Talent Selection team.
+              <br /><br />
+              You won't be able to make further changes until the review process is complete. Are you sure you are ready?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-6 gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsSubmitConfirmOpen(false)}
+              className="h-10 rounded-lg border-neutral-200 font-medium hover:bg-neutral-50 sm:flex-1"
+            >
+              Not yet
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setIsSubmitConfirmOpen(false);
+                void handleSubmitFinal();
+              }}
+              className="h-10 rounded-lg bg-primary font-bold text-primary-foreground shadow-md hover:bg-primary/90 sm:flex-1"
+            >
+              Yes, Submit
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

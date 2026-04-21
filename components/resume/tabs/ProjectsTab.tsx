@@ -8,6 +8,8 @@ export function ProjectsTab({
   onPersisted,
   disabled,
   headerActions,
+  onAddingChange,
+  onNewDraftChange,
 }: {
   resumeId: string;
   initial: Project[];
@@ -15,6 +17,8 @@ export function ProjectsTab({
   onPersisted?: () => void;
   disabled: boolean;
   headerActions?: React.ReactNode;
+  onAddingChange?: (isAdding: boolean) => void;
+  onNewDraftChange?: (draft: any | null) => void;
 }) {
   return (
     <ProjectsSection
@@ -24,6 +28,8 @@ export function ProjectsTab({
       onPersisted={onPersisted}
       disabled={disabled}
       headerActions={headerActions}
+      onAddingChange={onAddingChange}
+      onNewDraftChange={onNewDraftChange}
     />
   );
 }

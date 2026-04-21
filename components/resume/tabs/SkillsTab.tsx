@@ -8,6 +8,8 @@ export function SkillsTab({
   onPersisted,
   disabled,
   headerActions,
+  onAddingChange,
+  onNewDraftChange,
 }: {
   resumeId: string;
   initial: Skill[];
@@ -15,6 +17,8 @@ export function SkillsTab({
   onPersisted?: () => void;
   disabled: boolean;
   headerActions?: React.ReactNode;
+  onAddingChange?: (isAdding: boolean) => void;
+  onNewDraftChange?: (draft: any | null) => void;
 }) {
   return (
     <SkillsSection
@@ -24,6 +28,8 @@ export function SkillsTab({
       onPersisted={onPersisted}
       disabled={disabled}
       headerActions={headerActions}
+      onAddingChange={onAddingChange}
+      onNewDraftChange={onNewDraftChange}
     />
   );
 }

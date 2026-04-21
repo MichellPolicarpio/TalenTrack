@@ -47,6 +47,7 @@ import {
 } from "@/components/ui/select";
 import { SectionShell } from "./SectionShell";
 import { useGenericSection } from "@/lib/hooks/useGenericSection";
+import { DeleteConfirmPopover } from "./DeleteConfirmPopover";
 
 
 function SkillCard({
@@ -159,14 +160,12 @@ function SkillCard({
             <EyeOff className="size-4 text-[#9CA3AF]" />
           )}
         </button>
-        <button
-          type="button"
+        <DeleteConfirmPopover
           disabled={disabled}
-          onClick={() => onDelete(item.id)}
+          onConfirm={() => onDelete(item.id)}
+          title="Delete this skill?"
           className="rounded-md p-1 text-[#9CA3AF] transition-colors hover:bg-red-50 hover:text-[#DC2626]"
-        >
-          <Trash2 className="size-[15px]" />
-        </button>
+        />
         <button
           type="button"
           {...attributes}
@@ -196,17 +195,18 @@ function SkillCard({
 const emptyForm: SkillInput = {
   skillName: "",
 };
-
 function SkillForm({
   resumeId,
   onDone,
   onPersisted,
   onDirtyChange,
+  onFormChange,
 }: {
   resumeId: string;
   onDone: () => void;
   onPersisted?: () => void;
   onDirtyChange?: (isDirty: boolean, saveFn: () => void) => void;
+  onFormChange?: (draft: SkillInput | null) => void;
 }) {
   const [form, setForm] = useState<SkillInput>(emptyForm);
   const [pending, startTransition] = useTransition();
@@ -237,7 +237,8 @@ function SkillForm({
   useEffect(() => {
     const isDirty = !!form.skillName.trim();
     onDirtyChange?.(isDirty, handleSubmit);
-  }, [form]);
+    onFormChange?.(form);
+  }, [form, onFormChange]);
 
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:gap-4 sm:p-5">
@@ -262,6 +263,8 @@ export function SkillsSection({
   onPersisted,
   disabled = false,
   headerActions,
+  onAddingChange,
+  onNewDraftChange,
 }: {
   resumeId: string;
   initial: Skill[];
@@ -269,6 +272,8 @@ export function SkillsSection({
   onPersisted?: () => void;
   disabled?: boolean;
   headerActions?: React.ReactNode;
+  onAddingChange?: (isAdding: boolean) => void;
+  onNewDraftChange?: (draft: any | null) => void;
 }) {
   const {
     items,
@@ -292,14 +297,21 @@ export function SkillsSection({
     removeAction: removeSkill,
     reorderAction: reorderSkillsAction,
     headerActions,
+    onAddingChange,
   });
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    // useGenericSection already handles onAddingChange if passed in config
+    if (!isOpen) onNewDraftChange?.(null);
+  };
 
   return (
     <SectionShell
       title="Skills"
       addLabel="Add"
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={handleOpenChange}
       disabled={disabled}
       headerActions={hijackedActions}
       form={
@@ -311,6 +323,7 @@ export function SkillsSection({
             setLocalDirty(isDirty);
             setActiveSave(() => saveFn);
           }}
+          onFormChange={onNewDraftChange}
         />
       }
     >

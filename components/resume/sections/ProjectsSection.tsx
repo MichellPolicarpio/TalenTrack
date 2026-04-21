@@ -32,6 +32,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SectionShell } from "./SectionShell";
 import { useGenericSection } from "@/lib/hooks/useGenericSection";
+import { DeleteConfirmPopover } from "./DeleteConfirmPopover";
 
 function ProjectCard({
   item,
@@ -63,6 +64,7 @@ function ProjectCard({
     role: item.role,
     projectValue: item.projectValue,
     year: item.year,
+    client: item.client,
     expandedTitle: item.expandedTitle,
     description: item.description,
   };
@@ -80,7 +82,20 @@ function ProjectCard({
   function update(patch: Partial<ProjectInput>) {
     const nextForm = { ...form, ...patch };
     setForm(nextForm);
-    onDraftChange(item.id, patch as Partial<Project>);
+
+    // Build explicit draft patch to match Certifications pattern
+    const draftPatch: Partial<Project> = {};
+    if (patch.projectName !== undefined) draftPatch.projectName = patch.projectName;
+    if (patch.industry !== undefined) draftPatch.industry = patch.industry;
+    if (patch.role !== undefined) draftPatch.role = patch.role;
+    if (patch.projectValue !== undefined) draftPatch.projectValue = patch.projectValue;
+    if (patch.client !== undefined) draftPatch.client = patch.client;
+    if (patch.year !== undefined) draftPatch.year = patch.year;
+    if (patch.expandedTitle !== undefined) draftPatch.expandedTitle = patch.expandedTitle;
+    if (patch.description !== undefined) draftPatch.description = patch.description;
+
+    onDraftChange(item.id, draftPatch);
+
     if (!dirty) {
       setDirty(true);
       onDirtyChange?.(true, handleSave);
@@ -139,14 +154,12 @@ function ProjectCard({
             <EyeOff className="size-4 text-[#9CA3AF]" />
           )}
         </button>
-        <button
-          type="button"
+        <DeleteConfirmPopover
           disabled={disabled}
-          onClick={() => onDelete(item.id)}
+          onConfirm={() => onDelete(item.id)}
+          title="Delete this project?"
           className="rounded-md p-1 text-[#9CA3AF] transition-colors hover:bg-red-50 hover:text-[#DC2626]"
-        >
-          <Trash2 className="size-[15px]" />
-        </button>
+        />
         <button
           type="button"
           {...attributes}
@@ -160,16 +173,27 @@ function ProjectCard({
 
       {/* Fields — same label/input style as CertCard */}
       <div className="flex-1 space-y-3">
-        <div className="flex flex-col gap-1.5">
-          <Label className="text-[12px] text-[#6B7280]">
-            Project Name <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            value={form.projectName}
-            onChange={(e) => update({ projectName: e.target.value })}
-            disabled={disabled}
-            className={nameEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
-          />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-[12px] text-[#6B7280]">
+              Project Name <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              value={form.projectName}
+              onChange={(e) => update({ projectName: e.target.value })}
+              disabled={disabled}
+              className={nameEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-[12px] text-[#6B7280]">Client</Label>
+            <Input
+              value={form.client ?? ""}
+              onChange={(e) => update({ client: e.target.value || null })}
+              disabled={disabled}
+              placeholder="e.g. Brindley Engineering"
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -256,6 +280,7 @@ const emptyForm: ProjectInput = {
   industry: null,
   role: null,
   projectValue: null,
+  client: null,
   year: null,
   expandedTitle: null,
   description: null,
@@ -267,12 +292,14 @@ function ProjectForm({
   onPersisted,
   onAdded,
   onDirtyChange,
+  onFormChange,
 }: {
   resumeId: string;
   onDone: () => void;
   onPersisted?: () => void;
   onAdded?: (item: Project) => void;
   onDirtyChange?: (isDirty: boolean, saveFn: () => void) => void;
+  onFormChange?: (draft: ProjectInput | null) => void;
 }) {
   const [form, setForm] = useState<ProjectInput>(emptyForm);
   const [pending, startTransition] = useTransition();
@@ -303,19 +330,31 @@ function ProjectForm({
   useEffect(() => {
     const isDirty = !!form.projectName.trim();
     onDirtyChange?.(isDirty, handleSubmit);
+    onFormChange?.(form);
   }, [form]);
 
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:gap-4 sm:p-5">
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="rp-name">Project name <span className="text-red-500">*</span></Label>
-        <Input
-          id="rp-name"
-          value={form.projectName}
-          onChange={(e) => setForm((f) => ({ ...f, projectName: e.target.value }))}
-          placeholder="e.g. Dos Bocas New Refinery"
-          className={nameEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
-        />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="rp-name">Project name <span className="text-red-500">*</span></Label>
+          <Input
+            id="rp-name"
+            value={form.projectName}
+            onChange={(e) => setForm((f) => ({ ...f, projectName: e.target.value }))}
+            placeholder="e.g. Dos Bocas New Refinery"
+            className={nameEmpty ? "border-red-400 focus-visible:ring-red-400" : ""}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="rp-client">Client</Label>
+          <Input
+            id="rp-client"
+            value={form.client ?? ""}
+            onChange={(e) => setForm((f) => ({ ...f, client: e.target.value || null }))}
+            placeholder="e.g. Brindley Engineering"
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -391,6 +430,8 @@ export function ProjectsSection({
   onPersisted,
   disabled = false,
   headerActions,
+  onAddingChange,
+  onNewDraftChange,
 }: {
   resumeId: string;
   initial: Project[];
@@ -398,6 +439,8 @@ export function ProjectsSection({
   onPersisted?: () => void;
   disabled?: boolean;
   headerActions?: React.ReactNode;
+  onAddingChange?: (isAdding: boolean) => void;
+  onNewDraftChange?: (draft: any | null) => void;
 }) {
   const {
     items,
@@ -424,12 +467,19 @@ export function ProjectsSection({
     headerActions,
   });
 
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    onAddingChange?.(isOpen);
+    if (!isOpen) onNewDraftChange?.(null);
+  };
+
   return (
     <SectionShell
       title="Project List"
       addLabel="Add"
+      bottomLabel="Add New Project"
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={handleOpenChange}
       disabled={disabled}
       headerActions={hijackedActions}
       form={
@@ -445,6 +495,7 @@ export function ProjectsSection({
             setLocalDirty(isDirty);
             setActiveSave(() => saveFn);
           }}
+          onFormChange={onNewDraftChange}
         />
       }
     >
@@ -459,34 +510,22 @@ export function ProjectsSection({
           strategy={verticalListSortingStrategy}
         >
           <div className="flex flex-col">
-            {items.length === 0 ? (
-              <button
-                type="button"
-                disabled={disabled}
-                onClick={() => { if (!disabled) setOpen(true); }}
-                className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-transparent text-[13px] font-medium text-neutral-500 transition-colors hover:border-[#F17A28]/50 hover:text-[#F17A28] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Plus className="size-4" />
-                Add New Project
-              </button>
-            ) : (
-              items.map((item) => (
-                <ProjectCard
-                  key={item.id}
-                  item={item}
-                  resumeId={resumeId}
-                  onDelete={handleDelete}
-                  onToggleVisibility={handleToggleVisibility}
-                  onDraftChange={handleDraftChange}
-                  onPersisted={onPersisted}
-                  onDirtyChange={(isDirty, saveFn) => {
-                    setLocalDirty(isDirty);
-                    setActiveSave(() => saveFn);
-                  }}
-                  disabled={disabled || pending}
-                />
-              ))
-            )}
+            {items.map((item) => (
+              <ProjectCard
+                key={item.id}
+                item={item}
+                resumeId={resumeId}
+                onDelete={handleDelete}
+                onToggleVisibility={handleToggleVisibility}
+                onDraftChange={handleDraftChange}
+                onPersisted={onPersisted}
+                onDirtyChange={(isDirty, saveFn) => {
+                  setLocalDirty(isDirty);
+                  setActiveSave(() => saveFn);
+                }}
+                disabled={disabled || pending}
+              />
+            ))}
           </div>
         </SortableContext>
       </DndContext>
