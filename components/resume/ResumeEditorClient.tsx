@@ -627,22 +627,27 @@ export function ResumeEditorClient({
               <div className="hidden min-w-0 flex-1 flex-col border-l border-preview-toolbar-border bg-preview-panel lg:flex">
                 {/* Right Header */}
                 <div className="flex shrink-0 w-full min-w-0 flex-wrap items-center justify-center gap-x-4 gap-y-2 border-b border-preview-toolbar-border bg-preview-toolbar px-4 sm:px-6 py-2 min-h-[64px]">
-                  {(status === "DRAFT" || status === "NEEDS_CHANGES") && (
-                    <Button
-                      type="button"
-                      size="sm"
-                      disabled={isSubmitting || isSaving}
-                      onClick={() => setIsSubmitConfirmOpen(true)}
-                      className="h-8 gap-1.5 rounded-full bg-btn-submit px-4 text-[11px] font-semibold text-white shadow-sm hover:bg-btn-submit/90 disabled:opacity-40"
-                    >
-                      {isSubmitting ? (
-                        <Loader2 className="size-3.5 animate-spin" />
-                      ) : (
-                        <Send className="size-3.5" />
-                      )}
-                      {isSubmitting ? "Sending…" : "Submit Resume"}
-                    </Button>
-                  )}
+                  {(() => {
+                    const isReadyForSubmission = profileDraft.jobTitle.trim().length > 0 && draftExperiences.length > 0;
+                    return (status === "DRAFT" || status === "NEEDS_CHANGES") && (
+                      <div title={!isReadyForSubmission ? "Please add your Job Title and at least one Work Experience to submit." : ""}>
+                        <Button
+                          type="button"
+                          size="sm"
+                          disabled={isSubmitting || isSaving || !isReadyForSubmission}
+                          onClick={() => setIsSubmitConfirmOpen(true)}
+                          className="h-8 gap-1.5 rounded-full bg-btn-submit px-4 text-[11px] font-semibold text-white shadow-sm hover:bg-btn-submit/90 disabled:opacity-40"
+                        >
+                          {isSubmitting ? (
+                            <Loader2 className="size-3.5 animate-spin" />
+                          ) : (
+                            <Send className="size-3.5" />
+                          )}
+                          {isSubmitting ? "Sending…" : "Submit Resume"}
+                        </Button>
+                      </div>
+                    );
+                  })()}
                   <div className="inline-flex shrink-0 items-center gap-0.5 rounded-full border border-preview-toolbar-border bg-card px-1 py-0.5 shadow-sm">
                     <motion.div whileTap={{ scale: 0.9 }}>
                       <Button
