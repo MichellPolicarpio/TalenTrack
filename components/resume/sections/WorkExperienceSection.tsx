@@ -43,6 +43,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { SectionShell } from "./SectionShell";
 import { useGenericSection } from "@/lib/hooks/useGenericSection";
 import { MonthYearPicker } from "@/components/ui/month-year-picker";
+import { DeleteConfirmPopover } from "./DeleteConfirmPopover";
 
 function toDateStr(d: Date | null): string | null {
   return d ? (d.toISOString().split("T")[0] ?? null) : null;
@@ -180,14 +181,12 @@ function WorkExperienceCard({
             <EyeOff className="size-4 text-[#9CA3AF]" />
           )}
         </button>
-        <button
-          type="button"
+        <DeleteConfirmPopover
           disabled={disabled}
-          onClick={() => onDelete(item.id)}
+          onConfirm={() => onDelete(item.id)}
+          title="Delete this work experience?"
           className="rounded-md p-1 text-[#9CA3AF] transition-colors hover:bg-red-50 hover:text-[#DC2626]"
-        >
-          <Trash2 className="size-[15px]" />
-        </button>
+        />
         <button
           type="button"
           {...attributes}

@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { AnimatePresence } from "framer-motion";
 import { useDashboard } from "@/lib/context/dashboard-context";
 import { ResumeStatus } from "@/lib/db/types";
 
@@ -21,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User, Settings, Moon, LogOut } from "lucide-react";
+import { SplashScreen, EXIT_STEPS } from "@/components/layout/SplashScreen";
 
 const ROLE_LABELS: Record<UserRole, string> = {
   Employee: "Employee",
@@ -74,14 +77,30 @@ export function AppTopBar({
   const isResumeRoute = pathname === "/dashboard/resume" || pathname === "/dashboard";
   const { activeResumeStatus, editorActions } = useDashboard();
   const activeTab = activeResumeStatus ? resolveActiveTab(activeResumeStatus) : null;
+  const [signingOut, setSigningOut] = useState(false);
+
+  function handleSignOut() {
+    setSigningOut(true);
+    // 5 steps * 700ms = 3500ms. We wait 4000ms to ensure the "See you soon!" step is seen.
+    setTimeout(() => signOut({ callbackUrl: "/" }), 4000);
+  }
 
   return (
+    <>
+      <AnimatePresence>
+        {signingOut && (
+          <SplashScreen 
+            steps={EXIT_STEPS} 
+            intervalMs={700}
+          />
+        )}
+      </AnimatePresence>
     <div className="hidden relative h-[75px] shrink-0 items-center justify-between border-b border-topbar-border bg-topbar px-5 md:flex">
       {/* Left: app label */}
       <div className="flex shrink-0 items-center">
         {isAboutRoute || isSettingsRoute || isHistoryRoute || isResumeRoute ? (
           <div className="min-w-0 shrink-0">
-            <p className="truncate text-[18px] font-black tracking-tight text-sidebar-accent-foreground">
+            <p className="truncate text-[18px] font-black tracking-tight text-primary">
               {isAboutRoute ? "About" : isSettingsRoute ? "Settings" : isHistoryRoute ? "Resume History" : "My Resume"}
             </p>
           </div>
@@ -183,7 +202,7 @@ export function AppTopBar({
               </DropdownMenuItem>
               <DropdownMenuSeparator className="-mx-1.5 my-1.5" />
               <DropdownMenuItem 
-                onClick={() => signOut({ callbackUrl: "/" })}
+                onClick={handleSignOut}
                 className="flex items-center gap-2.5 px-2 py-2 text-red-600 focus:bg-red-50 focus:text-red-700 cursor-pointer"
               >
                 <LogOut className="size-4" />
@@ -194,5 +213,6 @@ export function AppTopBar({
         </div>
       </div>
     </div>
+    </>
   );
 }

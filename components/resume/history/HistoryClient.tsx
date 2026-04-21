@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { ResumePreview } from "@/components/resume/ResumePreview";
 import { 
   Dialog, 
@@ -91,12 +92,12 @@ export function HistoryClient({ snapshots }: HistoryClientProps) {
         {snapshots.map((snapshot) => (
           <Card
             key={snapshot.id}
-            className="group relative flex flex-col overflow-hidden border-neutral-200/60 bg-white transition-all hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5"
+            className="group relative flex flex-col overflow-hidden border-neutral-200/60 bg-white transition-all hover:border-success/20 hover:shadow-lg hover:shadow-success/5"
           >
             {/* Version Header */}
             <div className="flex items-center justify-between border-b border-neutral-100 bg-neutral-50/50 px-4 py-3">
               <div className="flex items-center gap-2">
-                <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-100/80 text-[11px] font-bold text-emerald-700">
+                <div className="flex size-7 items-center justify-center rounded-lg bg-success/20 text-[11px] font-bold text-success">
                   v{snapshot.version}
                 </div>
                 <span className="text-[12px] font-semibold text-neutral-700">Approved Version</span>
@@ -131,14 +132,16 @@ export function HistoryClient({ snapshots }: HistoryClientProps) {
 
             {/* Actions */}
             <div className="flex border-t border-neutral-100 p-2">
-              <Button
-                variant="ghost"
-                onClick={() => handleViewDetails(snapshot)}
-                className="h-9 w-full gap-2 rounded-lg text-[12px] font-bold text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
-              >
-                <Eye className="size-4" />
-                View Details
-              </Button>
+              <motion.div whileTap={{ scale: 0.98 }} className="w-full">
+                <Button
+                  variant="ghost"
+                  onClick={() => handleViewDetails(snapshot)}
+                  className="h-9 w-full gap-2 rounded-lg text-[12px] font-bold text-success hover:bg-success/10 hover:text-success/90"
+                >
+                  <Eye className="size-4" />
+                  View Details
+                </Button>
+              </motion.div>
             </div>
           </Card>
         ))}
@@ -149,17 +152,17 @@ export function HistoryClient({ snapshots }: HistoryClientProps) {
         <DialogContent className="sm:max-w-[880px] max-h-[90vh] overflow-hidden flex flex-col p-0 border-none shadow-2xl">
           {selectedFull ? (
             <>
-              <DialogHeader className="bg-emerald-600 px-6 py-4 text-white">
+              <DialogHeader className="bg-success px-6 py-4 text-white">
                 <div className="flex items-center justify-between">
                   <div>
                     <DialogTitle className="text-white text-lg">
                       Snapshot v{selectedFull.version}
                     </DialogTitle>
-                    <DialogDescription className="text-emerald-50/80 text-xs">
+                    <DialogDescription className="text-success/80 text-xs">
                       Archived on {detailDateFormatter.format(new Date(selectedFull.createdAt))}
                     </DialogDescription>
                   </div>
-                  <Button variant="outline" className="h-8 gap-2 bg-emerald-500 border-white/20 text-white hover:bg-emerald-400 hover:text-white">
+                  <Button variant="outline" className="h-8 gap-2 bg-success/90 border-white/20 text-white hover:bg-success/80 hover:text-white">
                      <ExternalLink className="size-3" />
                      View Official
                   </Button>
@@ -184,8 +187,8 @@ export function HistoryClient({ snapshots }: HistoryClientProps) {
           ) : (
             <div className="flex min-h-[400px] flex-col items-center justify-center gap-4 bg-white">
               <div className="relative flex items-center justify-center">
-                <div className="absolute size-12 animate-ping rounded-full bg-emerald-100 opacity-75"></div>
-                <Loader2 className="relative size-10 animate-spin text-emerald-600" />
+                <div className="absolute size-12 animate-ping rounded-full bg-success/20 opacity-75"></div>
+                <Loader2 className="relative size-10 animate-spin text-success" />
               </div>
               <p className="animate-pulse text-sm font-medium text-neutral-500">Loading version details...</p>
             </div>

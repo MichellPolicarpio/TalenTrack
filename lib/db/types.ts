@@ -145,6 +145,7 @@ export type Project = {
   industry: string | null;
   role: string | null;
   projectValue: string | null;
+  client: string | null;
   year: number | null;
   expandedTitle: string | null;
   description: string | null;
@@ -221,6 +222,7 @@ export type ProjectInput = {
   industry: string | null;
   role: string | null;
   projectValue: string | null;
+  client: string | null;
   year: number | null;
   expandedTitle: string | null;
   description: string | null;

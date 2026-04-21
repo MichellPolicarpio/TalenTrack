@@ -54,11 +54,18 @@ function TalentTrackLogo({ size = "default" }: { size?: "default" | "small" }) {
 
   return (
     <div className="flex items-center gap-2.5">
-      <div className={`flex ${iconSize} items-center justify-center rounded-lg bg-[#E87722]`}>
-        <span className={`${iconText} font-bold leading-none text-white`}>T</span>
+      <div className={`flex ${iconSize} items-center justify-center overflow-hidden rounded-lg bg-[#FF6C06]`}>
+        <Image
+          src="/TalentTrack_Logo.png"
+          alt="TalentTrack Logo"
+          width={40}
+          height={40}
+          className="size-full object-contain"
+          priority
+        />
       </div>
       <span className={`${textSize} font-bold italic tracking-tight text-white`} style={{ fontFamily: "var(--font-serif), Georgia, serif" }}>
-        Talent<span className="text-[#E87722]">Track</span>
+        Talent<span className="text-[#FF6C06]">Track</span>
       </span>
     </div>
   );
@@ -106,7 +113,7 @@ export function LoginClient() {
         </div>
 
         {/* Orange accent glow */}
-        <div className="pointer-events-none absolute -bottom-32 -left-32 size-96 rounded-full bg-[#E87722]/8 blur-[120px]" />
+        <div className="pointer-events-none absolute -bottom-32 -left-32 size-96 rounded-full bg-[#FF6C06]/8 blur-[120px]" />
 
         {/* Content */}
         <div className="relative z-10 flex flex-1 flex-col justify-between p-10 xl:p-14">
@@ -157,8 +164,8 @@ export function LoginClient() {
                   custom={3.5 + i * 0.5}
                   className="group flex items-start justify-center gap-4 text-left"
                 >
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.04] transition-colors group-hover:border-[#E87722]/30 group-hover:bg-[#E87722]/10">
-                    <feat.icon className="size-[18px] text-[#E87722]" />
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.04] transition-colors group-hover:border-[#FF6C06]/30 group-hover:bg-[#FF6C06]/10">
+                    <feat.icon className="size-[18px] text-[#FF6C06]" />
                   </div>
                   <div>
                     <h3 className="text-[13px] font-semibold text-white">{feat.title}</h3>
@@ -209,7 +216,7 @@ export function LoginClient() {
               }}
               className="relative flex items-center justify-center"
             >
-              <div className="pointer-events-none absolute inset-0 -z-10 h-[92px] w-[92px] rounded-full bg-[#E87722]/12 blur-[16px]" />
+              <div className="pointer-events-none absolute inset-0 -z-10 h-[92px] w-[92px] rounded-full bg-[#FF6C06]/12 blur-[16px]" />
               <Image
                 src="/BrindleyLogo.png"
                 alt="Brindley logo"
@@ -265,11 +272,11 @@ export function LoginClient() {
             animate="visible"
             variants={fadeUp}
             custom={4.5}
-            className="mt-6 overflow-hidden rounded-xl border border-[#E87722]/15 bg-[#FFFBF7]"
+            className="mt-6 overflow-hidden rounded-xl border border-[#FF6C06]/15 bg-[#FFFBF7]"
           >
             <div className="flex items-start gap-3 px-4 py-3.5">
-              <div className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-[#E87722]/10">
-                <Info className="size-3.5 text-[#E87722]" />
+              <div className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-[#FF6C06]/10">
+                <Info className="size-3.5 text-[#FF6C06]" />
               </div>
               <div>
                 <p className="text-[12px] font-semibold text-neutral-800">
@@ -294,7 +301,7 @@ export function LoginClient() {
             <button
               type="button"
               onClick={() => setShowAboutPanel(true)}
-              className="group flex items-center gap-1 text-[11px] font-medium text-neutral-400 transition-colors hover:text-[#E87722]"
+              className="group flex items-center gap-1 text-[11px] font-medium text-neutral-400 transition-colors hover:text-[#FF6C06]"
             >
               Learn more about TalentTrack
               <ChevronRight className="size-3 transition-transform group-hover:translate-x-0.5" />
@@ -325,15 +332,15 @@ export function LoginClient() {
               className="absolute inset-0 z-30 overflow-y-auto bg-white px-6 py-8"
             >
               <div className="pointer-events-none absolute inset-0">
-                <div className="absolute -right-20 top-20 h-56 w-56 rounded-full bg-[#E87722]/10 blur-3xl" />
+                <div className="absolute -right-20 top-20 h-56 w-56 rounded-full bg-[#FF6C06]/10 blur-3xl" />
                 <div className="absolute -left-20 bottom-20 h-48 w-48 rounded-full bg-[#0B1120]/6 blur-3xl" />
-                <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-[#E87722]/35 to-transparent" />
+                <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-[#FF6C06]/35 to-transparent" />
               </div>
 
               <div className="relative mx-auto w-full max-w-[460px]">
                 <div className="mb-5 flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#E87722]">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#FF6C06]">
                       Resume Builder Proposal
                     </p>
                     <h3 className="mt-1 text-[25px] font-bold tracking-tight text-neutral-900">
@@ -341,15 +348,15 @@ export function LoginClient() {
                     </h3>
                     <div className="mt-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-500">
                       <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-1">
-                        <Sparkles className="size-3 text-[#E87722]" />
+                        <Sparkles className="size-3 text-[#FF6C06]" />
                         Product
                       </span>
                       <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-1">
-                        <Workflow className="size-3 text-[#E87722]" />
+                        <Workflow className="size-3 text-[#FF6C06]" />
                         Workflow
                       </span>
                       <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-1">
-                        <LockKeyhole className="size-3 text-[#E87722]" />
+                        <LockKeyhole className="size-3 text-[#FF6C06]" />
                         Secure
                       </span>
                     </div>
@@ -415,11 +422,17 @@ export function LoginClient() {
         className="fixed left-5 top-5 z-50 lg:hidden"
       >
         <div className="flex items-center gap-2">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-[#E87722] shadow-md">
-            <span className="text-base font-bold text-white">T</span>
+          <div className="flex size-8 items-center justify-center overflow-hidden rounded-lg bg-[#FF6C06] shadow-md">
+            <Image
+              src="/TalentTrack_Logo.png"
+              alt="TalentTrack Logo"
+              width={32}
+              height={32}
+              className="size-full object-contain"
+            />
           </div>
           <span className="text-lg font-bold tracking-tight text-neutral-900">
-            Talent<span className="text-[#E87722]">Track</span>
+            Talent<span className="text-[#FF6C06]">Track</span>
           </span>
         </div>
       </motion.div>

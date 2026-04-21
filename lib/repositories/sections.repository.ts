@@ -101,6 +101,7 @@ export function mapProject(row: Record<string, unknown>): Project {
     industry: row.Industry == null ? null : String(row.Industry),
     role: row.Role == null ? null : String(row.Role),
     projectValue: row.ProjectValue == null ? null : String(row.ProjectValue),
+    client: row.Client == null ? null : String(row.Client),
     year: row.Year == null ? null : Number(row.Year),
     expandedTitle: row.ExpandedTitle == null ? null : String(row.ExpandedTitle),
     description: row.Description == null ? null : String(row.Description),
@@ -697,7 +698,7 @@ export async function getProjectsByResumeId(
       SELECT
         CAST(Id AS NVARCHAR(36)) AS Id,
         CAST(ResumeId AS NVARCHAR(36)) AS ResumeId,
-        ProjectName, Industry, Role, ProjectValue, Year, ExpandedTitle, Description,
+        ProjectName, Industry, Role, ProjectValue, Client, Year, ExpandedTitle, Description,
         SortOrder, IsVisibleOnResume
       FROM dbo.ResumeProjects
       WHERE ResumeId = @resumeId
@@ -720,6 +721,7 @@ export async function upsertProject(
       req.input("industry", sql.NVarChar(200), data.industry);
       req.input("role", sql.NVarChar(200), data.role);
       req.input("projectValue", sql.NVarChar(120), data.projectValue);
+      req.input("client", sql.NVarChar(255), data.client);
       req.input("year", sql.SmallInt, data.year);
       req.input("expandedTitle", sql.NVarChar(500), data.expandedTitle);
       req.input("description", sql.NVarChar(sql.MAX), data.description);
@@ -729,6 +731,7 @@ export async function upsertProject(
           Industry = @industry,
           Role = @role,
           ProjectValue = @projectValue,
+          Client = @client,
           Year = @year,
           ExpandedTitle = @expandedTitle,
           Description = @description,
@@ -737,7 +740,7 @@ export async function upsertProject(
           CAST(inserted.Id AS NVARCHAR(36)) AS Id,
           CAST(inserted.ResumeId AS NVARCHAR(36)) AS ResumeId,
           inserted.ProjectName, inserted.Industry, inserted.Role, 
-          inserted.ProjectValue, inserted.Year, inserted.ExpandedTitle,
+          inserted.ProjectValue, inserted.Client, inserted.Year, inserted.ExpandedTitle,
           inserted.Description, inserted.SortOrder, inserted.IsVisibleOnResume
         WHERE Id = @id AND ResumeId = @resumeId
       `);
@@ -749,22 +752,23 @@ export async function upsertProject(
       req.input("industry", sql.NVarChar(200), data.industry);
       req.input("role", sql.NVarChar(200), data.role);
       req.input("projectValue", sql.NVarChar(120), data.projectValue);
+      req.input("client", sql.NVarChar(255), data.client);
       req.input("year", sql.SmallInt, data.year);
       req.input("expandedTitle", sql.NVarChar(500), data.expandedTitle);
       req.input("description", sql.NVarChar(sql.MAX), data.description);
       const result = await req.query(`
         INSERT INTO dbo.ResumeProjects (
-          Id, ResumeId, ProjectName, Industry, Role, ProjectValue, Year, ExpandedTitle, Description,
+          Id, ResumeId, ProjectName, Industry, Role, ProjectValue, Client, Year, ExpandedTitle, Description,
           SortOrder, CreatedAt, UpdatedAt
         )
         OUTPUT 
           CAST(inserted.Id AS NVARCHAR(36)) AS Id,
           CAST(inserted.ResumeId AS NVARCHAR(36)) AS ResumeId,
           inserted.ProjectName, inserted.Industry, inserted.Role, 
-          inserted.ProjectValue, inserted.Year, inserted.ExpandedTitle,
+          inserted.ProjectValue, inserted.Client, inserted.Year, inserted.ExpandedTitle,
           inserted.Description, inserted.SortOrder, inserted.IsVisibleOnResume
         VALUES (
-          NEWID(), @resumeId, @projectName, @industry, @role, @projectValue, @year, @expandedTitle, @description,
+          NEWID(), @resumeId, @projectName, @industry, @role, @projectValue, @client, @year, @expandedTitle, @description,
           (SELECT ISNULL(MAX(SortOrder), 0) + 1 FROM dbo.ResumeProjects WHERE ResumeId = @resumeId),
           SYSUTCDATETIME(), SYSUTCDATETIME()
         )

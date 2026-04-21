@@ -228,7 +228,7 @@ export function HrQueueView({
                 {tab.label}
                 {active ? (
                   <span
-                    className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-[#E87722]"
+                    className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-[#FF6C06]"
                     aria-hidden
                   />
                 ) : null}
@@ -390,7 +390,7 @@ export function HrQueueView({
                           href={`/dashboard/hr/review/${item.resumeId}`}
                           className={cn(
                             buttonVariants({ size: "sm" }),
-                            "bg-[#E87722] text-white hover:bg-primary/90",
+                            "bg-[#FF6C06] text-white hover:bg-primary/90",
                           )}
                         >
                           Review

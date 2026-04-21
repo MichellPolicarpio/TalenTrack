@@ -55,6 +55,8 @@
   --color-preview-panel: #F2F0EB;
   --color-preview-toolbar: #F0EDE8;
   --color-btn-submit: #111827;
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
 }
 
 :root {
@@ -65,7 +67,7 @@
   --card-foreground: #2D2416;
   --popover: #FFFFFF;
   --popover-foreground: #2D2416;
-  --primary: #E87722;
+  --primary: #FF6C06;
   --primary-foreground: #FFFFFF;
   --secondary: #EAE6DF;
   --secondary-foreground: #6B5E52;
@@ -76,8 +78,8 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: #E8E4DE;
   --input: #F0EDE8;
-  --ring: #E87722;
-  --chart-1: #E87722;
+  --ring: #FF6C06;
+  --chart-1: #FF6C06;
   --chart-2: #B5A898;
   --chart-3: #9C8E80;
   --chart-4: #6B5E52;
@@ -86,12 +88,16 @@
 
   --sidebar: #F7F6F3;
   --sidebar-foreground: #6B5E52;
-  --sidebar-primary: #E87722;
+  --sidebar-primary: #FF6C06;
   --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent: #FFE8D4;
   --sidebar-accent-foreground: #C05E0E;
   --sidebar-border: #F2F0EB;
-  --sidebar-ring: #E87722;
+  --sidebar-ring: #FF6C06;
+
+  /* Official BE Green for success states */
+  --success: #BDBF09;
+  --success-foreground: #FFFFFF;
 }
 
 .dark {
@@ -169,4 +175,19 @@
 
 .splash-shimmer {
   animation: splash-shimmer 1.5s ease-in-out 0.8s infinite;
+}
+
+@keyframes logo-breathe {
+  0%, 100% { 
+    transform: scale(1) translateY(0); 
+    opacity: 1; 
+  }
+  50% { 
+    transform: scale(1.08) translateY(-4px); 
+    opacity: 0.88; 
+  }
+}
+
+.animate-logo-breathe {
+  animation: logo-breathe 2s ease-in-out infinite;
 }

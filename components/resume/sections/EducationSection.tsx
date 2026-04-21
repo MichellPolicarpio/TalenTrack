@@ -48,6 +48,7 @@ import {
 } from "@/components/ui/select";
 import { SectionShell } from "./SectionShell";
 import { useGenericSection } from "@/lib/hooks/useGenericSection";
+import { DeleteConfirmPopover } from "./DeleteConfirmPopover";
 
 const DEGREE_TYPES = [
   "Associate",
@@ -203,14 +204,12 @@ function EducationCard({
             <EyeOff className="size-4 text-[#9CA3AF]" />
           )}
         </button>
-        <button
-          type="button"
+        <DeleteConfirmPopover
           disabled={disabled}
-          onClick={() => onDelete(item.id)}
+          onConfirm={() => onDelete(item.id)}
+          title="Delete this education entry?"
           className="rounded-md p-1 text-[#9CA3AF] transition-colors hover:bg-red-50 hover:text-[#DC2626]"
-        >
-          <Trash2 className="size-[15px]" />
-        </button>
+        />
         <button
           type="button"
           {...attributes}

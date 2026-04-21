@@ -21,7 +21,7 @@ import {
   Search,
 } from "lucide-react";
 
-import { SplashScreen } from "@/components/layout/SplashScreen";
+import { SplashScreen, EXIT_STEPS } from "@/components/layout/SplashScreen";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -39,13 +39,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
   Admin: "Administrator",
 };
 
-const EXIT_STEPS = [
-  "Signing out safely...",
-  "Saving your workspace...",
-  "Clearing session cache...",
-  "Closing connection...",
-  "See you soon!",
-] as const;
+
 
 function initialsFromUser(name: string, email: string): string {
   const parts = name.trim().split(/\s+/);
@@ -223,9 +217,15 @@ function SidebarBody(
           collapsed ? "px-2" : "px-4 gap-3",
         )}
       >
-        {/* TalentTrack logo badge */}
-        <div className="flex size-[38px] shrink-0 items-center justify-center rounded-[10px] bg-primary shadow-md shadow-primary/10 transition-transform hover:scale-110 active:scale-95">
-          <span className="text-[19px] font-black leading-none text-primary-foreground">T</span>
+        {/* TalentTrack logo image badge */}
+        <div className="flex size-[38px] shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-primary shadow-md shadow-primary/10 transition-transform hover:scale-110 active:scale-95">
+          <Image
+            src="/TalentTrack_Logo.png"
+            alt="TalentTrack Logo"
+            width={38}
+            height={38}
+            className="size-full object-contain"
+          />
         </div>
 
         {!collapsed && (
@@ -267,80 +267,46 @@ function SidebarBody(
       {/* ── Footer — user row ─────────────────────────────────────────── */}
       <div className="shrink-0">
         {collapsed ? (
-          <div className="flex flex-col items-center gap-3 border-t border-sidebar-border/60 py-4">
-            <div
-              title={`${userName}\n${userEmail}\n${roleLabel}`}
-              className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary"
-            >
-              <span className="text-[11px] font-bold leading-none text-primary-foreground">
-                {initials}
-              </span>
-            </div>
+          <div className="flex flex-col items-center gap-1 px-3 pb-6 pt-2">
             <button
               type="button"
               onClick={onSignOut}
               title="Sign out"
               aria-label="Sign out"
-              className="rounded-md p-1.5 text-sidebar-foreground/60 transition-colors hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
             >
-              <LogOut className="size-[15px]" />
+              <LogOut className="size-[17px] shrink-0" />
             </button>
           </div>
         ) : (
           <>
             <div className="flex flex-col items-center gap-1 px-4 pt-6 pb-3">
-              <motion.div
-                animate={{ 
-                  y: [0, -6, 0],
-                  scale: [1, 1.03, 1]
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              >
-                <Image
-                  src="/BrindleyLogo.png"
-                  alt="Brindley Logo"
-                  width={170}
-                  height={44}
-                  className="h-11 w-auto object-contain"
-                  priority
-                />
-              </motion.div>
+              <Image
+                src="/BrindleyLogo.png"
+                alt="Brindley Logo"
+                width={170}
+                height={44}
+                className="animate-logo-breathe h-11 w-auto object-contain transition-transform duration-500 hover:scale-110"
+                priority
+              />
               <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-sidebar-foreground">
-                Powered By <span className="text-[#E87722]">BE</span>
+                Powered By <span className="text-[#FF6C06]">BE</span>
               </span>
             </div>
-            <div className="h-px border-t border-sidebar-border/60" />
-            <div className="flex items-center gap-3 px-3.5 py-3.5">
-            {/* Avatar */}
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary">
-              <span className="text-[11px] font-bold leading-none text-primary-foreground">
-                {initials}
-              </span>
+            <div className="mx-4 border-t border-sidebar-border/60" />
+            {/* Footer Actions — SurvBE Style */}
+            <div className="flex flex-col gap-0.5 px-3 pb-6 pt-4">
+              <button
+                type="button"
+                onClick={onSignOut}
+                className="group flex items-center justify-center gap-3 rounded-lg py-2.5 px-4 text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
+              >
+                <LogOut className="size-[17px] shrink-0" />
+                <span className="text-[11px] font-semibold uppercase tracking-[0.14em]">
+                  Sign Out
+                </span>
+              </button>
             </div>
-            {/* Name / role */}
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[12.5px] font-semibold leading-tight text-sidebar-foreground">
-                {userName || "User"}
-              </p>
-              <p className="text-[10.5px] leading-tight text-sidebar-foreground/60">
-                {roleLabel}
-              </p>
-            </div>
-            {/* Sign out */}
-            <button
-              type="button"
-              onClick={onSignOut}
-              title="Sign out"
-              aria-label="Sign out"
-              className="shrink-0 rounded-md p-1.5 text-sidebar-foreground/60 transition-colors hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
-            >
-              <LogOut className="size-[15px]" />
-            </button>
-          </div>
         </>
       )}
       </div>
@@ -358,13 +324,19 @@ export function AppSidebar({ userName, userEmail, role }: AppSidebarProps) {
 
   function handleSignOut() {
     setSigningOut(true);
-    setTimeout(() => signOut({ callbackUrl: "/" }), 1900);
+    // 5 steps * 700ms = 3500ms. We wait 4000ms to ensure the "See you soon!" step is seen.
+    setTimeout(() => signOut({ callbackUrl: "/" }), 4000);
   }
 
   return (
     <>
       <AnimatePresence>
-        {signingOut && <SplashScreen steps={EXIT_STEPS} />}
+        {signingOut && (
+          <SplashScreen 
+            steps={EXIT_STEPS} 
+            intervalMs={700}
+          />
+        )}
       </AnimatePresence>
 
       {/* Desktop */}
@@ -433,11 +405,17 @@ export function AppSidebar({ userName, userEmail, role }: AppSidebarProps) {
           </SheetContent>
         </Sheet>
         <div className="flex items-center gap-2.5">
-          <div className="flex size-7 items-center justify-center rounded-[7px] bg-[#E87722]">
-            <span className="text-[13px] font-black leading-none text-white">T</span>
+          <div className="flex size-7 items-center justify-center overflow-hidden rounded-[7px] bg-[#FF6C06]">
+            <Image
+              src="/TalentTrack_Logo.png"
+              alt="TalentTrack Logo"
+              width={28}
+              height={28}
+              className="size-full object-contain"
+            />
           </div>
           <span className="text-[13px] font-bold tracking-tight text-neutral-900">
-            Talent<span className="text-[#E87722]">Track</span>
+            Talent<span className="text-[#FF6C06]">Track</span>
           </span>
         </div>
       </div>

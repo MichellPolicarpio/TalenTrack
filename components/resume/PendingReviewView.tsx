@@ -188,7 +188,7 @@ export function PendingReviewView({
               type="button"
               disabled={downloading}
               onClick={() => void onDownloadPdf()}
-              className="h-10 gap-2 rounded-xl bg-[#E87722] px-5 text-[13px] font-semibold text-white shadow-sm transition-all hover:bg-primary/90 hover:shadow-md disabled:opacity-60"
+              className="h-10 gap-2 rounded-xl bg-[#FF6C06] px-5 text-[13px] font-semibold text-white shadow-sm transition-all hover:bg-primary/90 hover:shadow-md disabled:opacity-60"
             >
               {downloading ? (
                 <Loader2 className="size-4 animate-spin" />
