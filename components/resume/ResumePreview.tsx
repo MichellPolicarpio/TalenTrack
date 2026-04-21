@@ -302,7 +302,7 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
                               <span className="shrink-0 font-bold" style={{ color: ORANGE }}>•</span>
                               <div className="flex-1">
                                 <p className="font-bold leading-tight">
-                                  {[lic.licenseType, lic.jurisdiction, lic.status].filter(Boolean).join(" | ")}
+                                  {[lic.licenseType, lic.jurisdiction, lic.expirationDate ? `Exp. ${formatMonthYear(lic.expirationDate)}` : null].filter(Boolean).join(" | ")}
                                 </p>
                                 {lic.licenseNumber && <p className="text-[10pt] opacity-85">No. {lic.licenseNumber}</p>}
                               </div>
