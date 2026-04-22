@@ -545,7 +545,7 @@ export function ResumeEditorClient({
                       }}
                     >
                       {/* Mobile preview button */}
-                      <div className="mb-4 flex items-center justify-end lg:hidden">
+                      <div className="mb-4 flex items-center justify-center lg:hidden">
                         <motion.div
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
