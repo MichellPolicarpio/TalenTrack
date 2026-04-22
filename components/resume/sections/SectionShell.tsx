@@ -39,9 +39,9 @@ export function SectionShell({
 
   return (
     <section className="flex flex-col gap-4">
-      <div className="sticky top-0 z-20 -mx-4 bg-background px-4 pb-3 pt-3 backdrop-blur-md transition-shadow sm:-mx-6 sm:px-6">
+      <div className="sticky top-0 z-20 -mx-4 bg-background px-4 pb-2 pt-2 md:pb-3 md:pt-3 backdrop-blur-md transition-shadow sm:-mx-6 sm:px-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-[18px] font-semibold text-card-foreground">{title}</h2>
+          <h2 className="text-[16px] md:text-[18px] font-semibold text-card-foreground">{title}</h2>
           <div className="flex flex-wrap items-center gap-2">
             {!disabled ? (
               <Button
@@ -52,9 +52,9 @@ export function SectionShell({
                   if (disabled && onActivateEdit) onActivateEdit();
                   onOpenChange(true);
                 }}
-                className="h-9 gap-1.5 rounded-lg border-primary/30 px-4 text-[13px] font-medium text-primary shadow-sm hover:bg-sidebar-accent/50 hover:text-primary"
+                className="h-8 lg:h-9 gap-1.5 rounded-lg border-primary/30 px-3 lg:px-4 text-[12px] lg:text-[13px] font-medium text-primary shadow-sm hover:bg-sidebar-accent/50 hover:text-primary"
               >
-                <Plus className="size-3.5" aria-hidden />
+                <Plus className="size-3 lg:size-3.5" aria-hidden />
                 {addLabel}
               </Button>
             ) : null}

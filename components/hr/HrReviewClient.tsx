@@ -127,7 +127,7 @@ export function HrReviewClient({
                   {label}
                   {active ? (
                     <span
-                      className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-[#FF6C06]"
+                      className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-primary"
                       aria-hidden
                     />
                   ) : null}
@@ -176,7 +176,7 @@ export function HrReviewClient({
               href={`/api/pdf/${resumeId}`}
               className={cn(
                 buttonVariants({ size: "sm" }),
-                "ml-1 gap-1.5 bg-[#FF6C06] text-white hover:bg-primary/90",
+                "ml-1 gap-1.5 bg-primary text-white hover:bg-primary/90",
               )}
             >
               <Download className="size-3.5" />
@@ -205,7 +205,7 @@ export function HrReviewClient({
               <span className="text-neutral-300">/</span>
               <Link
                 href="/dashboard/hr/queue"
-                className="text-neutral-500 transition-colors hover:text-[#FF6C06]"
+                className="text-neutral-500 transition-colors hover:text-primary"
               >
                 Queue
               </Link>

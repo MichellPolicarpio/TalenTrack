@@ -11,7 +11,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import {
   GripVertical,
   Trash2,
@@ -238,9 +238,9 @@ function ProjectCard({
             <Label className="text-[12px] text-[#6B7280]">Project Value</Label>
             <Input
               value={form.projectValue ?? ""}
-              onChange={(e) => update({ projectValue: e.target.value || null })}
+              onChange={(e) => update({ projectValue: formatCurrency(e.target.value) || null })}
               disabled={disabled}
-              placeholder="e.g. $18.5B MDD"
+              placeholder="e.g. $18,500,000"
             />
           </div>
           <div className="flex flex-col gap-1.5">
@@ -394,8 +394,8 @@ function ProjectForm({
           <Input
             id="rp-value"
             value={form.projectValue ?? ""}
-            onChange={(e) => setForm((f) => ({ ...f, projectValue: e.target.value || null }))}
-            placeholder="e.g. $18.5B"
+            onChange={(e) => setForm((f) => ({ ...f, projectValue: formatCurrency(e.target.value) || null }))}
+            placeholder="e.g. $18,500,000"
           />
         </div>
         <div className="flex flex-col gap-2">
@@ -515,7 +515,7 @@ export function ProjectsSection({
           items={items.map((i) => i.id)}
           strategy={verticalListSortingStrategy}
         >
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-2">
             {items.map((item) => (
               <ProjectCard
                 key={item.id}

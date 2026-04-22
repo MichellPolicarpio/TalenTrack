@@ -68,9 +68,9 @@ export function EditorActionBar({
               variant="outline"
               disabled={!canEdit || isSaving || isSubmitting}
               onClick={onEdit}
-              className="h-9 gap-1.5 rounded-lg border-border bg-card text-[13px] font-medium text-foreground shadow-sm hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+              className="h-8 lg:h-9 gap-1.5 rounded-lg border-border bg-card text-[12px] lg:text-[13px] font-medium text-foreground shadow-sm hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
             >
-              <LockOpen className="size-3.5" />
+              <LockOpen className="size-3 lg:size-3.5" />
               Edit
             </Button>
           </div>
@@ -81,9 +81,9 @@ export function EditorActionBar({
             variant="outline"
             disabled={!canEdit || isSaving || isSubmitting}
             onClick={onCancel}
-            className="h-9 gap-1.5 rounded-lg border-border bg-card text-[13px] font-medium text-foreground shadow-sm hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+            className="h-8 lg:h-9 gap-1.5 rounded-lg border-border bg-card text-[12px] lg:text-[13px] font-medium text-foreground shadow-sm hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
           >
-            <X className="size-3.5" />
+            <X className="size-3 lg:size-3.5" />
             Cancel
           </Button>
         )}
@@ -93,12 +93,12 @@ export function EditorActionBar({
           size="sm"
           disabled={!canSave}
           onClick={onSave}
-          className="h-9 gap-1.5 rounded-lg bg-primary text-[13px] font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-40"
+          className="h-8 lg:h-9 gap-1.5 rounded-lg bg-primary text-[12px] lg:text-[13px] font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-40"
         >
           {isSaving ? (
-            <Loader2 className="size-3.5 animate-spin" />
+            <Loader2 className="size-3 lg:size-3.5 animate-spin" />
           ) : (
-            <Save className="size-3.5" />
+            <Save className="size-3 lg:size-3.5" />
           )}
           {isSaving ? "Saving…" : "Save"}
         </Button>

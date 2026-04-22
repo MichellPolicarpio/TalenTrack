@@ -400,7 +400,7 @@ export function AchievementsSection({
     >
       <DndContext id={`achievements-${resumeId}`} sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-2">
             {items.map((item) => (
               <AchievementCard
                 key={item.id}

@@ -62,7 +62,7 @@ export function SignInMicrosoftButton() {
               exit={{ opacity: 0, y: -4 }}
               className="flex items-center gap-2.5"
             >
-              <Loader2 className="size-4 animate-spin text-[#FF6C06]" />
+              <Loader2 className="size-4 animate-spin text-primary" />
               <span className="text-neutral-500">Signing in...</span>
             </motion.div>
           ) : (

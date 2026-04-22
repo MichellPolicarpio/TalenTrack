@@ -19,18 +19,42 @@ import {
   Users,
   History,
   Search,
+  UserX,
+  FileStack,
+  User,
+  LogOut as LogOutIcon,
+  Moon,
 } from "lucide-react";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import { SplashScreen, EXIT_STEPS } from "@/components/layout/SplashScreen";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/types/user-role";
+import type { ResumeStatus } from "@/lib/db/types";
 
 export type AppSidebarProps = {
   userName: string;
   userEmail: string;
   role: UserRole;
+  resumeStatus?: ResumeStatus;
+};
+
+const STATUS_CONFIG: Record<ResumeStatus, { label: string; color: string; bg: string; border: string }> = {
+  DRAFT: { label: "Draft", color: "text-neutral-600", bg: "bg-neutral-100", border: "border-neutral-200" },
+  PENDING_APPROVAL: { label: "Pending", color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200" },
+  APPROVED: { label: "Approved", color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200" },
+  NEEDS_CHANGES: { label: "Changes", color: "text-rose-700", bg: "bg-rose-50", border: "border-rose-200" },
 };
 
 const ROLE_LABELS: Record<UserRole, string> = {
@@ -59,9 +83,14 @@ function mainNavItems(role: UserRole): NavItem[] {
       icon: <FileText className="size-[17px] shrink-0" />,
     },
     {
-      href: "/dashboard/history",
-      label: "Resume History",
-      icon: <History className="size-[17px] shrink-0" />,
+      href: "/dashboard/blind-resume",
+      label: "Blind Resume",
+      icon: <UserX className="size-[17px] shrink-0" />,
+    },
+    {
+      href: "/dashboard/generic-resume",
+      label: "Generic Resume",
+      icon: <FileStack className="size-[17px] shrink-0" />,
     },
   ];
   if (role === "HR_Revisor" || role === "Admin") {
@@ -69,11 +98,6 @@ function mainNavItems(role: UserRole): NavItem[] {
       href: "/dashboard/hr/queue",
       label: "HR Management",
       icon: <ClipboardList className="size-[17px] shrink-0" />,
-    });
-    items.push({
-      href: "/dashboard/hr/query",
-      label: "Query Resumes",
-      icon: <Search className="size-[17px] shrink-0" />,
     });
   }
   if (role === "Admin") {
@@ -145,7 +169,7 @@ function NavLink({
     >
       <span className={cn(
         "transition-colors",
-        active ? "text-sidebar-accent-foreground" : "text-sidebar-foreground/60 group-hover:text-sidebar-accent-foreground",
+        active ? "text-sidebar-accent-foreground" : "text-sidebar-foreground group-hover:text-sidebar-accent-foreground",
       )}>
         {item.icon}
       </span>
@@ -290,10 +314,10 @@ function SidebarBody(
                 priority
               />
               <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-sidebar-foreground">
-                Powered By <span className="text-[#FF6C06]">BE</span>
+                Powered By <span className="text-primary">BE</span>
               </span>
             </div>
-            <div className="mx-4 border-t border-sidebar-border/60" />
+            <div className="mx-4 border-t border-sidebar-border" />
             {/* Footer Actions — SurvBE Style */}
             <div className="flex flex-col gap-0.5 px-3 pb-6 pt-4">
               <button
@@ -316,7 +340,7 @@ function SidebarBody(
 }
 
 // ─── Export ───────────────────────────────────────────────────────────────────
-export function AppSidebar({ userName, userEmail, role }: AppSidebarProps) {
+export function AppSidebar({ userName, userEmail, role, resumeStatus }: AppSidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -379,7 +403,7 @@ export function AppSidebar({ userName, userEmail, role }: AppSidebarProps) {
       </div>
 
       {/* Mobile top bar */}
-      <div className="fixed inset-x-0 top-0 z-40 flex h-14 items-center gap-3 border-b border-neutral-200 bg-white px-4 md:hidden">
+      <div className="fixed inset-x-0 top-0 z-40 flex h-[72px] items-center gap-4 border-b border-neutral-200 bg-white px-5 md:hidden">
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger
             render={
@@ -404,19 +428,89 @@ export function AppSidebar({ userName, userEmail, role }: AppSidebarProps) {
             />
           </SheetContent>
         </Sheet>
-        <div className="flex items-center gap-2.5">
-          <div className="flex size-7 items-center justify-center overflow-hidden rounded-[7px] bg-[#FF6C06]">
+        <div className="flex items-center gap-3">
+          <div className="flex size-9 items-center justify-center overflow-hidden rounded-[8px] bg-primary shadow-sm shadow-primary/10">
             <Image
               src="/TalentTrack_Logo.png"
               alt="TalentTrack Logo"
-              width={28}
-              height={28}
+              width={32}
+              height={32}
               className="size-full object-contain"
             />
           </div>
-          <span className="text-[13px] font-bold tracking-tight text-neutral-900">
-            Talent<span className="text-[#FF6C06]">Track</span>
+          <span className="text-[17px] font-extrabold tracking-tight text-neutral-900">
+            Talent<span className="text-primary">Track</span>
           </span>
+        </div>
+
+        {/* Right side: Status + Profile initials */}
+        <div className="ml-auto flex items-center gap-3">
+          {resumeStatus && (
+            <div className={cn(
+              "flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+              STATUS_CONFIG[resumeStatus].bg,
+              STATUS_CONFIG[resumeStatus].color,
+              STATUS_CONFIG[resumeStatus].border
+            )}>
+              <span className={cn("size-1.5 rounded-full", resumeStatus === 'APPROVED' ? 'bg-emerald-500' : resumeStatus === 'PENDING_APPROVAL' ? 'bg-amber-500' : 'bg-neutral-400')} />
+              {STATUS_CONFIG[resumeStatus].label}
+            </div>
+          )}
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <button className="flex size-10 items-center justify-center rounded-full bg-neutral-100 border border-neutral-200 text-neutral-600 shadow-sm transition-transform active:scale-95 outline-none">
+                  <span className="text-[13px] font-bold tracking-tighter">
+                    {initialsFromUser(userName, userEmail)}
+                  </span>
+                </button>
+              }
+            />
+            <DropdownMenuContent align="end" className="w-56 p-1.5 z-[100]">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="px-2 py-2">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-semibold text-neutral-900">{userName}</p>
+                    <p className="text-[11px] font-medium text-neutral-500 truncate">{userEmail}</p>
+                  </div>
+                </DropdownMenuLabel>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  render={
+                    <Link 
+                      href="/dashboard/settings" 
+                      className="flex w-full items-center gap-2.5 px-2 py-2 cursor-pointer" 
+                    />
+                  }
+                >
+                  <User className="size-4 text-neutral-500" />
+                  <span className="text-[13px] font-medium">Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  render={
+                    <Link 
+                      href="/dashboard/about" 
+                      className="flex w-full items-center gap-2.5 px-2 py-2 cursor-pointer" 
+                    />
+                  }
+                >
+                  <Info className="size-4 text-neutral-500" />
+                  <span className="text-[13px] font-medium">About</span>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={handleSignOut}
+                className="flex items-center gap-2.5 px-2 py-2 text-red-600 focus:bg-red-50 focus:text-red-700 cursor-pointer"
+              >
+                <LogOutIcon className="size-4" />
+                <span className="text-[13px] font-medium">Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </>

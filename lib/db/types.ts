@@ -330,3 +330,10 @@ export type ResumeSnapshotMeta = {
     skills: number;
   };
 };
+
+export type GlobalSetting = {
+  key: string;
+  value: string;
+  updatedAt: Date;
+  updatedBy: string | null;
+};

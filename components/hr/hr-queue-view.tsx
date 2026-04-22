@@ -33,6 +33,7 @@ export type HrQueueRow = {
   jobTitle: string | null;
   submittedAt: string;
   version: number;
+  status?: string;
 };
 
 export type HrQueueKpis = {
@@ -158,18 +159,20 @@ function KpiCard({
 export function HrQueueView({
   pendingRows,
   approvedRows,
+  historyRows,
   kpis,
 }: {
   pendingRows: HrQueueRow[];
   approvedRows: HrQueueRow[];
+  historyRows: HrQueueRow[];
   kpis: HrQueueKpis;
 }) {
-  const [activeTab, setActiveTab] = useState<"pending" | "approved">("pending");
+  const [activeTab, setActiveTab] = useState<"pending" | "approved" | "history">("pending");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(0);
   const now = useMemo(() => new Date(), []);
 
-  const rows = activeTab === "pending" ? pendingRows : approvedRows;
+  const rows = activeTab === "pending" ? pendingRows : activeTab === "approved" ? approvedRows : historyRows;
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -209,7 +212,8 @@ export function HrQueueView({
           <div className="flex items-end gap-8">
           {[
             { id: "pending", label: "Pending Approval" },
-            { id: "approved", label: "Approved" },
+            { id: "approved", label: "Approved (Recent)" },
+            { id: "history", label: "Full History" },
           ].map((tab) => {
             const active = tab.id === activeTab;
             return (
@@ -217,7 +221,7 @@ export function HrQueueView({
                 key={tab.id}
                 type="button"
                 onClick={() => {
-                  setActiveTab(tab.id as "pending" | "approved");
+                  setActiveTab(tab.id as "pending" | "approved" | "history");
                   setPage(0);
                 }}
                 className={cn(
@@ -228,7 +232,7 @@ export function HrQueueView({
                 {tab.label}
                 {active ? (
                   <span
-                    className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-[#FF6C06]"
+                    className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-primary"
                     aria-hidden
                   />
                 ) : null}
@@ -377,11 +381,13 @@ export function HrQueueView({
                           <Badge
                             variant="outline"
                             className={cn(
-                              "text-[10px] font-medium border-amber-200 bg-amber-50/50 text-amber-950",
-                              activeTab === "approved" && "border-sky-200 bg-sky-50/50 text-sky-950"
+                              "text-[10px] font-medium transition-colors",
+                              (item.status === "APPROVED" || activeTab === "approved") && "border-green-200 bg-green-50/50 text-green-950",
+                              (item.status === "PENDING_APPROVAL" || activeTab === "pending") && "border-amber-200 bg-amber-50/50 text-amber-950",
+                              (item.status === "NEEDS_CHANGES") && "border-red-200 bg-red-50/50 text-red-950",
                             )}
                           >
-                            {activeTab === "pending" ? "Pending" : "Approved"}
+                            {item.status === "PENDING_APPROVAL" ? "Pending" : item.status === "APPROVED" ? "Approved" : item.status === "NEEDS_CHANGES" ? "Changes" : (activeTab === "pending" ? "Pending" : "Approved")}
                           </Badge>
                         </div>
                       </TableCell>
@@ -390,7 +396,7 @@ export function HrQueueView({
                           href={`/dashboard/hr/review/${item.resumeId}`}
                           className={cn(
                             buttonVariants({ size: "sm" }),
-                            "bg-[#FF6C06] text-white hover:bg-primary/90",
+                            "bg-primary text-white hover:bg-primary/90",
                           )}
                         >
                           Review
@@ -407,8 +413,9 @@ export function HrQueueView({
         {filtered.length > 0 ? (
           <div className="flex flex-col items-center justify-between gap-3 border-t border-neutral-100 pt-4 text-[11px] text-muted-foreground sm:flex-row">
             <p className="font-medium uppercase tracking-[0.08em]">
-              Showing {showingFrom} to {showingTo} of {filtered.length} pending
-              {filtered.length !== 1 ? " reviews" : " review"}
+              Showing {showingFrom} to {showingTo} of {filtered.length} 
+              {activeTab === "pending" ? " pending" : activeTab === "approved" ? " approved" : " history"}
+              {filtered.length !== 1 ? " records" : " record"}
             </p>
             <div className="flex items-center gap-2">
               <Button

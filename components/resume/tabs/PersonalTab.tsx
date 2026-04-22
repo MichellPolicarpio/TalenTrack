@@ -32,9 +32,9 @@ export function PersonalTab({
 
   return (
     <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
-      <div className="sticky top-0 z-20 -mx-4 bg-background px-4 pb-3 pt-3 backdrop-blur-md transition-shadow sm:-mx-6 sm:px-6">
+      <div className="sticky top-0 z-20 -mx-4 bg-background px-4 pb-2 pt-2 md:pb-3 md:pt-3 backdrop-blur-md transition-shadow sm:-mx-6 sm:px-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-[18px] font-semibold text-card-foreground">Personal Information</h2>
+          <h2 className="text-[16px] md:text-[18px] font-semibold text-card-foreground">Personal Information</h2>
           <div className="flex items-center gap-2">
             {headerActions}
           </div>

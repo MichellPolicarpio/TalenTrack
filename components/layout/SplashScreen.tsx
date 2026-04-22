@@ -58,67 +58,72 @@ export function SplashScreen({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-white"
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-between bg-white px-6 py-12 text-center overflow-hidden"
     >
-      <div className="relative flex min-h-screen w-full max-w-[960px] flex-col items-center px-2 py-6 md:px-3 md:py-8">
-        {/* Centerpiece: TalentTrack Logo Full */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mt-[25vh] mb-12 flex w-full max-w-[400px] justify-center md:mt-[28vh]"
-        >
-          <Image
-            src="/TalentTrack_LogoFull.png"
-            alt="TalentTrack Full Logo"
-            width={400}
-            height={120}
-            className="h-auto w-full object-contain"
-            priority
-          />
-        </motion.div>
-
-        <div className="mt-32 flex w-full flex-col items-center gap-4 md:mt-40">
-          <p className="text-center text-[15px] font-medium tracking-wide text-neutral-500 md:text-[17px]">
-            {steps[stepIndex]}
-          </p>
-          
-          <div className="flex w-[70%] max-w-[280px] flex-col items-center gap-2">
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100 ring-1 ring-neutral-200/50">
-              <motion.div
-                className="h-full bg-[#FF6C06]"
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-              />
-            </div>
-            <p className="text-[11px] font-bold tracking-[0.15em] text-neutral-400 uppercase">
-              {Math.round(progress)}%
-            </p>
-          </div>
+        {/* Centered Logo */}
+        <div className="flex flex-1 items-center justify-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="w-full max-w-[280px] sm:max-w-[360px]"
+          >
+            <Image
+              src="/TalentTrack_LogoFull.png"
+              alt="TalentTrack Full Logo"
+              width={400}
+              height={120}
+              className="h-auto w-full object-contain"
+              priority
+            />
+          </motion.div>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.6 }}
-          className="absolute bottom-24 flex flex-col items-center gap-2"
-        >
-          <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-300">
-            Powered by
-          </span>
-          <Image
-            src={BELogo}
-            alt="BE Brindley Engineering"
-            priority
-            style={{ 
-              filter: `grayscale(${Math.max(0, 100 - progress)}%)`,
-              opacity: 0.4 + (progress / 100) * 0.6
-            }}
-            className="h-auto w-[160px] transition-all duration-700 md:w-[180px]"
-          />
-        </motion.div>
-      </div>
-    </motion.div>
+        {/* Bottom group: Loading Status + Footer Branding */}
+        <div className="flex flex-col items-center gap-12 w-full max-w-sm">
+          {/* Loading status area */}
+          <div className="flex w-full flex-col items-center gap-6">
+            <p className="h-6 text-[13px] font-medium tracking-wide text-neutral-500">
+              {steps[stepIndex]}
+            </p>
+            
+            <div className="flex w-full max-w-[280px] flex-col items-center gap-3 sm:max-w-[320px]">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100 ring-1 ring-neutral-200/50">
+                <motion.div
+                  className="h-full bg-primary"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                />
+              </div>
+              <p className="text-[9px] font-bold tracking-[0.25em] text-neutral-400 uppercase">
+                {Math.round(progress)}%
+              </p>
+            </div>
+          </div>
+
+          {/* Footer Branding */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.6 }}
+            className="flex flex-col items-center gap-3"
+          >
+            <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-neutral-300">
+              Powered by
+            </span>
+            <Image
+              src={BELogo}
+              alt="BE Brindley Engineering"
+              priority
+              style={{ 
+                filter: `grayscale(${Math.max(0, 100 - progress)}%)`,
+                opacity: 0.3 + (progress / 100) * 0.7
+              }}
+              className="h-auto w-[130px] transition-all duration-700 sm:w-[150px]"
+            />
+          </motion.div>
+        </div>
+      </motion.div>
   );
 }

@@ -203,11 +203,12 @@ export async function getAllPendingResumes(): Promise<ResumeQueueItem[]> {
   });
 }
 
-export async function getAllApprovedResumes(): Promise<ResumeQueueItem[]> {
+export async function getAllApprovedResumes(limit?: number): Promise<ResumeQueueItem[]> {
   return runWithPool(async (pool) => {
     const req = pool.request();
+    const topClause = limit ? `TOP (${limit})` : "";
     const result = await req.query(`
-      SELECT
+      SELECT ${topClause}
         CAST(r.Id AS NVARCHAR(36)) AS ResumeId,
         CAST(r.EmployeeId AS NVARCHAR(36)) AS EmployeeId,
         e.DisplayName AS EmployeeName,
@@ -230,6 +231,39 @@ export async function getAllApprovedResumes(): Promise<ResumeQueueItem[]> {
       jobTitle: row.JobTitle ? String(row.JobTitle) : null,
       submittedAt: new Date(row.SubmittedAt as string),
       version: Number(row.Version),
+    }));
+  });
+}
+
+export async function getAllResumesHistory(): Promise<(ResumeQueueItem & { status: ResumeStatus })[]> {
+  return runWithPool(async (pool) => {
+    const req = pool.request();
+    const result = await req.query(`
+      SELECT
+        CAST(r.Id AS NVARCHAR(36)) AS ResumeId,
+        CAST(r.EmployeeId AS NVARCHAR(36)) AS EmployeeId,
+        e.DisplayName AS EmployeeName,
+        e.CorporateEmail AS EmployeeEmail,
+        p.JobTitle,
+        r.SubmittedAt,
+        r.Version,
+        r.Status
+      FROM dbo.Resumes r
+      JOIN dbo.Employees e ON e.Id = r.EmployeeId
+      LEFT JOIN dbo.ResumeProfiles p ON p.ResumeId = r.Id
+      WHERE r.Status <> 'DRAFT'
+      ORDER BY r.UpdatedAt DESC
+    `);
+
+    return (result.recordset as Record<string, unknown>[]).map((row) => ({
+      resumeId: String(row.ResumeId),
+      employeeId: String(row.EmployeeId),
+      employeeName: String(row.EmployeeName ?? ""),
+      employeeEmail: String(row.EmployeeEmail ?? ""),
+      jobTitle: row.JobTitle ? String(row.JobTitle) : null,
+      submittedAt: new Date(row.SubmittedAt as string),
+      version: Number(row.Version),
+      status: row.Status as ResumeStatus,
     }));
   });
 }

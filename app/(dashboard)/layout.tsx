@@ -10,6 +10,8 @@ import {
 } from "@/lib/repositories/notifications.repository";
 import type { NotificationsSnapshotDTO } from "@/lib/actions/notifications.actions";
 import { DashboardProvider } from "@/lib/context/dashboard-context";
+import { getResumeByEmployeeId } from "@/lib/repositories/resume.repository";
+import type { ResumeStatus } from "@/lib/db/types";
 
 export default async function DashboardGroupLayout({
   children,
@@ -26,15 +28,22 @@ export default async function DashboardGroupLayout({
   const role = session.user.role;
 
   let notificationsInitial: NotificationsSnapshotDTO | null = null;
+  let resumeStatus: ResumeStatus = "DRAFT";
   const entraId = session.user.entraObjectId;
   if (entraId) {
     const employee = await getEmployeeByEntraId(entraId);
     if (employee) {
       try {
-        const [unreadCount, items] = await Promise.all([
+        const [unreadCount, items, resumeWithProfile] = await Promise.all([
           getUnreadNotificationCount(employee.id),
           listNotificationsForEmployee(employee.id, 12),
+          getResumeByEmployeeId(employee.id),
         ]);
+        
+        if (resumeWithProfile) {
+          resumeStatus = resumeWithProfile.resume.status;
+        }
+
         notificationsInitial = {
           unreadCount,
           items: items.map((n) => ({
@@ -55,7 +64,12 @@ export default async function DashboardGroupLayout({
   return (
     <DashboardProvider>
       <div className="flex h-screen w-full overflow-hidden bg-background">
-        <AppSidebar userName={userName} userEmail={userEmail} role={role} />
+        <AppSidebar
+          userName={userName}
+          userEmail={userEmail}
+          role={role}
+          resumeStatus={resumeStatus}
+        />
 
         {/* Content column: TopBar (desktop) + scrollable page area */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
@@ -66,7 +80,7 @@ export default async function DashboardGroupLayout({
             notificationsInitial={notificationsInitial}
           />
 
-          <main className="flex-1 overflow-y-auto pt-14 md:pt-0">
+          <main className="flex-1 overflow-y-auto pt-[72px] md:pt-0">
             {children}
           </main>
         </div>

@@ -412,7 +412,7 @@ export function CertificationsSection({
     >
       <DndContext id={`certifications-${resumeId}`} sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-2">
             {items.map((item) => (
               <CertCard
                 key={item.id}

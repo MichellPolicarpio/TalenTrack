@@ -338,10 +338,9 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
                             <li key={lic.id} className="flex gap-2 text-[11pt] text-[#000000]">
                               <span className="shrink-0 font-bold" style={{ color: ORANGE }}>•</span>
                               <div className="flex-1">
-                                <p className="font-bold leading-tight">
+                                <p className="leading-tight">
                                   {[lic.licenseType, lic.jurisdiction, lic.expirationDate ? `Exp. ${formatMonthYear(lic.expirationDate)}` : null].filter(Boolean).join(" | ")}
                                 </p>
-                                {lic.licenseNumber && <p className="text-[10pt] opacity-85">No. {lic.licenseNumber}</p>}
                               </div>
                             </li>
                           ))}
@@ -349,8 +348,7 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
                             <li key={cert.id} className="flex gap-2 text-[11pt] text-[#000000]">
                               <span className="shrink-0 font-bold" style={{ color: ORANGE }}>•</span>
                               <div className="flex-1">
-                                <p className="font-bold leading-tight">{cert.certificationName}</p>
-                                {cert.issuingOrganization && <p className="text-[10pt] opacity-85">{cert.issuingOrganization}</p>}
+                                <p className="leading-tight">{cert.certificationName}</p>
                               </div>
                             </li>
                           ))}

@@ -16,3 +16,13 @@ export function formatTitleCase(str: string): string {
     )
     .join("");
 }
+
+export function formatCurrency(val: string): string {
+  // Extract only digits
+  const digits = val.replace(/\D/g, "");
+  if (!digits) return "";
+
+  // Convert to number and format with commas
+  const amount = parseInt(digits, 10);
+  return "$" + amount.toLocaleString("en-US");
+}

@@ -22,10 +22,10 @@ const twCenMT = localFont({
   display: "swap",
 });
 
+import { ThemeInjector } from "@/components/settings/ThemeInjector";
+
 export const metadata: Metadata = {
-  title: "TalentTrack — Brindley Engineering",
-  description:
-    "Internal resume platform for Brindley Engineering Corporation employees.",
+// ... existing metadata code ...
 };
 
 export default function RootLayout({
@@ -35,6 +35,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${plusJakartaSans.variable} ${newsreader.variable} ${twCenMT.variable} h-full antialiased`}>
+      <head>
+        <ThemeInjector />
+      </head>
       <body className="flex min-h-full flex-col font-sans">{children}</body>
     </html>
   );

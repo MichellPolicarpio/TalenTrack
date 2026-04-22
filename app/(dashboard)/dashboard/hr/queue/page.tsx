@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import { HrQueueView } from "@/components/hr/hr-queue-view";
 import { auth } from "@/lib/auth";
-import { getAllPendingResumes, getAllApprovedResumes } from "@/lib/repositories/approval.repository";
+import { getAllPendingResumes, getAllApprovedResumes, getAllResumesHistory } from "@/lib/repositories/approval.repository";
 
 const CRITICAL_WAIT_DAYS = 3;
 
@@ -64,9 +64,10 @@ export default async function HrQueuePage() {
     redirect("/dashboard/resume");
   }
 
-  const [pendingQueue, approvedQueue] = await Promise.all([
+  const [pendingQueue, approvedQueue, historyQueue] = await Promise.all([
     getAllPendingResumes(),
-    getAllApprovedResumes()
+    getAllApprovedResumes(15),
+    getAllResumesHistory(),
   ]);
   const nowMs = Date.now();
   const kpis = computeQueueKpis(pendingQueue, nowMs);
@@ -85,13 +86,28 @@ export default async function HrQueuePage() {
     employeeName: item.employeeName,
     employeeEmail: item.employeeEmail,
     jobTitle: item.jobTitle,
-    submittedAt: item.submittedAt.toISOString(), // We use SubmittedAt or ReviewedAt depending on if we add it, but SubmittedAt is fine
+    submittedAt: item.submittedAt.toISOString(),
     version: item.version,
+  }));
+
+  const historyRows = historyQueue.map((item) => ({
+    resumeId: item.resumeId,
+    employeeName: item.employeeName,
+    employeeEmail: item.employeeEmail,
+    jobTitle: item.jobTitle,
+    submittedAt: item.submittedAt.toISOString(),
+    version: item.version,
+    status: item.status,
   }));
 
   return (
     <div className="flex h-full flex-col p-4 md:p-6 pb-20">
-      <HrQueueView pendingRows={pendingRows} approvedRows={approvedRows} kpis={kpis} />
+      <HrQueueView 
+        pendingRows={pendingRows} 
+        approvedRows={approvedRows} 
+        historyRows={historyRows}
+        kpis={kpis} 
+      />
     </div>
   );
 }

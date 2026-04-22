@@ -474,8 +474,8 @@ export function ResumeEditorClient({
               <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background">
                 {/* Left Header with Navigation */}
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-1 flex-col overflow-hidden">
-                  <div className="flex shrink-0 w-full min-w-0 items-center border-b border-neutral-200 bg-sidebar px-4 sm:px-6 min-h-[64px]">
-                    <div className="flex flex-1 items-stretch gap-1.5 overflow-hidden py-2">
+                  <div className="flex shrink-0 w-full min-w-0 items-center border-b border-neutral-200 bg-sidebar px-4 sm:px-6 min-h-[56px] lg:min-h-[64px]">
+                    <div className="flex flex-1 items-stretch gap-1.5 overflow-hidden py-1 lg:py-2">
                       {tabStripScroll.overflow ? (
                         <Button
                           type="button"

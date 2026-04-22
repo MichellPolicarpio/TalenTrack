@@ -193,7 +193,7 @@ export function HrReviewPanel({
                       <div
                         className={cn(
                           "relative z-[1] mt-1 size-2.5 shrink-0 rounded-full ring-2 ring-white",
-                          isOrange ? "bg-[#FF6C06]" : "bg-sky-500",
+                          isOrange ? "bg-primary" : "bg-sky-500",
                         )}
                       />
                       <div className="min-w-0 flex-1 space-y-0.5">

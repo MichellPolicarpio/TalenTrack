@@ -482,7 +482,7 @@ export function WorkExperienceSection({
           items={items.map((i) => i.id)}
           strategy={verticalListSortingStrategy}
         >
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-2">
             {items.map((item) => (
               <WorkExperienceCard
                 key={item.id}
