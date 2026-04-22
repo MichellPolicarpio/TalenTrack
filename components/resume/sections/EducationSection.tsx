@@ -437,7 +437,7 @@ function EducationForm({
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
         <div className="flex flex-col gap-2 md:col-span-2">
           <Label htmlFor="ed-field">Specialization (optional)</Label>
-          <Input id="ed-field" value={form.specialization ?? ""} onChange={(e) => setForm((f) => ({ ...f, specialization: formatTitleCase(e.target.value || null) }))} placeholder="e.g. AI" />
+          <Input id="ed-field" value={form.specialization ?? ""} onChange={(e) => setForm((f) => ({ ...f, specialization: e.target.value ? formatTitleCase(e.target.value) : null }))} placeholder="e.g. AI" />
         </div>
         <div className="flex flex-col gap-2 md:col-span-1">
           <Label htmlFor="ed-start" className="text-neutral-500">Start <span className="text-red-500">*</span></Label>
