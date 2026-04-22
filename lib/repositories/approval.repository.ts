@@ -203,7 +203,7 @@ export async function getAllPendingResumes(): Promise<ResumeQueueItem[]> {
   });
 }
 
-export async function getAllApprovedResumes(limit?: number): Promise<ResumeQueueItem[]> {
+export async function getAllApprovedResumes(limit?: number): Promise<(ResumeQueueItem & { isSnapshot: boolean; snapshotId: string | null })[]> {
   return runWithPool(async (pool) => {
     const req = pool.request();
     const topClause = limit ? `TOP (${limit})` : "";
@@ -211,59 +211,107 @@ export async function getAllApprovedResumes(limit?: number): Promise<ResumeQueue
       SELECT ${topClause}
         CAST(r.Id AS NVARCHAR(36)) AS ResumeId,
         CAST(r.EmployeeId AS NVARCHAR(36)) AS EmployeeId,
+        NULL AS SnapshotId,
         e.DisplayName AS EmployeeName,
         e.CorporateEmail AS EmployeeEmail,
         p.JobTitle,
         r.SubmittedAt,
-        r.Version
+        r.Version,
+        0 AS IsSnapshot
       FROM dbo.Resumes r
       JOIN dbo.Employees e ON e.Id = r.EmployeeId
       LEFT JOIN dbo.ResumeProfiles p ON p.ResumeId = r.Id
       WHERE r.Status = 'APPROVED'
-      ORDER BY r.ReviewedAt DESC
+
+      UNION ALL
+
+      SELECT ${topClause}
+        CAST(s.ResumeId AS NVARCHAR(36)) AS ResumeId,
+        CAST(r.EmployeeId AS NVARCHAR(36)) AS EmployeeId,
+        CAST(s.Id AS NVARCHAR(36)) AS SnapshotId,
+        e.DisplayName AS EmployeeName,
+        e.CorporateEmail AS EmployeeEmail,
+        JSON_VALUE(s.SnapshotData, '$.profile.jobTitle') AS JobTitle,
+        s.CreatedAt AS SubmittedAt,
+        s.Version,
+        1 AS IsSnapshot
+      FROM dbo.ResumeSnapshots s
+      JOIN dbo.Resumes r ON r.Id = s.ResumeId
+      JOIN dbo.Employees e ON e.Id = r.EmployeeId
+      WHERE s.CreatedAt >= DATEADD(month, -1, GETUTCDATE())
+        AND r.Status <> 'APPROVED'
+
+      ORDER BY SubmittedAt DESC
     `);
 
     return (result.recordset as Record<string, unknown>[]).map((row) => ({
       resumeId: String(row.ResumeId),
       employeeId: String(row.EmployeeId),
+      snapshotId: row.SnapshotId ? String(row.SnapshotId) : null,
       employeeName: String(row.EmployeeName ?? ""),
       employeeEmail: String(row.EmployeeEmail ?? ""),
       jobTitle: row.JobTitle ? String(row.JobTitle) : null,
       submittedAt: new Date(row.SubmittedAt as string),
       version: Number(row.Version),
+      isSnapshot: Boolean(row.IsSnapshot),
     }));
   });
 }
 
-export async function getAllResumesHistory(): Promise<(ResumeQueueItem & { status: ResumeStatus })[]> {
+export async function getAllResumesHistory(): Promise<(ResumeQueueItem & { status: ResumeStatus; isSnapshot: boolean; operationDate: Date; snapshotId: string | null })[]> {
   return runWithPool(async (pool) => {
     const req = pool.request();
     const result = await req.query(`
       SELECT
         CAST(r.Id AS NVARCHAR(36)) AS ResumeId,
         CAST(r.EmployeeId AS NVARCHAR(36)) AS EmployeeId,
+        NULL AS SnapshotId,
         e.DisplayName AS EmployeeName,
         e.CorporateEmail AS EmployeeEmail,
         p.JobTitle,
         r.SubmittedAt,
         r.Version,
-        r.Status
+        r.Status,
+        r.UpdatedAt AS OperationDate,
+        0 AS IsSnapshot
       FROM dbo.Resumes r
       JOIN dbo.Employees e ON e.Id = r.EmployeeId
       LEFT JOIN dbo.ResumeProfiles p ON p.ResumeId = r.Id
-      WHERE r.Status <> 'DRAFT'
-      ORDER BY r.UpdatedAt DESC
+      WHERE r.Status IN ('PENDING_APPROVAL', 'NEEDS_CHANGES')
+
+      UNION ALL
+
+      SELECT
+        CAST(s.ResumeId AS NVARCHAR(36)) AS ResumeId,
+        CAST(r.EmployeeId AS NVARCHAR(36)) AS EmployeeId,
+        CAST(s.Id AS NVARCHAR(36)) AS SnapshotId,
+        e.DisplayName AS EmployeeName,
+        e.CorporateEmail AS EmployeeEmail,
+        JSON_VALUE(s.SnapshotData, '$.profile.jobTitle') AS JobTitle,
+        s.CreatedAt AS SubmittedAt,
+        s.Version,
+        'APPROVED' AS Status,
+        s.CreatedAt AS OperationDate,
+        1 AS IsSnapshot
+      FROM dbo.ResumeSnapshots s
+      JOIN dbo.Resumes r ON r.Id = s.ResumeId
+      JOIN dbo.Employees e ON e.Id = r.EmployeeId
+
+      ORDER BY OperationDate DESC
     `);
 
     return (result.recordset as Record<string, unknown>[]).map((row) => ({
       resumeId: String(row.ResumeId),
       employeeId: String(row.EmployeeId),
+      snapshotId: row.SnapshotId ? String(row.SnapshotId) : null,
       employeeName: String(row.EmployeeName ?? ""),
       employeeEmail: String(row.EmployeeEmail ?? ""),
       jobTitle: row.JobTitle ? String(row.JobTitle) : null,
       submittedAt: new Date(row.SubmittedAt as string),
       version: Number(row.Version),
       status: row.Status as ResumeStatus,
+      isSnapshot: Boolean(row.IsSnapshot),
+      operationDate: new Date(row.OperationDate as string),
     }));
   });
 }

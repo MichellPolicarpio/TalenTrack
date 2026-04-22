@@ -75,6 +75,8 @@ export function AppTopBar({
   const isHrRoute = pathname.startsWith("/dashboard/hr");
   const isHistoryRoute = pathname.startsWith("/dashboard/history");
   const isResumeRoute = pathname === "/dashboard/resume" || pathname === "/dashboard";
+  const isBlindRoute = pathname === "/dashboard/blind-resume";
+  const isGenericRoute = pathname === "/dashboard/generic-resume";
   const { activeResumeStatus, editorActions } = useDashboard();
   const activeTab = activeResumeStatus ? resolveActiveTab(activeResumeStatus) : null;
   const [signingOut, setSigningOut] = useState(false);
@@ -98,10 +100,20 @@ export function AppTopBar({
     <div className="hidden relative h-[75px] shrink-0 items-center justify-between border-b border-topbar-border bg-topbar px-5 md:flex">
       {/* Left: app label */}
       <div className="flex shrink-0 items-center">
-        {isAboutRoute || isSettingsRoute || isHistoryRoute || isResumeRoute ? (
+        {isAboutRoute || isSettingsRoute || isHistoryRoute || isResumeRoute || isBlindRoute || isGenericRoute ? (
           <div className="min-w-0 shrink-0">
             <p className="truncate text-[18px] font-black tracking-tight text-primary">
-              {isAboutRoute ? "About" : isSettingsRoute ? "Settings" : isHistoryRoute ? "Resume History" : "My Resume"}
+              {isAboutRoute 
+                ? "About" 
+                : isSettingsRoute 
+                  ? "Settings" 
+                  : isHistoryRoute 
+                    ? "Resume History" 
+                    : isBlindRoute
+                      ? "Blind Resume"
+                      : isGenericRoute
+                        ? "Generic Resume"
+                        : "My Resume"}
             </p>
           </div>
         ) : isHrRoute ? (

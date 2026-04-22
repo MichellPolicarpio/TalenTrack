@@ -249,315 +249,212 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
     const phone = profile?.personalPhone?.trim() || null;
     const email = profile?.personalEmail?.trim() || null;
 
-    // ─── PAGINATION LOGIC ───
-    // We roughly estimate height. A standard letter page (1056px) 
-    // minus header (~120px) and footer (~80px) leaves ~850px for content.
-    // We'll use a simpler "item count" approach first:
-    // Page 1: Top 3-4 experiences.
-    // Page 2: Rest of experiences + projects.
-    // If there are many projects, we might need a Page 3.
-    
-    const EXP_PER_PAGE_1 = 4; // Page 1 usually has sidebar info taking space
-    const EXP_PER_PAGE_OTHER = 6;
-    const PROJ_PER_PAGE = 4;
-
-    const experiencesPage1 = finalVisibleExp.slice(0, EXP_PER_PAGE_1);
-    const experiencesRemaining = finalVisibleExp.slice(EXP_PER_PAGE_1);
-    
-    // For simplicity in this industrial layout, we'll keep the sidebar content on Page 1.
-    // Subsequent pages will have the same structure but empty or reduced sidebars.
-
     return (
       <div
         ref={ref}
-        className={cn("flex flex-col gap-8 pt-10 px-4 pb-10 bg-transparent", className)}
+        className={cn("flex flex-col gap-8 pt-10 px-4 pb-5 bg-transparent", className)}
         style={{
           fontFamily: 'var(--font-tw-cen), "Tw Cen MT", "Tw Cen MT Condensed", "Century Gothic", system-ui, -apple-system, "Segoe UI", sans-serif',
           ...style,
         }}
       >
         {/* ─── PAGE 1 ─── */}
-        <PageSheet
-          id="page-1"
-          ref={page1Ref}
-          employeeName={employeeName}
-          profile={profile}
-          logoOk={logoOk}
-          setLogoOk={setLogoOk}
-          phone={phone}
-          email={email}
-        >
-          <div className="flex min-h-0 w-full flex-1 flex-row items-stretch">
-            {/* Sidebar (Aside) */}
-            <aside
-              className="box-border flex min-h-0 w-[38%] shrink-0 flex-col self-stretch px-8 py-5"
-              style={{ background: GRAY_GRADIENT }}
-            >
-              <section className="mb-4">
-                <LeftSectionTitle first>Professional Summary</LeftSectionTitle>
-                <p className={`text-[11pt] text-left ${summaryText ? "text-[#000000]" : "italic text-[#9CA3AF]"}`}>
-                  {summaryDisplay}
-                </p>
-              </section>
-
-              {finalVisibleLicenses.length > 0 || finalVisibleCerts.length > 0 || isAddingCert || isAddingLicense ? (
-                <section className="mb-4">
-                  <LeftSectionTitle>
-                    {(finalVisibleLicenses.length > 0 || isAddingLicense) && (finalVisibleCerts.length > 0 || isAddingCert)
-                      ? "Licenses / Certifications"
-                      : finalVisibleLicenses.length > 0 || isAddingLicense
-                      ? "Licenses"
-                      : "Certifications"}
-                  </LeftSectionTitle>
-                  <ul className="space-y-2">
-                    {finalVisibleLicenses.map((lic) => (
-                      <li key={lic.id} className="flex gap-2 text-[11pt] text-[#000000]">
-                        <span className="shrink-0 font-bold" style={{ color: ORANGE }}>•</span>
-                        <div className="flex-1">
-                          <p className="leading-tight">
-                            {[lic.licenseType, lic.jurisdiction, lic.expirationDate ? `Exp. ${formatMonthYear(lic.expirationDate)}` : null].filter(Boolean).join(" | ")}
-                          </p>
-                        </div>
-                      </li>
-                    ))}
-                    {finalVisibleCerts.map((cert) => (
-                      <li key={cert.id} className="flex gap-2 text-[11pt] text-[#000000]">
-                        <span className="shrink-0 font-bold" style={{ color: ORANGE }}>•</span>
-                        <div className="flex-1">
-                          <p className="leading-tight">{cert.certificationName}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              ) : null}
-
-              {finalVisibleEdu.length > 0 || isAddingEducation ? (
-                <section className="mb-4">
-                  <LeftSectionTitle>Education</LeftSectionTitle>
-                  <div className="flex flex-col gap-3">
-                    {finalVisibleEdu.map((edu) => (
-                      <div key={edu.id}>
-                        <p className="text-[11pt] font-bold text-[#000000]">{edu.institutionName || "Institution Name"}</p>
-                        <p className="text-[11pt] italic text-[#000000]">
-                          {edu.degreeType ? `${edu.degreeType} in ` : ""}{edu.degree || "Degree"}{edu.specialization ? `, ${edu.specialization}` : ""}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              ) : null}
-
-              {finalVisibleAchievements.length > 0 || isAddingAchievement ? (
-                <section className="mb-4">
-                  <LeftSectionTitle>Achievements</LeftSectionTitle>
-                  <ul className="space-y-2">
-                    {finalVisibleAchievements.map((ach) => (
-                      <li key={ach.id} className="flex gap-2 text-[11pt] text-[#000000]">
-                        <span className="shrink-0 font-bold" style={{ color: ORANGE }}>•</span>
-                        <div className="flex-1 text-left">
-                          <p className="font-bold leading-tight">{ach.year ? `${ach.year} | ` : ""}{ach.title || "Achievement Title"}</p>
-                          {ach.organization && <p className="text-[10pt] opacity-85 leading-snug">{ach.organization}</p>}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              ) : null}
-
-              {finalVisibleSkills.length > 0 || isAddingSkill ? (
-                <section className="mb-4">
-                  <LeftSectionTitle>Expertise</LeftSectionTitle>
-                  <ul className="space-y-1">
-                    {finalVisibleSkills.map((skill) => (
-                      <li key={skill.id} className="flex gap-2 text-[11pt] text-[#000000]">
-                        <span className="shrink-0 font-bold" style={{ color: ORANGE }}>•</span>
-                        <span>{skill.skillName}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              ) : null}
-            </aside>
-
-            {/* Main Content */}
-            <main className="box-border min-h-0 min-w-0 flex-1 self-stretch bg-white px-8 py-5">
-              {experiencesPage1.length > 0 ? (
-                <section className="mb-5">
-                  <RightSectionTitle>Professional Experience</RightSectionTitle>
-                  <div className="flex flex-col gap-4">
-                    {experiencesPage1.map((exp) => (
-                      <ExperienceItem key={exp.id} exp={exp} />
-                    ))}
-                  </div>
-                </section>
-              ) : null}
-
-              {!hasBodyContent && !summaryText && (
-                <div className="flex h-48 flex-col items-center justify-center gap-3 text-center">
-                  <p className="text-[11pt] font-medium text-neutral-400">Your resume preview will appear here</p>
-                  <p className="text-[11pt] text-neutral-300">Add sections on the left to get started</p>
-                </div>
-              )}
-            </main>
-          </div>
-        </PageSheet>
-
-        {/* ─── PAGE 1b (Continuation) ─── */}
-        {experiencesRemaining.length > 0 && (
-          <PageSheet
-            id="page-1b"
-            employeeName={employeeName}
-            profile={profile}
-            logoOk={logoOk}
-            setLogoOk={setLogoOk}
-            phone={phone}
-            email={email}
+        <div className="relative z-10 shrink-0">
+          <div
+            ref={page1Ref}
+            className="resume-page-sheet relative mx-auto flex h-[1056px] w-[816px] min-w-[816px] flex-col overflow-hidden bg-white shadow-[0_-2px_4px_rgba(0,0,0,0.08),0_0_2px_rgba(0,0,0,0.3),0_8px_16px_rgba(0,0,0,0.12),0_24px_48px_rgba(0,0,0,0.18)] transition-shadow duration-300 hover:shadow-[0_-4px_8px_rgba(0,0,0,0.12),0_0_2px_rgba(0,0,0,0.35),0_12px_24px_rgba(0,0,0,0.18),0_32px_64px_rgba(0,0,0,0.25)]"
+            style={{
+              fontFamily: 'var(--font-tw-cen), "Tw Cen MT", "Tw Cen MT Condensed", "Century Gothic", system-ui, -apple-system, "Segoe UI", sans-serif',
+              fontSize: "11pt",
+              lineHeight: 1.15,
+            }}
           >
+            {/* Contenido Page 1 */}
             <div className="box-border flex min-h-0 w-full flex-1 flex-row items-stretch">
-              <aside 
-                className="box-border flex min-h-0 w-[38%] shrink-0 flex-col self-stretch px-8 py-5" 
-                style={{ background: GRAY_GRADIENT }}
+              <div
+                className="shrink-0 self-stretch"
+                style={{ width: ORANGE_RAIL_PX, backgroundColor: ORANGE }}
                 aria-hidden
               />
 
-              <main className="flex min-w-0 flex-1 flex-col px-8 py-5 bg-white">
-                <section className="mb-5">
-                  <RightSectionTitle>Professional Experience (Cont.)</RightSectionTitle>
-                  <div className="flex flex-col gap-4">
-                    {experiencesRemaining.map((exp) => (
-                      <ExperienceItem key={exp.id} exp={exp} />
-                    ))}
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+                <header
+                  className="flex shrink-0 flex-row items-center justify-between px-8 py-[12pt]"
+                  style={{ background: 'linear-gradient(to right, #eeeeee, #d2d2d2)' }}
+                >
+                  <div className="min-w-0 pr-4">
+                    <h1 className="text-[30pt] leading-tight tracking-tight text-[#000000]">
+                      {employeeName || "Your Name"}
+                    </h1>
+                    {profile?.jobTitle ? (
+                      <p className="mt-1 text-[20pt] text-[#000000]">
+                        {profile.jobTitle}
+                      </p>
+                    ) : null}
                   </div>
-                </section>
-              </main>
-            </div>
-          </PageSheet>
-        )}
-
-        {/* ─── PAGE 2 (Project List) ─── */}
-        {finalVisibleProjects.length > 0 && (
-          <PageSheet
-            id="page-2"
-            ref={page2Ref}
-            employeeName={employeeName}
-            profile={profile}
-            logoOk={logoOk}
-            setLogoOk={setLogoOk}
-            phone={phone}
-            email={email}
-            isProjectPage
-          >
-            <div className="box-border flex min-h-0 w-full flex-1 flex-row items-stretch">
-              <div 
-                className="shrink-0 self-stretch" 
-                style={{ width: ORANGE_RAIL_PX, backgroundColor: ORANGE }} 
-                aria-hidden 
-              />
-
-              <main className="flex min-w-0 flex-1 flex-col px-8 py-5 bg-white">
-                <section className="mb-5">
-                  <RightSectionTitle>Project List</RightSectionTitle>
-                  <div className="flex flex-col gap-4">
-                    {finalVisibleProjects.map((p, idx) => (
-                      <ProjectItem key={p.id} p={p} isLast={idx === finalVisibleProjects.length - 1} />
-                    ))}
+                  <div className="shrink-0 pt-0.5">
+                    {logoOk ? (
+                      <img
+                        src="/BE_Logo_Orange_Dark_TM.png"
+                        alt="BE Brindley Engineering"
+                        width={360}
+                        height={86}
+                        className="h-[64px] w-auto max-w-[320px] object-contain object-right"
+                        crossOrigin="anonymous"
+                        decoding="sync"
+                        onError={() => setLogoOk(false)}
+                      />
+                    ) : (
+                      <div className="text-right text-[11pt] font-semibold text-[#000000]">
+                        <span style={{ color: ORANGE }}>B</span>E · Brindley Engineering
+                      </div>
+                    )}
                   </div>
-                </section>
-              </main>
+                </header>
+
+                <div className="box-border flex min-h-0 w-full flex-1 flex-row items-stretch">
+                  <aside
+                    className="box-border flex min-h-0 w-[38%] shrink-0 flex-col self-stretch px-8 py-5"
+                    style={{ background: GRAY_GRADIENT }}
+                  >
+                    <section className="mb-4">
+                      <LeftSectionTitle first>Professional Summary</LeftSectionTitle>
+                      <p className={`text-[11pt] text-left ${summaryText ? "text-[#000000]" : "italic text-[#9CA3AF]"}`}>
+                        {summaryDisplay}
+                      </p>
+                    </section>
+
+                    {finalVisibleLicenses.length > 0 || finalVisibleCerts.length > 0 || isAddingCert || isAddingLicense ? (
+                      <section className="mb-4">
+                        <LeftSectionTitle>
+                          {(finalVisibleLicenses.length > 0 || isAddingLicense) && (finalVisibleCerts.length > 0 || isAddingCert)
+                            ? "Licenses / Certifications"
+                            : finalVisibleLicenses.length > 0 || isAddingLicense
+                            ? "Licenses"
+                            : "Certifications"}
+                        </LeftSectionTitle>
+                        <ul className="space-y-2">
+                          {finalVisibleLicenses.map((lic) => (
+                            <li key={lic.id} className="flex gap-2 text-[11pt] text-[#000000]">
+                              <span className="shrink-0 font-bold" style={{ color: ORANGE }}>•</span>
+                              <div className="flex-1">
+                                <p className="leading-tight">
+                                  {[lic.licenseType, lic.jurisdiction, lic.expirationDate ? `Exp. ${formatMonthYear(lic.expirationDate)}` : null].filter(Boolean).join(" | ")}
+                                </p>
+                              </div>
+                            </li>
+                          ))}
+                          {finalVisibleCerts.map((cert) => (
+                            <li key={cert.id} className="flex gap-2 text-[11pt] text-[#000000]">
+                              <span className="shrink-0 font-bold" style={{ color: ORANGE }}>•</span>
+                              <div className="flex-1">
+                                <p className="leading-tight">{cert.certificationName}</p>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+                    ) : null}
+
+                    {finalVisibleEdu.length > 0 || isAddingEducation ? (
+                      <section className="mb-4">
+                        <LeftSectionTitle>Education</LeftSectionTitle>
+                        <div className="flex flex-col gap-3">
+                          {finalVisibleEdu.map((edu) => (
+                            <div key={edu.id}>
+                              <p className="text-[11pt] font-bold text-[#000000]">{edu.institutionName || "Institution Name"}</p>
+                              <p className="text-[11pt] italic text-[#000000]">
+                                {edu.degreeType ? `${edu.degreeType} in ` : ""}{edu.degree || "Degree"}{edu.specialization ? `, ${edu.specialization}` : ""}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    ) : null}
+
+                    {finalVisibleAchievements.length > 0 || isAddingAchievement ? (
+                      <section className="mb-4">
+                        <LeftSectionTitle>Achievements</LeftSectionTitle>
+                        <ul className="space-y-2">
+                          {finalVisibleAchievements.map((ach) => (
+                            <li key={ach.id} className="flex gap-2 text-[11pt] text-[#000000]">
+                              <span className="shrink-0 font-bold" style={{ color: ORANGE }}>•</span>
+                              <div className="flex-1 text-left">
+                                <p className="font-bold leading-tight">{ach.year ? `${ach.year} | ` : ""}{ach.title || "Achievement Title"}</p>
+                                {ach.organization && <p className="text-[10pt] opacity-85 leading-snug">{ach.organization}</p>}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+                    ) : null}
+
+                    {finalVisibleSkills.length > 0 || isAddingSkill ? (
+                      <section className="mb-4">
+                        <LeftSectionTitle>Expertise</LeftSectionTitle>
+                        <ul className="space-y-1">
+                          {finalVisibleSkills.map((skill) => (
+                            <li key={skill.id} className="flex gap-2 text-[11pt] text-[#000000]">
+                              <span className="shrink-0 font-bold" style={{ color: ORANGE }}>•</span>
+                              <span>{skill.skillName}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+                    ) : null}
+                  </aside>
+
+                  <main className="box-border min-h-0 min-w-0 flex-1 self-stretch bg-white px-8 py-5">
+                    {visibleExp.length > 0 ? (
+                      <section className="mb-5">
+                        <RightSectionTitle>Professional Experience</RightSectionTitle>
+                        <div className="flex flex-col gap-4">
+                          {finalVisibleExp.map((exp) => {
+                            const lines = exp.description ? exp.description.split("\n").map((l) => l.replace(/^[-•]\s*/, "").trim()).filter(Boolean) : [];
+                            return (
+                              <div key={exp.id}>
+                                <h4 className="mb-0.5 text-[11pt] text-[#000000]">
+                                  {[exp.companyName || "Company", exp.jobTitle || "Job Title", formatExpRange(exp)].filter(Boolean).join(" | ")}
+                                </h4>
+                                {lines.length > 0 && (
+                                  <ul className="space-y-0.5">
+                                    {lines.map((line, i) => (
+                                      <li key={i} className="flex gap-2 text-[11pt] text-[#000000]">
+                                        <span className="shrink-0 font-bold" style={{ color: ORANGE }}>•</span>
+                                        <span>{line}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </section>
+                    ) : null}
+
+                    {!hasBodyContent && !summaryText && (
+                      <div className="flex h-48 flex-col items-center justify-center gap-3 text-center">
+                        <p className="text-[11pt] font-medium text-neutral-400">Your resume preview will appear here</p>
+                        <p className="text-[11pt] text-neutral-300">Add sections on the left to get started</p>
+                      </div>
+                    )}
+                  </main>
+                </div>
+              </div>
             </div>
-          </PageSheet>
-        )}
-      </div>
-    );
-  },
-);
 
-/**
- * Shared Page Layout Component
- */
-const PageSheet = forwardRef<HTMLDivElement, {
-  id: string;
-  children: React.ReactNode;
-  employeeName: string;
-  profile: ResumeProfile | null;
-  logoOk: boolean;
-  setLogoOk: (ok: boolean) => void;
-  phone: string | null;
-  email: string | null;
-  isProjectPage?: boolean;
-}>(({ id, children, employeeName, profile, logoOk, setLogoOk, phone, email, isProjectPage }, ref) => {
-  return (
-    <div className="relative z-10 shrink-0">
-      <div
-        ref={ref}
-        id={id}
-        className="resume-page-sheet relative mx-auto flex h-[1056px] w-[816px] min-w-[816px] flex-col overflow-hidden bg-white shadow-[0_-2px_4px_rgba(0,0,0,0.08),0_0_2px_rgba(0,0,0,0.3),0_8px_16px_rgba(0,0,0,0.12),0_24px_48px_rgba(0,0,0,0.18)] transition-shadow duration-300 hover:shadow-[0_-4px_8px_rgba(0,0,0,0.12),0_0_2px_rgba(0,0,0,0.35),0_12px_24px_rgba(0,0,0,0.18),0_32px_64px_rgba(0,0,0,0.25)]"
-        style={{
-          fontFamily: 'var(--font-tw-cen), "Tw Cen MT", "Tw Cen MT Condensed", "Century Gothic", system-ui, -apple-system, "Segoe UI", sans-serif',
-          fontSize: "11pt",
-          lineHeight: 1.15,
-        }}
-      >
-        <div className="box-border flex min-h-0 w-full flex-1 flex-row items-stretch">
-          <div
-            className="shrink-0 self-stretch"
-            style={{ width: ORANGE_RAIL_PX, backgroundColor: ORANGE }}
-            aria-hidden
-          />
-
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-            <header
-              className="flex shrink-0 flex-row items-center justify-between px-8 py-[12pt]"
-              style={{ background: 'linear-gradient(to right, #eeeeee, #d2d2d2)' }}
-            >
-              <div className="min-w-0 pr-4">
-                <h1 className="text-[30pt] leading-tight tracking-tight text-[#000000]">
-                  {employeeName || "Your Name"}
-                </h1>
-                {profile?.jobTitle ? (
-                  <p className="mt-1 text-[20pt] text-[#000000]">
-                    {profile.jobTitle}
+            <footer className="box-border flex w-full shrink-0 flex-row items-stretch">
+              <div className="shrink-0 self-stretch" style={{ width: ORANGE_RAIL_PX, backgroundColor: ORANGE }} aria-hidden />
+              <div className="flex min-h-[3.5rem] min-w-0 flex-1 flex-row items-stretch">
+                <div className="box-border flex w-[38%] shrink-0 flex-col items-center justify-center px-6 py-3 text-center" style={{ backgroundColor: "#e6e6e6" }}>
+                  <p className="font-bold leading-[0.9] tracking-tight text-[#000000]">
+                    <span className="text-[34pt]" style={{ color: ORANGE }}>BE</span>
+                    <span className="text-[28pt]"> On.</span>
                   </p>
-                ) : null}
-              </div>
-              <div className="shrink-0 pt-0.5">
-                {logoOk ? (
-                  <img
-                    src="/BE_Logo_Orange_Dark_TM.png"
-                    alt="BE Brindley Engineering"
-                    width={360}
-                    height={86}
-                    className="h-[64px] w-auto max-w-[320px] object-contain object-right"
-                    crossOrigin="anonymous"
-                    decoding="sync"
-                    onError={() => setLogoOk(false)}
-                  />
-                ) : (
-                  <div className="text-right text-[11pt] font-semibold text-[#000000]">
-                    <span style={{ color: ORANGE }}>B</span>E · Brindley Engineering
-                  </div>
-                )}
-              </div>
-            </header>
-
-            {children}
-          </div>
-        </div>
-
-        <footer className="box-border flex w-full shrink-0 flex-row items-stretch">
-          <div className="shrink-0 self-stretch" style={{ width: ORANGE_RAIL_PX, backgroundColor: ORANGE }} aria-hidden />
-          <div className="flex min-h-[3.5rem] min-w-0 flex-1 flex-row items-stretch">
-            <div className="box-border flex w-[38%] shrink-0 flex-col items-center justify-center px-6 py-3 text-center" style={{ backgroundColor: "#e6e6e6" }}>
-              <p className="font-bold leading-[0.9] tracking-tight text-[#000000]">
-                <span className="text-[34pt]" style={{ color: ORANGE }}>BE</span>
-                <span className="text-[28pt]"> On.</span>
-              </p>
-              <p className="mt-1.5 text-[11pt] text-[#000000]">brindleyengineering.com</p>
-            </div>
-            <div className="box-border flex min-w-0 flex-1 flex-row items-stretch justify-between gap-6 px-8 py-3 text-white" style={{ backgroundColor: isProjectPage ? "transparent" : ORANGE }}>
-              {!isProjectPage && (
-                <>
+                  <p className="mt-1.5 text-[11pt] text-[#000000]">brindleyengineering.com</p>
+                </div>
+                <div className="box-border flex min-w-0 flex-1 flex-row items-stretch justify-between gap-6 px-8 py-3 text-white" style={{ backgroundColor: ORANGE }}>
                   <div className="min-w-0">
                     <p className="mb-1 text-[12pt] font-bold">Contact</p>
                     {phone && <p className="text-[11pt] leading-snug opacity-95">{phone}</p>}
@@ -566,60 +463,98 @@ const PageSheet = forwardRef<HTMLDivElement, {
                   <div className="max-w-[55%] shrink-0 border-l border-white/40 pl-4">
                     <p className="text-right text-[11pt] italic leading-snug text-white/90">Detailed project history<br />available in the attached<br />Project List</p>
                   </div>
-                </>
-              )}
-            </div>
+                </div>
+              </div>
+            </footer>
           </div>
-        </footer>
-      </div>
-    </div>
-  );
-});
-
-function ExperienceItem({ exp }: { exp: WorkExperience }) {
-  const lines = exp.description ? exp.description.split("\n").map((l) => l.replace(/^[-•]\s*/, "").trim()).filter(Boolean) : [];
-  return (
-    <div>
-      <h4 className="mb-0.5 text-[11pt] text-[#000000]">
-        {[exp.companyName || "Company", exp.jobTitle || "Job Title", formatExpRange(exp)].filter(Boolean).join(" | ")}
-      </h4>
-      {lines.length > 0 && (
-        <ul className="space-y-0.5">
-          {lines.map((line, i) => (
-            <li key={i} className="flex gap-2 text-[11pt] text-[#000000]">
-              <span className="shrink-0 font-bold" style={{ color: ORANGE }}>•</span>
-              <span>{line}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-function ProjectItem({ p, isLast }: { p: Project, isLast: boolean }) {
-  const desc = (p.description ?? "").trim();
-  return (
-    <div className="mb-4">
-      <div className="border border-[#D1D5DB]">
-        <div className="grid border-b border-[#D1D5DB] text-[9pt] font-bold text-[#000000]" style={{ gridTemplateColumns: "17% 30% 22% 18% 13%" }}>
-          <div className="border-r border-[#D1D5DB] px-1.5 py-0.5">Industry</div>
-          <div className="border-r border-[#D1D5DB] px-1.5 py-0.5">Project</div>
-          <div className="border-r border-[#D1D5DB] px-1.5 py-0.5">Role</div>
-          <div className="border-r border-[#D1D5DB] px-1.5 py-0.5">Value</div>
-          <div className="px-1.5 py-0.5">Year</div>
         </div>
-        <div className="grid text-[9.5pt] text-[#000000]" style={{ gridTemplateColumns: "17% 30% 22% 18% 13%" }}>
-          <div className="border-r border-[#D1D5DB] px-1.5 py-0.5 break-words">{p.industry ?? ""}</div>
-          <div className="border-r border-[#D1D5DB] px-1.5 py-0.5 break-words">{p.projectName}</div>
-          <div className="border-r border-[#D1D5DB] px-1.5 py-0.5 break-words">{p.role ?? ""}</div>
-          <div className="border-r border-[#D1D5DB] px-1.5 py-0.5 break-words">{p.projectValue ?? ""}</div>
-          <div className="px-1.5 py-0.5 break-words">{p.year ?? ""}</div>
+
+        {/* ─── PAGE 2 (Independent) ─── */}
+        <div className="relative z-10 shrink-0">
+          <div
+            ref={page2Ref}
+            className="resume-page-sheet relative mx-auto flex h-[1056px] w-[816px] min-w-[816px] flex-col overflow-hidden bg-white shadow-[0_0_2px_rgba(0,0,0,0.3),0_8px_16px_rgba(0,0,0,0.12),0_24px_48px_rgba(0,0,0,0.18)] transition-shadow duration-300 hover:shadow-[0_0_2px_rgba(0,0,0,0.35),0_12px_24px_rgba(0,0,0,0.18),0_32px_64px_rgba(0,0,0,0.25)]"
+            style={{
+              fontFamily: 'var(--font-tw-cen), "Tw Cen MT", "Tw Cen MT Condensed", "Century Gothic", system-ui, -apple-system, "Segoe UI", sans-serif',
+              fontSize: "11pt",
+              lineHeight: 1.15,
+            }}
+          >
+            <div className="box-border flex min-h-0 w-full flex-1 flex-row items-stretch">
+              <div className="shrink-0 self-stretch" style={{ width: ORANGE_RAIL_PX, backgroundColor: ORANGE }} aria-hidden />
+
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+                <header
+                  className="flex shrink-0 flex-row items-center justify-between px-8 py-[12pt]"
+                  style={{ background: 'linear-gradient(to right, #eeeeee, #d2d2d2)' }}
+                >
+                  <div className="min-w-0 pr-4">
+                    <h1 className="text-[30pt] leading-tight tracking-tight text-[#000000]">{employeeName || "Your Name"}</h1>
+                    {profile?.jobTitle && <p className="mt-1 text-[20pt] text-[#000000]">{profile.jobTitle}</p>}
+                  </div>
+                  <div className="shrink-0">
+                    {logoOk ? (
+                      <img
+                        src="/BE_Logo_Orange_Dark_TM.png"
+                        alt="BE Brindley Engineering"
+                        width={360}
+                        height={86}
+                        className="h-[64px] w-auto max-w-[320px] object-contain object-right"
+                        crossOrigin="anonymous"
+                        decoding="sync"
+                        onError={() => setLogoOk(false)}
+                      />
+                    ) : (
+                      <div className="text-right text-[11pt] font-semibold text-[#000000]">
+                        <span style={{ color: ORANGE }}>B</span>E · Brindley Engineering
+                      </div>
+                    )}
+                  </div>
+                </header>
+
+                <main className="flex min-w-0 flex-1 flex-col px-8 py-5">
+                  {finalVisibleProjects.length > 0 && (
+                    <section className="mb-5">
+                      <RightSectionTitle>Project List</RightSectionTitle>
+                      {finalVisibleProjects.map((p, idx) => {
+                        const desc = (p.description ?? "").trim();
+                        return (
+                          <div key={p.id} className="mb-4">
+                            <div className="border border-[#D1D5DB]">
+                              <div className="grid border-b border-[#D1D5DB] text-[9pt] font-bold text-[#000000]" style={{ gridTemplateColumns: "17% 30% 22% 18% 13%" }}>
+                                <div className="border-r border-[#D1D5DB] px-1.5 py-0.5">Industry</div>
+                                <div className="border-r border-[#D1D5DB] px-1.5 py-0.5">Project</div>
+                                <div className="border-r border-[#D1D5DB] px-1.5 py-0.5">Role</div>
+                                <div className="border-r border-[#D1D5DB] px-1.5 py-0.5">Value</div>
+                                <div className="px-1.5 py-0.5">Year</div>
+                              </div>
+                              <div className="grid text-[9.5pt] text-[#000000]" style={{ gridTemplateColumns: "17% 30% 22% 18% 13%" }}>
+                                <div className="border-r border-[#D1D5DB] px-1.5 py-0.5 break-words">{p.industry ?? ""}</div>
+                                <div className="border-r border-[#D1D5DB] px-1.5 py-0.5 break-words">{p.projectName}</div>
+                                <div className="border-r border-[#D1D5DB] px-1.5 py-0.5 break-words">{p.role ?? ""}</div>
+                                <div className="border-r border-[#D1D5DB] px-1.5 py-0.5 break-words">{p.projectValue ?? ""}</div>
+                                <div className="px-1.5 py-0.5 break-words">{p.year ?? ""}</div>
+                              </div>
+                            </div>
+                            {p.expandedTitle && <p className="mt-2 text-[9.5pt] font-bold text-[#000000] leading-snug">{p.expandedTitle}</p>}
+                            {desc && <p className="mt-0.5 text-[9pt] text-[#000000] leading-snug text-justify">{desc}</p>}
+                            {idx < finalVisibleProjects.length - 1 && <div className="mt-4 border-b border-[#E5E7EB]" />}
+                          </div>
+                        );
+                      })}
+                    </section>
+                  )}
+                </main>
+              </div>
+            </div>
+
+            <footer className="box-border flex w-full shrink-0 flex-row items-stretch">
+              <div className="shrink-0 self-stretch" style={{ width: ORANGE_RAIL_PX, backgroundColor: ORANGE }} aria-hidden />
+              <div className="flex min-h-[3.5rem] min-w-0 flex-1 flex-row items-stretch bg-transparent" />
+            </footer>
+          </div>
         </div>
       </div>
-      {p.expandedTitle && <p className="mt-2 text-[9.5pt] font-bold text-[#000000] leading-snug">{p.expandedTitle}</p>}
-      {desc && <p className="mt-0.5 text-[9pt] text-[#000000] leading-snug text-justify">{desc}</p>}
-      {!isLast && <div className="mt-4 border-b border-[#E5E7EB]" />}
-    </div>
-  );
-}
+    );
+  },
+);

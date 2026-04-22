@@ -572,7 +572,7 @@ export function ResumeEditorClient({
                               size="sm"
                               onClick={() => setIsSubmitConfirmOpen(true)}
                               disabled={isSubmitting}
-                              className="gap-1.5 bg-green-600 text-white hover:bg-green-700 shadow-sm"
+                              className="gap-1.5 bg-neutral-900 text-white hover:bg-black shadow-sm"
                             >
                               {isSubmitting ? (
                                 <Loader2 className="size-4 animate-spin" />

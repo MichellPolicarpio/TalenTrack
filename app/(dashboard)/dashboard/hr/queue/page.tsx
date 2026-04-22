@@ -88,6 +88,8 @@ export default async function HrQueuePage() {
     jobTitle: item.jobTitle,
     submittedAt: item.submittedAt.toISOString(),
     version: item.version,
+    isSnapshot: item.isSnapshot,
+    snapshotId: item.snapshotId,
   }));
 
   const historyRows = historyQueue.map((item) => ({
@@ -98,6 +100,9 @@ export default async function HrQueuePage() {
     submittedAt: item.submittedAt.toISOString(),
     version: item.version,
     status: item.status,
+    isSnapshot: item.isSnapshot,
+    snapshotId: item.snapshotId,
+    operationDate: item.operationDate.toISOString(),
   }));
 
   return (

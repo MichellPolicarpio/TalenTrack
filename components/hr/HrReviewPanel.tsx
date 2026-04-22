@@ -38,6 +38,7 @@ export function HrReviewPanel({
   employeeName,
   auditLog,
   resumeUpdatedAtIso,
+  isReadOnly = false,
 }: {
   resumeId: string;
   status: ResumeStatus;
@@ -45,6 +46,7 @@ export function HrReviewPanel({
   employeeName: string;
   auditLog: AuditLogEntry[];
   resumeUpdatedAtIso: string | null;
+  isReadOnly?: boolean;
 }) {
   const router = useRouter();
   const [notes, setNotes] = useState("");
@@ -94,7 +96,30 @@ export function HrReviewPanel({
       <Toaster position="bottom-right" />
       <div className="flex flex-col gap-4">
         {/* ─── Reviewer card (mockup) ─── */}
-        {status === "PENDING_APPROVAL" ? (
+        {isReadOnly ? (
+          <Card className="border-neutral-200 bg-slate-50/50 shadow-sm">
+            <CardHeader className="space-y-0 pb-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <CardTitle className="text-base font-semibold leading-snug text-[#111827]">
+                    {employeeName}
+                  </CardTitle>
+                  <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+                    Historical Version: <span className="text-foreground">v{version}</span>
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
+                  Archived
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <p className="text-[12px] leading-relaxed text-muted-foreground">
+                You are viewing a previously approved version of this resume. This record is read-only and preserved for audit purposes.
+              </p>
+            </CardContent>
+          </Card>
+        ) : status === "PENDING_APPROVAL" ? (
           <Card className="border-neutral-200 shadow-sm ring-1 ring-black/[0.03]">
             <CardHeader className="space-y-0 pb-3">
               <div className="flex items-start justify-between gap-3">

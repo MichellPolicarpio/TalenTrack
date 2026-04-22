@@ -71,6 +71,7 @@ export type HrReviewClientProps = {
   resumeUpdatedAtIso: string | null;
   reviewerName: string;
   reviewerEmail: string;
+  isReadOnly?: boolean;
 };
 
 export function HrReviewClient({
@@ -90,6 +91,7 @@ export function HrReviewClient({
   resumeUpdatedAtIso,
   reviewerName,
   reviewerEmail,
+  isReadOnly = false,
 }: HrReviewClientProps) {
   const [zoomPct, setZoomPct] = useState(90);
 
@@ -259,6 +261,7 @@ export function HrReviewClient({
                 employeeName={employeeName}
                 auditLog={auditLog}
                 resumeUpdatedAtIso={resumeUpdatedAtIso}
+                isReadOnly={isReadOnly}
               />
             </div>
           </div>
