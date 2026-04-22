@@ -41,7 +41,7 @@ export function PersonalTab({
         </div>
       </div>
 
-      <div className="space-y-4 pr-0 sm:space-y-5 sm:pr-2">
+      <div className="space-y-4 px-4 sm:px-0 sm:space-y-5 sm:pr-2">
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
             <Label htmlFor="pt-jobtitle" className="text-[12px] text-[#6B7280]">
