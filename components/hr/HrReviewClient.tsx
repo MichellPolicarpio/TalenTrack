@@ -8,17 +8,18 @@ import { ResumePreview } from "@/components/resume/ResumePreview";
 import { HrReviewPanel } from "@/components/hr/HrReviewPanel";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type {
-  Achievement,
-  AuditLogEntry,
-  Certification,
-  Education,
-  License,
-  ResumeProfile,
-  Project,
-  ResumeStatus,
-  Skill,
-  WorkExperience,
+import {
+  type Achievement,
+  type AuditLogEntry,
+  type Certification,
+  type Education,
+  type License,
+  type ResumeProfile,
+  type Project,
+  type ResumeStatus,
+  RESUME_STATUS,
+  type Skill,
+  type WorkExperience,
 } from "@/lib/db/types";
 
 function initials(name: string, email: string): string {
@@ -34,9 +35,9 @@ function tabMatches(
   tab: "draft" | "pending" | "approved",
 ): boolean {
   if (tab === "draft")
-    return status === "DRAFT" || status === "NEEDS_CHANGES";
-  if (tab === "pending") return status === "PENDING_APPROVAL";
-  return status === "APPROVED";
+    return status === RESUME_STATUS.DRAFT || status === RESUME_STATUS.NEEDS_CHANGES;
+  if (tab === "pending") return status === RESUME_STATUS.PENDING_APPROVAL;
+  return status === RESUME_STATUS.APPROVED;
 }
 
 function normalizeDate(d: Date | string | null | undefined): Date | null {

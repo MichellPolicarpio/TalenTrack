@@ -1,6 +1,7 @@
 import { getResumeAllDataForEditor } from "@/lib/repositories/resume.repository";
 import { auth } from "@/lib/auth";
 import { ResumeEditorClient } from "@/components/resume/ResumeEditorClient";
+import { RESUME_STATUS } from "@/lib/db/types";
 
 export type ResumeEditorProps = {
   resumeId: string;
@@ -21,7 +22,7 @@ export async function ResumeEditor({ resumeId }: ResumeEditorProps) {
   } = data;
   const resume = resumeWithProfile?.resume;
   const profile = resumeWithProfile?.profile ?? null;
-  const status = resume?.status ?? "DRAFT";
+  const status = resume?.status ?? RESUME_STATUS.DRAFT;
 
   return (
     <>

@@ -18,6 +18,8 @@ import {
   saveResumeSnapshot,
 } from "@/lib/repositories/resume.repository";
 
+import { APP_NOTIFICATION_TYPE, RESUME_STATUS } from "@/lib/db/types";
+
 async function getSession() {
   const session = await auth();
   if (!session?.user?.entraObjectId) throw new Error("Unauthorized");
@@ -67,7 +69,7 @@ export async function approveResumeAction(resumeId: string): Promise<void> {
     await createNotification({
       employeeId: ownerResume.resume.employeeId,
       resumeId,
-      type: "APPROVED",
+      type: APP_NOTIFICATION_TYPE.APPROVED,
       message: "Your resume was approved.",
     });
   }
@@ -95,7 +97,7 @@ export async function requestChangesAction(
     await createNotification({
       employeeId: ownerResume.resume.employeeId,
       resumeId,
-      type: "NEEDS_CHANGES",
+      type: APP_NOTIFICATION_TYPE.NEEDS_CHANGES,
       message: `HR requested changes: ${preview}`,
     });
   }

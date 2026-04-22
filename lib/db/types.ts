@@ -168,6 +168,12 @@ export type License = {
 
 export type LicenseStatus = "Active" | "Inactive" | "Retired";
 
+export const LICENSE_STATUS = {
+  ACTIVE: "Active",
+  INACTIVE: "Inactive",
+  RETIRED: "Retired",
+} as const;
+
 
 // ─── Input types ─────────────────────────────────────────────────────────────
 
@@ -250,6 +256,13 @@ export type ResumeStatus =
   | "APPROVED"
   | "NEEDS_CHANGES";
 
+export const RESUME_STATUS = {
+  DRAFT: "DRAFT",
+  PENDING_APPROVAL: "PENDING_APPROVAL",
+  APPROVED: "APPROVED",
+  NEEDS_CHANGES: "NEEDS_CHANGES",
+} as const;
+
 export type ResumeWithStatus = Resume & {
   status: ResumeStatus;
   submittedAt: Date | null;
@@ -285,6 +298,11 @@ export type ResumeQueueItem = {
 
 /** In-app notification (see dbo.Notifications). */
 export type AppNotificationType = "NEEDS_CHANGES" | "APPROVED";
+
+export const APP_NOTIFICATION_TYPE = {
+  NEEDS_CHANGES: "NEEDS_CHANGES",
+  APPROVED: "APPROVED",
+} as const;
 
 export type AppNotification = {
   id: string;

@@ -12,7 +12,7 @@ import {
   approveResumeAction,
   requestChangesAction,
 } from "@/lib/actions/approval.actions";
-import type { AuditLogEntry, ResumeStatus } from "@/lib/db/types";
+import { type AuditLogEntry, type ResumeStatus, RESUME_STATUS } from "@/lib/db/types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -119,7 +119,7 @@ export function HrReviewPanel({
               </p>
             </CardContent>
           </Card>
-        ) : status === "PENDING_APPROVAL" ? (
+        ) : status === RESUME_STATUS.PENDING_APPROVAL ? (
           <Card className="border-neutral-200 shadow-sm ring-1 ring-black/[0.03]">
             <CardHeader className="space-y-0 pb-3">
               <div className="flex items-start justify-between gap-3">
@@ -252,7 +252,7 @@ export function HrReviewPanel({
                   );
                 })}
 
-                {status === "PENDING_APPROVAL" ? (
+                {status === RESUME_STATUS.PENDING_APPROVAL ? (
                   <li className="relative flex gap-3 opacity-70">
                     <div className="mt-1 size-2.5 shrink-0 rounded-full bg-neutral-300 ring-2 ring-white" />
                     <div>

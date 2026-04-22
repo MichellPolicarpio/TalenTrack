@@ -10,6 +10,7 @@ import type {
   ResumeSnapshot,
   ResumeSnapshotMeta,
 } from "@/lib/db/types";
+import { RESUME_STATUS } from "@/lib/db/types";
 import {
   getWorkExperiencesByResumeId,
   getEducationByResumeId,
@@ -30,7 +31,7 @@ function mapResume(row: Record<string, unknown>): Resume {
   return {
     id: String(row.ResumeId),
     employeeId: String(row.EmployeeId),
-    status: String(row.Status ?? "DRAFT") as ResumeStatus,
+    status: String(row.Status ?? RESUME_STATUS.DRAFT) as ResumeStatus,
     reminderMonths: Number(row.ReminderMonths),
     submittedAt: row.SubmittedAt ? new Date(row.SubmittedAt as string) : null,
     reviewedAt: row.ReviewedAt ? new Date(row.ReviewedAt as string) : null,
@@ -192,7 +193,7 @@ export async function touchResumeUpdatedAt(
       const pre = pool.request();
       pre.input("resumeId", sql.UniqueIdentifier, resumeId);
       const preRes = await pre.query(`
-        SELECT CASE WHEN Status = N'APPROVED' THEN 1 ELSE 0 END AS WasApproved
+        SELECT CASE WHEN Status = N'${RESUME_STATUS.APPROVED}' THEN 1 ELSE 0 END AS WasApproved
         FROM dbo.Resumes WHERE Id = @resumeId
       `);
       wasApproved = Boolean(preRes.recordset[0]?.WasApproved);
@@ -205,8 +206,8 @@ export async function touchResumeUpdatedAt(
       UPDATE dbo.Resumes
       SET
         UpdatedAt = SYSUTCDATETIME(),
-        Status = CASE WHEN @shouldInvalidateApproval = 1 AND Status = N'APPROVED' THEN N'DRAFT' ELSE Status END,
-        IsPublicLinkActive = CASE WHEN @shouldInvalidateApproval = 1 AND Status = N'APPROVED' THEN 0 ELSE IsPublicLinkActive END
+        Status = CASE WHEN @shouldInvalidateApproval = 1 AND Status = N'${RESUME_STATUS.APPROVED}' THEN N'${RESUME_STATUS.DRAFT}' ELSE Status END,
+        IsPublicLinkActive = CASE WHEN @shouldInvalidateApproval = 1 AND Status = N'${RESUME_STATUS.APPROVED}' THEN 0 ELSE IsPublicLinkActive END
       WHERE Id = @resumeId
     `);
 
@@ -220,8 +221,8 @@ export async function touchResumeUpdatedAt(
           NEWID(),
           @resumeId,
           @actorEmployeeId,
-          N'APPROVED',
-          N'DRAFT',
+          N'${RESUME_STATUS.APPROVED}',
+          N'${RESUME_STATUS.DRAFT}',
           N'Approval invalidated: resume content was edited by the employee. Public share link deactivated until the next approval.',
           SYSDATETIMEOFFSET()
         )
@@ -386,7 +387,7 @@ export async function createResumeWithProfile(
         VALUES (
           NEWID(),
           @employeeId,
-          'DRAFT',
+          '${RESUME_STATUS.DRAFT}',
           @reminderMonths,
           SYSUTCDATETIME(),
           SYSUTCDATETIME()

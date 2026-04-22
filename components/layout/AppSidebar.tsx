@@ -39,9 +39,9 @@ import {
 import { SplashScreen, EXIT_STEPS } from "@/components/layout/SplashScreen";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
+import { cn, initialsFromName } from "@/lib/utils";
 import type { UserRole } from "@/types/user-role";
-import type { ResumeStatus } from "@/lib/db/types";
+import { type ResumeStatus, RESUME_STATUS } from "@/lib/db/types";
 
 export type AppSidebarProps = {
   userName: string;
@@ -51,10 +51,10 @@ export type AppSidebarProps = {
 };
 
 const STATUS_CONFIG: Record<ResumeStatus, { label: string; color: string; bg: string; border: string }> = {
-  DRAFT: { label: "Draft", color: "text-neutral-600", bg: "bg-neutral-100", border: "border-neutral-200" },
-  PENDING_APPROVAL: { label: "Pending", color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200" },
-  APPROVED: { label: "Approved", color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200" },
-  NEEDS_CHANGES: { label: "Changes", color: "text-rose-700", bg: "bg-rose-50", border: "border-rose-200" },
+  [RESUME_STATUS.DRAFT]: { label: "Draft", color: "text-neutral-600", bg: "bg-neutral-100", border: "border-neutral-200" },
+  [RESUME_STATUS.PENDING_APPROVAL]: { label: "Pending", color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200" },
+  [RESUME_STATUS.APPROVED]: { label: "Approved", color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200" },
+  [RESUME_STATUS.NEEDS_CHANGES]: { label: "Changes", color: "text-rose-700", bg: "bg-rose-50", border: "border-rose-200" },
 };
 
 const ROLE_LABELS: Record<UserRole, string> = {
@@ -62,16 +62,6 @@ const ROLE_LABELS: Record<UserRole, string> = {
   HR_Revisor: "HR Reviewer",
   Admin: "Administrator",
 };
-
-
-
-function initialsFromUser(name: string, email: string): string {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2)
-    return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase();
-  if (parts[0] && parts[0].length > 0) return parts[0][0]!.toUpperCase();
-  return email[0]?.toUpperCase() ?? "?";
-}
 
 type NavItem = { href: string; label: string; icon: ReactNode };
 
@@ -227,7 +217,7 @@ function SidebarBody(
     onNavigate,
     onSignOut,
   } = props;
-  const initials = initialsFromUser(userName, userEmail);
+  const initials = initialsFromName(userName, userEmail);
   const mainItems = mainNavItems(role);
   const roleLabel = ROLE_LABELS[role];
 
@@ -462,7 +452,7 @@ export function AppSidebar({ userName, userEmail, role, resumeStatus }: AppSideb
               render={
                 <button className="flex size-10 items-center justify-center rounded-full bg-neutral-100 border border-neutral-200 text-neutral-600 shadow-sm transition-transform active:scale-95 outline-none">
                   <span className="text-[13px] font-bold tracking-tighter">
-                    {initialsFromUser(userName, userEmail)}
+                    {initialsFromName(userName, userEmail)}
                   </span>
                 </button>
               }

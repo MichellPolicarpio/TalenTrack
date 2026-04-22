@@ -8,11 +8,12 @@ import { AnimatePresence } from "framer-motion";
 import { useDashboard } from "@/lib/context/dashboard-context";
 import { ResumeStatus } from "@/lib/db/types";
 
-import { cn } from "@/lib/utils";
+import { cn, initialsFromName } from "@/lib/utils";
 import type { UserRole } from "@/types/user-role";
 import { NotificationsBell } from "@/components/layout/NotificationsBell";
 import type { NotificationsSnapshotDTO } from "@/lib/actions/notifications.actions";
 import { EditorActionBar } from "@/components/resume/EditorActionBar";
+import { RESUME_STATUS } from "@/lib/db/types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,22 +33,14 @@ const ROLE_LABELS: Record<UserRole, string> = {
 };
 
 const STATUS_TABS: { key: ResumeStatus; label: string }[] = [
-  { key: "DRAFT", label: "Draft" },
-  { key: "PENDING_APPROVAL", label: "Pending Review" },
-  { key: "APPROVED", label: "Approved" },
+  { key: RESUME_STATUS.DRAFT, label: "Draft" },
+  { key: RESUME_STATUS.PENDING_APPROVAL, label: "Pending Review" },
+  { key: RESUME_STATUS.APPROVED, label: "Approved" },
 ];
 
 function resolveActiveTab(status: ResumeStatus): ResumeStatus {
-  if (status === "NEEDS_CHANGES") return "DRAFT";
+  if (status === RESUME_STATUS.NEEDS_CHANGES) return RESUME_STATUS.DRAFT;
   return status;
-}
-
-function initialsFromName(name: string, email: string): string {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2)
-    return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase();
-  if (parts[0] && parts[0].length > 0) return parts[0][0]!.toUpperCase();
-  return email[0]?.toUpperCase() ?? "?";
 }
 
 export type AppTopBarProps = {

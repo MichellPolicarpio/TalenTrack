@@ -11,7 +11,7 @@ import {
 import type { NotificationsSnapshotDTO } from "@/lib/actions/notifications.actions";
 import { DashboardProvider } from "@/lib/context/dashboard-context";
 import { getResumeByEmployeeId } from "@/lib/repositories/resume.repository";
-import type { ResumeStatus } from "@/lib/db/types";
+import { type ResumeStatus, RESUME_STATUS } from "@/lib/db/types";
 
 export default async function DashboardGroupLayout({
   children,
@@ -28,7 +28,7 @@ export default async function DashboardGroupLayout({
   const role = session.user.role;
 
   let notificationsInitial: NotificationsSnapshotDTO | null = null;
-  let resumeStatus: ResumeStatus = "DRAFT";
+  let resumeStatus: ResumeStatus = RESUME_STATUS.DRAFT;
   const entraId = session.user.entraObjectId;
   if (entraId) {
     const employee = await getEmployeeByEntraId(entraId);

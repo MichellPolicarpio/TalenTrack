@@ -13,12 +13,13 @@ import {
   markNotificationReadAction,
   type NotificationsSnapshotDTO,
 } from "@/lib/actions/notifications.actions";
+import { APP_NOTIFICATION_TYPE } from "@/lib/db/types";
 
 const POLL_MS = 45_000;
 
 function typeLabel(type: string): string {
-  if (type === "NEEDS_CHANGES") return "Changes requested";
-  if (type === "APPROVED") return "Approved";
+  if (type === APP_NOTIFICATION_TYPE.NEEDS_CHANGES) return "Changes requested";
+  if (type === APP_NOTIFICATION_TYPE.APPROVED) return "Approved";
   return type;
 }
 
@@ -160,7 +161,7 @@ export function NotificationsBell({
                         <span
                           className={cn(
                             "text-[10px] font-semibold uppercase tracking-wide",
-                            n.type === "NEEDS_CHANGES"
+                            n.type === APP_NOTIFICATION_TYPE.NEEDS_CHANGES
                               ? "text-red-700"
                               : "text-emerald-700",
                           )}

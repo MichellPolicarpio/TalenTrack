@@ -9,6 +9,7 @@ import {
   getResumeWithEmployeeById
 } from "@/lib/repositories/approval.repository";
 import { HrReviewClient } from "@/components/hr/HrReviewClient";
+import { RESUME_STATUS } from "@/lib/db/types";
 
 export default async function HrSnapshotReviewPage({
   params,
@@ -43,7 +44,7 @@ export default async function HrSnapshotReviewPage({
       <HrReviewClient
         resumeId={snapshot.resumeId}
         employeeName={data.employee.displayName}
-        status="APPROVED" // Snapshots are by definition historical approvals
+        status={RESUME_STATUS.APPROVED} // Snapshots are by definition historical approvals
         version={snapshot.version}
         profile={data.profile}
         experiences={data.workExperiences}

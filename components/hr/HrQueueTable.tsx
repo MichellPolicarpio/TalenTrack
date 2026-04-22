@@ -12,8 +12,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
+import { cn, initialsFromName } from "@/lib/utils";
 import type { HrQueueRow } from "./hr-queue-view";
+import { RESUME_STATUS } from "@/lib/db/types";
 
 interface HrQueueTableProps {
   rows: HrQueueRow[];
@@ -26,14 +27,6 @@ interface HrQueueTableProps {
   showingTo: number;
   totalFiltered: number;
   query: string;
-}
-
-function initialsFromName(name: string, email: string): string {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2)
-    return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase();
-  if (parts[0] && parts[0].length > 0) return parts[0][0]!.toUpperCase();
-  return email[0]?.toUpperCase() ?? "?";
 }
 
 export function HrQueueTable({
@@ -115,19 +108,19 @@ export function HrQueueTable({
                       variant="outline"
                       className={cn(
                         "text-[10px] font-medium transition-colors",
-                        (item.status === "APPROVED" || activeTab === "approved") && !item.isSnapshot && "border-green-200 bg-green-50/50 text-green-950",
-                        (item.status === "APPROVED" || activeTab === "approved") && item.isSnapshot && "border-slate-200 bg-slate-50/80 text-slate-600",
-                        (item.status === "PENDING_APPROVAL" || activeTab === "pending") && "border-amber-200 bg-amber-50/50 text-amber-950",
-                        item.status === "NEEDS_CHANGES" && "border-red-200 bg-red-50/50 text-red-950",
+                        (item.status === RESUME_STATUS.APPROVED || activeTab === "approved") && !item.isSnapshot && "border-green-200 bg-green-50/50 text-green-950",
+                        (item.status === RESUME_STATUS.APPROVED || activeTab === "approved") && item.isSnapshot && "border-slate-200 bg-slate-50/80 text-slate-600",
+                        (item.status === RESUME_STATUS.PENDING_APPROVAL || activeTab === "pending") && "border-amber-200 bg-amber-50/50 text-amber-950",
+                        item.status === RESUME_STATUS.NEEDS_CHANGES && "border-red-200 bg-red-50/50 text-red-950",
                       )}
                     >
                       {item.isSnapshot
                         ? `v${item.version} · Archived`
-                        : item.status === "PENDING_APPROVAL"
+                        : item.status === RESUME_STATUS.PENDING_APPROVAL
                           ? "Pending"
-                          : item.status === "APPROVED"
+                          : item.status === RESUME_STATUS.APPROVED
                             ? "Approved"
-                            : item.status === "NEEDS_CHANGES"
+                            : item.status === RESUME_STATUS.NEEDS_CHANGES
                               ? "Changes"
                               : activeTab === "pending"
                                 ? "Pending"

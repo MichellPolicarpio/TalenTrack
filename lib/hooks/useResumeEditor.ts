@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { saveProfileAction } from "@/lib/actions/profile.actions";
 import { submitForApprovalAction } from "@/lib/actions/approval.actions";
 import { useDashboard } from "@/lib/context/dashboard-context";
-import type { ResumeStatus } from "@/lib/db/types";
+import { type ResumeStatus, RESUME_STATUS } from "@/lib/db/types";
 import type { PersonalDraft } from "@/components/resume/tabs/PersonalTab";
 
 export function useResumeEditor({
@@ -33,7 +33,7 @@ export function useResumeEditor({
   const { setEditorActions } = useDashboard();
   const router = useRouter();
 
-  const isPendingReview = status === "PENDING_APPROVAL";
+  const isPendingReview = status === RESUME_STATUS.PENDING_APPROVAL;
 
   const handleEdit = useCallback(() => {
     setIsLocked(false);
@@ -107,7 +107,7 @@ export function useResumeEditor({
     setEditorActions({
       isLocked,
       hasUnsavedChanges,
-      canEdit: !isLocked || status !== "PENDING_APPROVAL",
+      canEdit: !isLocked || status !== RESUME_STATUS.PENDING_APPROVAL,
       isSaving,
       isSubmitting,
       onEdit: handleEdit,

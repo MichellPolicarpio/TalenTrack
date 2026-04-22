@@ -72,6 +72,7 @@ import { usePreviewState } from "@/lib/hooks/usePreviewState";
 import { useResumeEditor } from "@/lib/hooks/useResumeEditor";
 import { useTabScroll } from "@/lib/hooks/useTabScroll";
 import { useEditorChromeHeight } from "@/lib/hooks/useEditorChromeHeight";
+import { RESUME_STATUS } from "@/lib/db/types";
 
 const PROFILE_STUB_TS = new Date(0);
 
@@ -314,12 +315,12 @@ export function ResumeEditorClient({
     () =>
       !isLocked ||
       hasUnsavedChanges ||
-      status === "DRAFT" ||
-      status === "NEEDS_CHANGES" ? (
+      status === RESUME_STATUS.DRAFT ||
+      status === RESUME_STATUS.NEEDS_CHANGES ? (
         <EditorActionBar
           isLocked={isLocked}
           hasUnsavedChanges={hasUnsavedChanges}
-          canEdit={!isLocked || status === "DRAFT" || status === "NEEDS_CHANGES"}
+          canEdit={!isLocked || status === RESUME_STATUS.DRAFT || status === RESUME_STATUS.NEEDS_CHANGES}
           isSaving={isSaving}
           isSubmitting={isSubmitting}
           onEdit={handleEdit}
@@ -456,7 +457,7 @@ export function ResumeEditorClient({
             onDownloadPdf={() => handleExportPdf("download")}
             downloading={downloading}
           />
-        ) : status === "APPROVED" ? (
+        ) : status === RESUME_STATUS.APPROVED ? (
           /* ─── APPROVED: celebratory full-width mode ─── */
           <ApprovedView
             resumeId={resumeId}
@@ -562,7 +563,7 @@ export function ResumeEditorClient({
                           </Button>
                         </motion.div>
 
-                        {isLocked && !hasUnsavedChanges && status !== "PENDING_APPROVAL" && (
+                        {isLocked && !hasUnsavedChanges && status !== RESUME_STATUS.PENDING_APPROVAL && (
                           <motion.div
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
@@ -722,7 +723,7 @@ export function ResumeEditorClient({
                       draftExperiences.length > 0 &&
                       isValidEmail(profileDraft.personalEmail);
                     
-                    return (status === "DRAFT" || status === "NEEDS_CHANGES") && (
+                    return (status === RESUME_STATUS.DRAFT || status === RESUME_STATUS.NEEDS_CHANGES) && (
                       <div title={!isReadyForSubmission ? "Please ensure Job Title, Email, and at least one Work Experience are valid." : ""}>
                         <Button
                           type="button"

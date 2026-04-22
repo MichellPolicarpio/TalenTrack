@@ -13,7 +13,7 @@ import {
 import { toast } from "sonner";
 import { withdrawSubmissionAction } from "@/lib/actions/approval.actions";
 import { formatLastSavedRelative } from "@/lib/format-last-saved";
-import type { ResumeStatus } from "@/lib/db/types";
+import { type ResumeStatus, RESUME_STATUS } from "@/lib/db/types";
 import {
   Dialog,
   DialogClose,
@@ -26,10 +26,10 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const STATUS_META: Record<ResumeStatus, { color: string; label: string }> = {
-  DRAFT: { color: "#F17A28", label: "Draft" },
-  PENDING_APPROVAL: { color: "#F59E0B", label: "Pending review" },
-  APPROVED: { color: "#16A34A", label: "Approved" },
-  NEEDS_CHANGES: { color: "#DC2626", label: "Changes requested" },
+  [RESUME_STATUS.DRAFT]: { color: "#F17A28", label: "Draft" },
+  [RESUME_STATUS.PENDING_APPROVAL]: { color: "#F59E0B", label: "Pending review" },
+  [RESUME_STATUS.APPROVED]: { color: "#16A34A", label: "Approved" },
+  [RESUME_STATUS.NEEDS_CHANGES]: { color: "#DC2626", label: "Changes requested" },
 };
 
 const statusPillClass =
@@ -104,7 +104,7 @@ export function StatusBanner({
     <>
       <div className="flex flex-col gap-3 border-b border-neutral-200 bg-neutral-50/70 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-6">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-2">
-          {status === "NEEDS_CHANGES" && hasHrFeedback ? (
+          {status === RESUME_STATUS.NEEDS_CHANGES && hasHrFeedback ? (
             <button
               type="button"
               onClick={() => setFeedbackOpen(true)}
@@ -132,7 +132,7 @@ export function StatusBanner({
             </span>
           )}
 
-          {hasHrFeedback && status !== "NEEDS_CHANGES" ? (
+          {hasHrFeedback && status !== RESUME_STATUS.NEEDS_CHANGES ? (
             <button
               type="button"
               onClick={() => setFeedbackOpen(true)}
@@ -159,7 +159,7 @@ export function StatusBanner({
         </div>
 
         <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
-          {status === "PENDING_APPROVAL" && (
+          {status === RESUME_STATUS.PENDING_APPROVAL && (
             <button
               type="button"
               disabled={pendingWithdraw}
@@ -175,7 +175,7 @@ export function StatusBanner({
             </button>
           )}
 
-          {status === "APPROVED" && publicShareToken && (
+          {status === RESUME_STATUS.APPROVED && publicShareToken && (
             <button
               type="button"
               onClick={handleCopy}
