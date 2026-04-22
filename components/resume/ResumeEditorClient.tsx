@@ -148,7 +148,7 @@ export function ResumeEditorClient({
   const previewRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(ZOOM_DEFAULT);
   const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
-  const [mobileZoom, setMobileZoom] = useState(60);
+  const [mobileZoom, setMobileZoom] = useState(45);
   const [downloading, setDownloading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const router = useRouter();
