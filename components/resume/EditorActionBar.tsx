@@ -103,6 +103,23 @@ export function EditorActionBar({
           {isSaving ? "Saving…" : "Save"}
         </Button>
 
+        {canSubmit && (
+          <Button
+            type="button"
+            size="sm"
+            onClick={onSubmit}
+            disabled={isSubmitting}
+            className="h-8 lg:h-9 gap-1.5 rounded-lg bg-green-600 text-[12px] lg:text-[13px] font-semibold text-white shadow-sm hover:bg-green-700 disabled:opacity-40"
+          >
+            {isSubmitting ? (
+              <Loader2 className="size-3 lg:size-3.5 animate-spin" />
+            ) : (
+              <Send className="size-3 lg:size-3.5" />
+            )}
+            {isSubmitting ? "Submitting…" : "Submit to Review"}
+          </Button>
+        )}
+
 
       </div>
     </div>

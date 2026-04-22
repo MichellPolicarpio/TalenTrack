@@ -544,8 +544,8 @@ export function ResumeEditorClient({
                         if (isLocked && !isActionButton) triggerEditHint();
                       }}
                     >
-                      {/* Mobile preview button */}
-                      <div className="mb-4 flex items-center justify-center lg:hidden">
+                      {/* Mobile preview + submit actions */}
+                      <div className="mb-4 flex flex-wrap items-center justify-center gap-3 lg:hidden">
                         <motion.div
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
@@ -561,6 +561,28 @@ export function ResumeEditorClient({
                             Preview
                           </Button>
                         </motion.div>
+
+                        {isLocked && !hasUnsavedChanges && status !== "PENDING_APPROVAL" && (
+                          <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => setIsSubmitConfirmOpen(true)}
+                              disabled={isSubmitting}
+                              className="gap-1.5 bg-green-600 text-white hover:bg-green-700 shadow-sm"
+                            >
+                              {isSubmitting ? (
+                                <Loader2 className="size-4 animate-spin" />
+                              ) : (
+                                <Send className="size-4" />
+                              )}
+                              {isSubmitting ? "Submitting…" : "Submit"}
+                            </Button>
+                          </motion.div>
+                        )}
                       </div>
 
                       {/* ── Personal Info ── */}
