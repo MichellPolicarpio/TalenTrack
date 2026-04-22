@@ -403,8 +403,40 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
           </div>
         </PageSheet>
 
-        {/* ─── PAGE 2+: Remaining Experience + Projects ─── */}
-        {(experiencesRemaining.length > 0 || finalVisibleProjects.length > 0) && (
+        {/* ─── PAGE 1b (Continuation) ─── */}
+        {experiencesRemaining.length > 0 && (
+          <PageSheet
+            id="page-1b"
+            employeeName={employeeName}
+            profile={profile}
+            logoOk={logoOk}
+            setLogoOk={setLogoOk}
+            phone={phone}
+            email={email}
+          >
+            <div className="box-border flex min-h-0 w-full flex-1 flex-row items-stretch">
+              <aside 
+                className="box-border flex min-h-0 w-[38%] shrink-0 flex-col self-stretch px-8 py-5" 
+                style={{ background: GRAY_GRADIENT }}
+                aria-hidden
+              />
+
+              <main className="flex min-w-0 flex-1 flex-col px-8 py-5 bg-white">
+                <section className="mb-5">
+                  <RightSectionTitle>Professional Experience (Cont.)</RightSectionTitle>
+                  <div className="flex flex-col gap-4">
+                    {experiencesRemaining.map((exp) => (
+                      <ExperienceItem key={exp.id} exp={exp} />
+                    ))}
+                  </div>
+                </section>
+              </main>
+            </div>
+          </PageSheet>
+        )}
+
+        {/* ─── PAGE 2 (Project List) ─── */}
+        {finalVisibleProjects.length > 0 && (
           <PageSheet
             id="page-2"
             ref={page2Ref}
@@ -418,33 +450,20 @@ export const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
           >
             <div className="box-border flex min-h-0 w-full flex-1 flex-row items-stretch">
               <div 
-                className="box-border flex min-h-0 w-[38%] shrink-0 flex-col self-stretch px-8 py-5" 
-                style={{ background: GRAY_GRADIENT }}
-                aria-hidden
+                className="shrink-0 self-stretch" 
+                style={{ width: ORANGE_RAIL_PX, backgroundColor: ORANGE }} 
+                aria-hidden 
               />
 
               <main className="flex min-w-0 flex-1 flex-col px-8 py-5 bg-white">
-                {experiencesRemaining.length > 0 && (
-                  <section className="mb-5">
-                    <RightSectionTitle>Professional Experience (Cont.)</RightSectionTitle>
-                    <div className="flex flex-col gap-4">
-                      {experiencesRemaining.map((exp) => (
-                        <ExperienceItem key={exp.id} exp={exp} />
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {finalVisibleProjects.length > 0 && (
-                  <section className="mb-5">
-                    <RightSectionTitle>Project List</RightSectionTitle>
-                    <div className="flex flex-col gap-4">
-                      {finalVisibleProjects.map((p, idx) => (
-                        <ProjectItem key={p.id} p={p} isLast={idx === finalVisibleProjects.length - 1} />
-                      ))}
-                    </div>
-                  </section>
-                )}
+                <section className="mb-5">
+                  <RightSectionTitle>Project List</RightSectionTitle>
+                  <div className="flex flex-col gap-4">
+                    {finalVisibleProjects.map((p, idx) => (
+                      <ProjectItem key={p.id} p={p} isLast={idx === finalVisibleProjects.length - 1} />
+                    ))}
+                  </div>
+                </section>
               </main>
             </div>
           </PageSheet>
@@ -603,4 +622,4 @@ function ProjectItem({ p, isLast }: { p: Project, isLast: boolean }) {
       {!isLast && <div className="mt-4 border-b border-[#E5E7EB]" />}
     </div>
   );
-});
+}
