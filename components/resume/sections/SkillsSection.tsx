@@ -292,6 +292,8 @@ export function SkillsSection({
     handleDragEnd,
     setLocalDirty,
     setActiveSave,
+    localDirty,
+    activeSave,
   } = useGenericSection({
     resumeId,
     tableName: "Skills",
@@ -309,9 +311,9 @@ export function SkillsSection({
 
   const handleOpenChange = (isOpen: boolean) => {
     // If user clicks ADD while already open with content, trigger auto-save but stay open
-    if (isOpen && open && hijackedActions?.props?.hasUnsavedChanges && hijackedActions?.props?.onSave) {
+    if (isOpen && open && localDirty && activeSave) {
       setIsAutoSaving(true);
-      hijackedActions.props.onSave();
+      activeSave();
       return;
     }
 

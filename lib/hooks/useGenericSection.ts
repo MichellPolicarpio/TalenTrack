@@ -146,6 +146,8 @@ export function useGenericSection<T extends GenericSectionItem>({
     handleDragEnd,
     setLocalDirty,
     setActiveSave,
+    localDirty,
+    activeSave,
     updateItems,
   };
 }
