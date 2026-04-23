@@ -278,15 +278,16 @@ export async function deleteWorkExperience(
 export async function reorderWorkExperiences(
   items: ReorderItem[],
 ): Promise<void> {
+  if (items.length === 0) return;
   return runWithPool(async (pool) => {
-    for (const item of items) {
-      const req = pool.request();
-      req.input("id", sql.UniqueIdentifier, item.id);
-      req.input("sortOrder", sql.Int, item.sortOrder);
-      await req.query(`
-        UPDATE dbo.WorkExperiences SET SortOrder = @sortOrder WHERE Id = @id
-      `);
-    }
+    const req = pool.request();
+    let query = "";
+    items.forEach((item, i) => {
+      req.input(`id${i}`, sql.UniqueIdentifier, item.id);
+      req.input(`so${i}`, sql.Int, item.sortOrder);
+      query += `UPDATE dbo.WorkExperiences SET SortOrder = @so${i} WHERE Id = @id${i}; `;
+    });
+    await req.query(query);
   });
 }
 
@@ -382,15 +383,16 @@ export async function deleteEducation(
 }
 
 export async function reorderEducation(items: ReorderItem[]): Promise<void> {
+  if (items.length === 0) return;
   return runWithPool(async (pool) => {
-    for (const item of items) {
-      const req = pool.request();
-      req.input("id", sql.UniqueIdentifier, item.id);
-      req.input("sortOrder", sql.Int, item.sortOrder);
-      await req.query(`
-        UPDATE dbo.Education SET SortOrder = @sortOrder WHERE Id = @id
-      `);
-    }
+    const req = pool.request();
+    let query = "";
+    items.forEach((item, i) => {
+      req.input(`id${i}`, sql.UniqueIdentifier, item.id);
+      req.input(`so${i}`, sql.Int, item.sortOrder);
+      query += `UPDATE dbo.Education SET SortOrder = @so${i} WHERE Id = @id${i}; `;
+    });
+    await req.query(query);
   });
 }
 
@@ -457,15 +459,16 @@ export async function deleteSkill(id: string, resumeId: string): Promise<void> {
 }
 
 export async function reorderSkills(items: ReorderItem[]): Promise<void> {
+  if (items.length === 0) return;
   return runWithPool(async (pool) => {
-    for (const item of items) {
-      const req = pool.request();
-      req.input("id", sql.UniqueIdentifier, item.id);
-      req.input("sortOrder", sql.Int, item.sortOrder);
-      await req.query(`
-        UPDATE dbo.Skills SET SortOrder = @sortOrder WHERE Id = @id
-      `);
-    }
+    const req = pool.request();
+    let query = "";
+    items.forEach((item, i) => {
+      req.input(`id${i}`, sql.UniqueIdentifier, item.id);
+      req.input(`so${i}`, sql.Int, item.sortOrder);
+      query += `UPDATE dbo.Skills SET SortOrder = @so${i} WHERE Id = @id${i}; `;
+    });
+    await req.query(query);
   });
 }
 
@@ -558,15 +561,16 @@ export async function deleteCertification(
 export async function reorderCertifications(
   items: ReorderItem[],
 ): Promise<void> {
+  if (items.length === 0) return;
   return runWithPool(async (pool) => {
-    for (const item of items) {
-      const req = pool.request();
-      req.input("id", sql.UniqueIdentifier, item.id);
-      req.input("sortOrder", sql.Int, item.sortOrder);
-      await req.query(`
-        UPDATE dbo.Certifications SET SortOrder = @sortOrder WHERE Id = @id
-      `);
-    }
+    const req = pool.request();
+    let query = "";
+    items.forEach((item, i) => {
+      req.input(`id${i}`, sql.UniqueIdentifier, item.id);
+      req.input(`so${i}`, sql.Int, item.sortOrder);
+      query += `UPDATE dbo.Certifications SET SortOrder = @so${i} WHERE Id = @id${i}; `;
+    });
+    await req.query(query);
   });
 }
 
@@ -668,6 +672,7 @@ export async function deleteAchievement(
 export async function reorderAchievements(
   items: ReorderItem[],
 ): Promise<void> {
+  if (items.length === 0) return;
   return runWithPool(async (pool) => {
     const achievementsTableName = await resolveAchievementsTableName(pool);
     if (!achievementsTableName) {
@@ -675,14 +680,14 @@ export async function reorderAchievements(
         "La seccion de logros no esta configurada en la base de datos (falta tabla de Achievements).",
       );
     }
-    for (const item of items) {
-      const req = pool.request();
-      req.input("id", sql.UniqueIdentifier, item.id);
-      req.input("sortOrder", sql.Int, item.sortOrder);
-      await req.query(`
-        UPDATE dbo.${achievementsTableName} SET SortOrder = @sortOrder WHERE Id = @id
-      `);
-    }
+    const req = pool.request();
+    let query = "";
+    items.forEach((item, i) => {
+      req.input(`id${i}`, sql.UniqueIdentifier, item.id);
+      req.input(`so${i}`, sql.Int, item.sortOrder);
+      query += `UPDATE dbo.${achievementsTableName} SET SortOrder = @so${i} WHERE Id = @id${i}; `;
+    });
+    await req.query(query);
   });
 }
 
@@ -795,15 +800,16 @@ export async function deleteProject(
 export async function reorderProjects(
   items: ReorderItem[],
 ): Promise<void> {
+  if (items.length === 0) return;
   return runWithPool(async (pool) => {
-    for (const item of items) {
-      const req = pool.request();
-      req.input("id", sql.UniqueIdentifier, item.id);
-      req.input("sortOrder", sql.Int, item.sortOrder);
-      await req.query(`
-        UPDATE dbo.ResumeProjects SET SortOrder = @sortOrder WHERE Id = @id
-      `);
-    }
+    const req = pool.request();
+    let query = "";
+    items.forEach((item, i) => {
+      req.input(`id${i}`, sql.UniqueIdentifier, item.id);
+      req.input(`so${i}`, sql.Int, item.sortOrder);
+      query += `UPDATE dbo.ResumeProjects SET SortOrder = @so${i} WHERE Id = @id${i}; `;
+    });
+    await req.query(query);
   });
 }
 
@@ -887,15 +893,16 @@ export async function deleteLicense(id: string, resumeId: string): Promise<void>
 }
 
 export async function reorderLicenses(items: ReorderItem[]): Promise<void> {
+  if (items.length === 0) return;
   return runWithPool(async (pool) => {
-    for (const item of items) {
-      const req = pool.request();
-      req.input("id", sql.UniqueIdentifier, item.id);
-      req.input("sortOrder", sql.Int, item.sortOrder);
-      await req.query(`
-        UPDATE dbo.Licenses SET SortOrder = @sortOrder WHERE Id = @id
-      `);
-    }
+    const req = pool.request();
+    let query = "";
+    items.forEach((item, i) => {
+      req.input(`id${i}`, sql.UniqueIdentifier, item.id);
+      req.input(`so${i}`, sql.Int, item.sortOrder);
+      query += `UPDATE dbo.Licenses SET SortOrder = @so${i} WHERE Id = @id${i}; `;
+    });
+    await req.query(query);
   });
 }
 

@@ -203,44 +203,45 @@ export async function getAllPendingResumes(): Promise<ResumeQueueItem[]> {
   });
 }
 
-export async function getAllApprovedResumes(limit?: number): Promise<(ResumeQueueItem & { isSnapshot: boolean; snapshotId: string | null })[]> {
+export async function getAllApprovedResumes(limit: number = 15): Promise<(ResumeQueueItem & { isSnapshot: boolean; snapshotId: string | null })[]> {
   return runWithPool(async (pool) => {
     const req = pool.request();
-    const topClause = limit ? `TOP (${limit})` : "";
+    req.input("limit", sql.Int, limit);
     const result = await req.query(`
-      SELECT ${topClause}
-        CAST(r.Id AS NVARCHAR(36)) AS ResumeId,
-        CAST(r.EmployeeId AS NVARCHAR(36)) AS EmployeeId,
-        NULL AS SnapshotId,
-        e.DisplayName AS EmployeeName,
-        e.CorporateEmail AS EmployeeEmail,
-        p.JobTitle,
-        r.SubmittedAt,
-        r.Version,
-        0 AS IsSnapshot
-      FROM dbo.Resumes r
-      JOIN dbo.Employees e ON e.Id = r.EmployeeId
-      LEFT JOIN dbo.ResumeProfiles p ON p.ResumeId = r.Id
-      WHERE r.Status = 'APPROVED'
+      SELECT TOP (@limit) * FROM (
+        SELECT
+          CAST(r.Id AS NVARCHAR(36)) AS ResumeId,
+          CAST(r.EmployeeId AS NVARCHAR(36)) AS EmployeeId,
+          NULL AS SnapshotId,
+          e.DisplayName AS EmployeeName,
+          e.CorporateEmail AS EmployeeEmail,
+          p.JobTitle,
+          r.SubmittedAt,
+          r.Version,
+          0 AS IsSnapshot
+        FROM dbo.Resumes r
+        JOIN dbo.Employees e ON e.Id = r.EmployeeId
+        LEFT JOIN dbo.ResumeProfiles p ON p.ResumeId = r.Id
+        WHERE r.Status = 'APPROVED'
 
-      UNION ALL
+        UNION ALL
 
-      SELECT ${topClause}
-        CAST(s.ResumeId AS NVARCHAR(36)) AS ResumeId,
-        CAST(r.EmployeeId AS NVARCHAR(36)) AS EmployeeId,
-        CAST(s.Id AS NVARCHAR(36)) AS SnapshotId,
-        e.DisplayName AS EmployeeName,
-        e.CorporateEmail AS EmployeeEmail,
-        JSON_VALUE(s.SnapshotData, '$.profile.jobTitle') AS JobTitle,
-        s.CreatedAt AS SubmittedAt,
-        s.Version,
-        1 AS IsSnapshot
-      FROM dbo.ResumeSnapshots s
-      JOIN dbo.Resumes r ON r.Id = s.ResumeId
-      JOIN dbo.Employees e ON e.Id = r.EmployeeId
-      WHERE s.CreatedAt >= DATEADD(month, -1, GETUTCDATE())
-        AND r.Status <> 'APPROVED'
-
+        SELECT
+          CAST(s.ResumeId AS NVARCHAR(36)) AS ResumeId,
+          CAST(r.EmployeeId AS NVARCHAR(36)) AS EmployeeId,
+          CAST(s.Id AS NVARCHAR(36)) AS SnapshotId,
+          e.DisplayName AS EmployeeName,
+          e.CorporateEmail AS EmployeeEmail,
+          JSON_VALUE(s.SnapshotData, '$.profile.jobTitle') AS JobTitle,
+          s.CreatedAt AS SubmittedAt,
+          s.Version,
+          1 AS IsSnapshot
+        FROM dbo.ResumeSnapshots s
+        JOIN dbo.Resumes r ON r.Id = s.ResumeId
+        JOIN dbo.Employees e ON e.Id = r.EmployeeId
+        WHERE s.CreatedAt >= DATEADD(month, -1, GETUTCDATE())
+          AND r.Status <> 'APPROVED'
+      ) AS t
       ORDER BY SubmittedAt DESC
     `);
 
@@ -258,46 +259,51 @@ export async function getAllApprovedResumes(limit?: number): Promise<(ResumeQueu
   });
 }
 
-export async function getAllResumesHistory(): Promise<(ResumeQueueItem & { status: ResumeStatus; isSnapshot: boolean; operationDate: Date; snapshotId: string | null })[]> {
+export async function getAllResumesHistory(limit: number = 50, offset: number = 0): Promise<(ResumeQueueItem & { status: ResumeStatus; isSnapshot: boolean; operationDate: Date; snapshotId: string | null })[]> {
   return runWithPool(async (pool) => {
     const req = pool.request();
+    req.input("limit", sql.Int, limit);
+    req.input("offset", sql.Int, offset);
+    
     const result = await req.query(`
-      SELECT
-        CAST(r.Id AS NVARCHAR(36)) AS ResumeId,
-        CAST(r.EmployeeId AS NVARCHAR(36)) AS EmployeeId,
-        NULL AS SnapshotId,
-        e.DisplayName AS EmployeeName,
-        e.CorporateEmail AS EmployeeEmail,
-        p.JobTitle,
-        r.SubmittedAt,
-        r.Version,
-        r.Status,
-        r.UpdatedAt AS OperationDate,
-        0 AS IsSnapshot
-      FROM dbo.Resumes r
-      JOIN dbo.Employees e ON e.Id = r.EmployeeId
-      LEFT JOIN dbo.ResumeProfiles p ON p.ResumeId = r.Id
-      WHERE r.Status IN ('PENDING_APPROVAL', 'NEEDS_CHANGES')
+      SELECT * FROM (
+        SELECT
+          CAST(r.Id AS NVARCHAR(36)) AS ResumeId,
+          CAST(r.EmployeeId AS NVARCHAR(36)) AS EmployeeId,
+          NULL AS SnapshotId,
+          e.DisplayName AS EmployeeName,
+          e.CorporateEmail AS EmployeeEmail,
+          p.JobTitle,
+          r.SubmittedAt,
+          r.Version,
+          r.Status,
+          r.UpdatedAt AS OperationDate,
+          0 AS IsSnapshot
+        FROM dbo.Resumes r
+        JOIN dbo.Employees e ON e.Id = r.EmployeeId
+        LEFT JOIN dbo.ResumeProfiles p ON p.ResumeId = r.Id
+        WHERE r.Status IN ('PENDING_APPROVAL', 'NEEDS_CHANGES')
 
-      UNION ALL
+        UNION ALL
 
-      SELECT
-        CAST(s.ResumeId AS NVARCHAR(36)) AS ResumeId,
-        CAST(r.EmployeeId AS NVARCHAR(36)) AS EmployeeId,
-        CAST(s.Id AS NVARCHAR(36)) AS SnapshotId,
-        e.DisplayName AS EmployeeName,
-        e.CorporateEmail AS EmployeeEmail,
-        JSON_VALUE(s.SnapshotData, '$.profile.jobTitle') AS JobTitle,
-        s.CreatedAt AS SubmittedAt,
-        s.Version,
-        'APPROVED' AS Status,
-        s.CreatedAt AS OperationDate,
-        1 AS IsSnapshot
-      FROM dbo.ResumeSnapshots s
-      JOIN dbo.Resumes r ON r.Id = s.ResumeId
-      JOIN dbo.Employees e ON e.Id = r.EmployeeId
-
+        SELECT
+          CAST(s.ResumeId AS NVARCHAR(36)) AS ResumeId,
+          CAST(r.EmployeeId AS NVARCHAR(36)) AS EmployeeId,
+          CAST(s.Id AS NVARCHAR(36)) AS SnapshotId,
+          e.DisplayName AS EmployeeName,
+          e.CorporateEmail AS EmployeeEmail,
+          JSON_VALUE(s.SnapshotData, '$.profile.jobTitle') AS JobTitle,
+          s.CreatedAt AS SubmittedAt,
+          s.Version,
+          'APPROVED' AS Status,
+          s.CreatedAt AS OperationDate,
+          1 AS IsSnapshot
+        FROM dbo.ResumeSnapshots s
+        JOIN dbo.Resumes r ON r.Id = s.ResumeId
+        JOIN dbo.Employees e ON e.Id = r.EmployeeId
+      ) AS t
       ORDER BY OperationDate DESC
+      OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
     `);
 
     return (result.recordset as Record<string, unknown>[]).map((row) => ({

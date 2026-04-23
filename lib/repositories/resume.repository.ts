@@ -533,6 +533,7 @@ export async function getFullResumeForPdf(
     req.input("resumeId", sql.UniqueIdentifier, resumeId);
 
     const result = await req.query(`
+      -- 0: Employee + Profile
       SELECT
         e.DisplayName,
         e.CorporateEmail,
@@ -548,32 +549,54 @@ export async function getFullResumeForPdf(
       FROM dbo.Resumes r
       JOIN dbo.Employees e ON e.Id = r.EmployeeId
       LEFT JOIN dbo.ResumeProfiles p ON p.ResumeId = r.Id
-      WHERE r.Id = @resumeId
+      WHERE r.Id = @resumeId;
+
+      -- 1: WorkExperiences
+      SELECT
+        CAST(Id AS NVARCHAR(36)) AS Id, CAST(ResumeId AS NVARCHAR(36)) AS ResumeId,
+        CompanyName, JobTitle, Location, StartDate, EndDate, IsCurrent, Description, SortOrder, IsVisibleOnResume
+      FROM dbo.WorkExperiences WHERE ResumeId = @resumeId AND IsVisibleOnResume = 1 ORDER BY SortOrder ASC;
+
+      -- 2: Education
+      SELECT
+        CAST(Id AS NVARCHAR(36)) AS Id, CAST(ResumeId AS NVARCHAR(36)) AS ResumeId,
+        InstitutionName, Degree, DegreeType, Specialization, StartYear, EndYear, IsOngoing, SortOrder, IsVisibleOnResume
+      FROM dbo.Education WHERE ResumeId = @resumeId AND IsVisibleOnResume = 1 ORDER BY SortOrder ASC;
+
+      -- 3: Skills
+      SELECT
+        CAST(Id AS NVARCHAR(36)) AS Id, CAST(ResumeId AS NVARCHAR(36)) AS ResumeId,
+        SkillName, SortOrder, IsVisibleOnResume
+      FROM dbo.Skills WHERE ResumeId = @resumeId AND IsVisibleOnResume = 1 ORDER BY SortOrder ASC;
+
+      -- 4: Certifications
+      SELECT
+        CAST(Id AS NVARCHAR(36)) AS Id, CAST(ResumeId AS NVARCHAR(36)) AS ResumeId,
+        CertificationName, IssuingOrganization, IssueDate, ExpirationDate, CredentialId, SortOrder, IsVisibleOnResume
+      FROM dbo.Certifications WHERE ResumeId = @resumeId AND IsVisibleOnResume = 1 ORDER BY SortOrder ASC;
+
+      -- 5: Projects
+      SELECT
+        CAST(Id AS NVARCHAR(36)) AS Id, CAST(ResumeId AS NVARCHAR(36)) AS ResumeId,
+        ProjectName, Industry, Role, ProjectValue, Year, ExpandedTitle, Description, SortOrder, IsVisibleOnResume
+      FROM dbo.ResumeProjects WHERE ResumeId = @resumeId AND IsVisibleOnResume = 1 ORDER BY SortOrder ASC;
     `);
 
-    const row = result.recordset[0] as Record<string, unknown> | undefined;
-    if (!row) return null;
-
-    const [workExperiences, educationRows, skillRows, certRows, projectRows] =
-      await Promise.all([
-        getWorkExperiencesByResumeId(resumeId),
-        getEducationByResumeId(resumeId),
-        getSkillsByResumeId(resumeId),
-        getCertificationsByResumeId(resumeId),
-        getProjectsByResumeId(resumeId),
-      ]);
+    const rss = result.recordsets;
+    const profileRow = rss[0]?.[0];
+    if (!profileRow) return null;
 
     return {
       employee: {
-        displayName: String(row.DisplayName ?? ""),
-        corporateEmail: String(row.CorporateEmail ?? ""),
+        displayName: String(profileRow.DisplayName ?? ""),
+        corporateEmail: String(profileRow.CorporateEmail ?? ""),
       },
-      profile: await mapProfile(row),
-      workExperiences: workExperiences.filter((e) => e.isVisibleOnResume),
-      education: (educationRows || []).filter((e) => e.isVisibleOnResume),
-      skills: (skillRows || []).filter((s) => s.isVisibleOnResume),
-      certifications: (certRows || []).filter((c) => c.isVisibleOnResume),
-      projects: (projectRows || []).filter((p) => p.isVisibleOnResume),
+      profile: await mapProfile(profileRow),
+      workExperiences: (rss[1] || []).map(mapWorkExperience),
+      education: (rss[2] || []).map(mapEducation),
+      skills: (rss[3] || []).map(mapSkill),
+      certifications: (rss[4] || []).map(mapCertification),
+      projects: (rss[5] || []).map(mapProject),
       achievements: [],
       licenses: []
     };
