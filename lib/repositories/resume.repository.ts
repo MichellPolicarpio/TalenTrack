@@ -582,7 +582,7 @@ export async function getFullResumeForPdf(
       FROM dbo.ResumeProjects WHERE ResumeId = @resumeId AND IsVisibleOnResume = 1 ORDER BY SortOrder ASC;
     `);
 
-    const rss = result.recordsets;
+    const rss = result.recordsets as any;
     const profileRow = rss[0]?.[0];
     if (!profileRow) return null;
 
