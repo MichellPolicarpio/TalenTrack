@@ -115,7 +115,7 @@ export function AppTopBar({
           </p>
         ) : (
           <p className="shrink-0 text-[18px] font-black tracking-tight text-sidebar-label/40">
-            TalentTrack
+            TalenTrack
           </p>
         )}
       </div>

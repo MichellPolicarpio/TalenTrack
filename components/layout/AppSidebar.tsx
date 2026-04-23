@@ -234,8 +234,8 @@ function SidebarBody(
         {/* TalentTrack logo image badge */}
         <div className="flex size-[38px] shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-primary shadow-md shadow-primary/10 transition-transform hover:scale-110 active:scale-95">
           <Image
-            src="/TalentTrack_Logo.png"
-            alt="TalentTrack Logo"
+            src="/TalenTrack_Logo.png"
+            alt="TalenTrack Logo"
             width={38}
             height={38}
             className="size-full object-contain"
@@ -245,7 +245,7 @@ function SidebarBody(
         {!collapsed && (
           <div className="min-w-0">
             <p className="text-[18px] font-extrabold leading-tight tracking-tight text-sidebar-foreground">
-              Talent<span className="text-primary">Track</span>
+              Talen<span className="text-primary">Track</span>
             </p>
           </div>
         )}
@@ -421,7 +421,7 @@ export function AppSidebar({ userName, userEmail, role, resumeStatus }: AppSideb
         <div className="flex items-center gap-3">
           <div className="flex size-9 items-center justify-center overflow-hidden rounded-[8px] bg-primary shadow-sm shadow-primary/10">
             <Image
-              src="/TalentTrack_Logo.png"
+              src="/TalenTrack_Logo.png"
               alt="TalentTrack Logo"
               width={32}
               height={32}
@@ -429,7 +429,7 @@ export function AppSidebar({ userName, userEmail, role, resumeStatus }: AppSideb
             />
           </div>
           <span className="text-[17px] font-extrabold tracking-tight text-neutral-900">
-            Talent<span className="text-primary">Track</span>
+            Talen<span className="text-primary">Track</span>
           </span>
         </div>
 

@@ -42,7 +42,7 @@ export default function AboutPage() {
             Professional Standards
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            TalentTrack centralizes and elevates the quality of our team's resumes, ensuring a consistent and elite image for Brindley Engineering.
+            TalenTrack centralizes and elevates the quality of our team's resumes, ensuring a consistent and elite image for Brindley Engineering.
           </p>
         </motion.section>
 
@@ -126,7 +126,7 @@ export default function AboutPage() {
       >
         <div className="flex flex-col items-center gap-8">
           <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-muted-foreground/40">
-            Internal Capability · TalentTrack V2.0
+            Internal Capability · TalenTrack V2.0
           </p>
         </div>
       </motion.div>

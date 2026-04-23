@@ -69,8 +69,8 @@ export function SplashScreen({
             className="w-full max-w-[280px] sm:max-w-[360px]"
           >
             <Image
-              src="/TalentTrack_LogoFull.png"
-              alt="TalentTrack Full Logo"
+              src="/TalenTrack_LogoFull.png"
+              alt="TalenTrack Full Logo"
               width={400}
               height={120}
               className="h-auto w-full object-contain"

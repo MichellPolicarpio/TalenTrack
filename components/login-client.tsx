@@ -47,7 +47,7 @@ const scaleIn = {
   },
 };
 
-function TalentTrackLogo({ size = "default" }: { size?: "default" | "small" }) {
+function TalenTrackLogo({ size = "default" }: { size?: "default" | "small" }) {
   const iconSize = size === "small" ? "size-8" : "size-9";
   const textSize = size === "small" ? "text-lg" : "text-xl";
   const iconText = size === "small" ? "text-base" : "text-lg";
@@ -56,8 +56,8 @@ function TalentTrackLogo({ size = "default" }: { size?: "default" | "small" }) {
     <div className="flex items-center gap-2.5">
       <div className={`flex ${iconSize} items-center justify-center overflow-hidden rounded-lg bg-primary`}>
         <Image
-          src="/TalentTrack_Logo.png"
-          alt="TalentTrack Logo"
+          src="/TalenTrack_Logo.png"
+          alt="TalenTrack Logo"
           width={40}
           height={40}
           className="size-full object-contain"
@@ -65,7 +65,7 @@ function TalentTrackLogo({ size = "default" }: { size?: "default" | "small" }) {
         />
       </div>
       <span className={`${textSize} font-bold italic tracking-tight text-white`} style={{ fontFamily: "var(--font-serif), Georgia, serif" }}>
-        Talent<span className="text-[#FF6C06]">Track</span>
+        Talen<span className="text-[#FF6C06]">Track</span>
       </span>
     </div>
   );
@@ -119,7 +119,7 @@ export function LoginClient() {
         <div className="relative z-10 flex flex-1 flex-col justify-between p-10 xl:p-14">
           {/* Logo */}
           <motion.div initial="hidden" animate="visible" variants={fadeIn} custom={0}>
-            <TalentTrackLogo />
+            <TalenTrackLogo />
           </motion.div>
 
           {/* Hero text + features */}
@@ -283,7 +283,7 @@ export function LoginClient() {
                   System Requirements
                 </p>
                 <p className="mt-1 text-[11.5px] leading-relaxed text-neutral-500">
-                  Access to TalentTrack requires a valid @brindley.com email address
+                  Access to TalenTrack requires a valid @brindley.com email address
                   and active directory permissions.
                 </p>
               </div>
@@ -303,7 +303,7 @@ export function LoginClient() {
               onClick={() => setShowAboutPanel(true)}
               className="group flex items-center gap-1 text-[11px] font-medium text-neutral-400 transition-colors hover:text-primary"
             >
-              Learn more about TalentTrack
+              Learn more about TalenTrack
               <ChevronRight className="size-3 transition-transform group-hover:translate-x-0.5" />
             </button>
           </motion.div>
@@ -366,7 +366,7 @@ export function LoginClient() {
                   <div className="rounded-xl border border-neutral-200/90 bg-white/90 p-4 shadow-sm">
                     <p className="font-semibold text-neutral-800">Purpose</p>
                     <p className="mt-1.5">
-                      TalentTrack is a proposal designed for Brindley Engineering to centralize
+                      TalenTrack is a proposal designed for Brindley Engineering to centralize
                       employee resumes in one secure and auditable workspace.
                     </p>
                   </div>
@@ -413,8 +413,8 @@ export function LoginClient() {
         <div className="flex items-center gap-2">
           <div className="flex size-8 items-center justify-center overflow-hidden rounded-lg bg-primary shadow-md">
             <Image
-              src="/TalentTrack_Logo.png"
-              alt="TalentTrack Logo"
+              src="/TalenTrack_Logo.png"
+              alt="TalenTrack Logo"
               width={32}
               height={32}
               className="size-full object-contain"

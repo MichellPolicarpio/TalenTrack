@@ -1,5 +1,5 @@
 [ignoring loop detection]
-# TalentTrack: Professional Resume Management System
+# TalenTrack: Professional Resume Management System
 
 ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white) 
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) 
@@ -12,7 +12,7 @@
 
 ## 📝 Project Overview
 
-**TalentTrack** is a high-performance, enterprise-grade resume building and management platform. Designed with premium aesthetics and professional functionality in mind, it allows users to create multi-page, brand-consistent resumes with real-time editing and high-fidelity PDF exporting.
+**TalenTrack** is a high-performance, enterprise-grade resume building and management platform. Designed with premium aesthetics and professional functionality in mind, it allows users to create multi-page, brand-consistent resumes with real-time editing and high-fidelity PDF exporting.
 
 Built for **Brindley Engineering**, the system ensures that every technical project experience is documented accurately, maintaining confidentiality and professional standards.
 

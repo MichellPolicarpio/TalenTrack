@@ -30,7 +30,7 @@ export function SettingsClient({ initialSettings }: SettingsClientProps) {
   const [dateFormat, setDateFormat] = useState(initialSettings["localization.dateFormat"] || "DD/MM/YYYY");
 
   // Simulated Identity (Non-persisted for now)
-  const [orgName, setOrgName] = useState("TalentTrack");
+  const [orgName, setOrgName] = useState("TalenTrack");
   const [footerInitials, setFooterInitials] = useState("BE");
 
   // Logic to auto-calculate nav color from primary using HSL
@@ -319,7 +319,7 @@ export function SettingsClient({ initialSettings }: SettingsClientProps) {
             <Info className="size-4 text-indigo-500 mt-0.5 shrink-0" />
             <p className="text-[11px] text-indigo-900 leading-normal">
               <strong>Interactive Demo:</strong> Notice how the "Powered By" text in the bottom left of your sidebar would change to <strong>{footerInitials}</strong>. 
-              The organization name <strong>{orgName}</strong> would also replace "TalentTrack" in the main navigation header.
+              The organization name <strong>{orgName}</strong> would also replace "TalenTrack" in the main navigation header.
             </p>
           </div>
         </CardContent>
