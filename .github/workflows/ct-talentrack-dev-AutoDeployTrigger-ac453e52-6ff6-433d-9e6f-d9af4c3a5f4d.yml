@@ -17,33 +17,28 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     permissions: 
-      id-token: write #This is required for requesting the OIDC JWT Token
-      contents: read #Required when GH token is used to authenticate with private repo
+      id-token: write # This is required for requesting the OIDC JWT Token
+      contents: read # Required when GH token is used to authenticate with private repo
 
     steps:
       - name: Checkout to the branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Azure Login
-        uses: azure/login@v2
+        uses: azure/login@v1
         with:
           client-id: ${{ secrets.CTTALENTRACKDEV_AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.CTTALENTRACKDEV_AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.CTTALENTRACKDEV_AZURE_SUBSCRIPTION_ID }}
+          subscription-id: "a41e3a62-8884-43e7-8fb9-0fdb1db8320f" # ID de suscripción directo
 
       - name: Build and push container image to registry
-        uses: azure/container-apps-deploy-action@v2
+        uses: azure/container-apps-deploy-action@v1
         with:
           appSourcePath: ${{ github.workspace }}
-          _dockerfilePathKey_: _dockerfilePath_
-          _targetLabelKey_: _targetLabel_
+          dockerFilePath: Dockerfile
           registryUrl: acrtalentrackdev.azurecr.io
           registryUsername: ${{ secrets.CTTALENTRACKDEV_REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.CTTALENTRACKDEV_REGISTRY_PASSWORD }}
           containerAppName: ct-talentrack-dev
           resourceGroup: rg-talentrack-dev
-          imageToBuild: acrtalentrackdev.azurecr.io/ct-talentrack-dev:${{ github.sha }}
-          _buildArgumentsKey_: |
-            _buildArgumentsValues_
-
-
+          imageToBuild: acrtalentrackdev.azurecr.io/talentrack:latest
