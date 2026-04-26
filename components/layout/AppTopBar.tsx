@@ -1,0 +1,220 @@
+"use client";
+
+import { useState } from "react";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { signOut } from "next-auth/react";
+import { AnimatePresence } from "framer-motion";
+import { useDashboard } from "@/lib/context/dashboard-context";
+import { ResumeStatus } from "@/lib/db/types";
+
+import { cn, initialsFromName } from "@/lib/utils";
+import type { UserRole } from "@/types/user-role";
+import { NotificationsBell } from "@/components/layout/NotificationsBell";
+import type { NotificationsSnapshotDTO } from "@/lib/actions/notifications.actions";
+import { EditorActionBar } from "@/components/resume/EditorActionBar";
+import { RESUME_STATUS } from "@/lib/db/types";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { User, Settings, Moon, LogOut } from "lucide-react";
+import { SplashScreen, EXIT_STEPS } from "@/components/layout/SplashScreen";
+
+const ROLE_LABELS: Record<UserRole, string> = {
+  Employee: "Employee",
+  HR_Revisor: "HR Reviewer",
+  Admin: "Administrator",
+};
+
+const STATUS_TABS: { key: ResumeStatus; label: string }[] = [
+  { key: RESUME_STATUS.DRAFT, label: "Draft" },
+  { key: RESUME_STATUS.PENDING_APPROVAL, label: "Pending Review" },
+  { key: RESUME_STATUS.APPROVED, label: "Approved" },
+];
+
+function resolveActiveTab(status: ResumeStatus): ResumeStatus {
+  if (status === RESUME_STATUS.NEEDS_CHANGES) return RESUME_STATUS.DRAFT;
+  return status;
+}
+
+export type AppTopBarProps = {
+  userName: string;
+  userEmail: string;
+  role: UserRole;
+  /** Destino al hacer clic en el avatar (default: settings). */
+  profileHref?: string;
+  /** Campana in-app; si no hay empleado en BD, omitir. */
+  notificationsInitial?: NotificationsSnapshotDTO | null;
+};
+
+export function AppTopBar({
+  userName,
+  userEmail,
+  role,
+  profileHref = "/dashboard/settings",
+  notificationsInitial,
+}: AppTopBarProps) {
+  const initials = initialsFromName(userName, userEmail);
+  const roleLabel = ROLE_LABELS[role];
+  const pathname = usePathname();
+  const isAboutRoute = pathname === "/dashboard/about";
+  const isSettingsRoute = pathname.startsWith("/dashboard/settings");
+  const isHrRoute = pathname.startsWith("/dashboard/hr");
+  const isHistoryRoute = pathname.startsWith("/dashboard/history");
+  const isResumeRoute = pathname === "/dashboard/resume" || pathname === "/dashboard";
+  const isBlindRoute = pathname === "/dashboard/blind-resume";
+  const isGenericRoute = pathname === "/dashboard/generic-resume";
+  const { activeResumeStatus, editorActions } = useDashboard();
+  const activeTab = activeResumeStatus ? resolveActiveTab(activeResumeStatus) : null;
+  const [signingOut, setSigningOut] = useState(false);
+
+  function handleSignOut() {
+    setSigningOut(true);
+    // 5 steps * 700ms = 3500ms. We wait 4000ms to ensure the "See you soon!" step is seen.
+    setTimeout(() => signOut({ callbackUrl: "/" }), 4000);
+  }
+
+  return (
+    <>
+      <AnimatePresence>
+        {signingOut && (
+          <SplashScreen 
+            steps={EXIT_STEPS} 
+            intervalMs={700}
+          />
+        )}
+      </AnimatePresence>
+    <div className="hidden relative h-[75px] shrink-0 items-center justify-between bg-transparent px-0 md:flex">
+      {/* Left: app label */}
+      <div className="flex shrink-0 items-center">
+        {isAboutRoute || isSettingsRoute || isHistoryRoute || isResumeRoute || isBlindRoute || isGenericRoute ? (
+          <div className="min-w-0 shrink-0">
+            <p className="truncate text-[18px] font-black tracking-tight text-primary">
+              {isAboutRoute 
+                ? "About" 
+                : isSettingsRoute 
+                  ? "Settings" 
+                  : isHistoryRoute 
+                    ? "Resume History" 
+                    : isBlindRoute
+                      ? "Blind Resume"
+                      : isGenericRoute
+                        ? "Generic Resume"
+                        : "My Resume"}
+            </p>
+          </div>
+        ) : isHrRoute ? (
+          <p className="shrink-0 text-[18px] font-black tracking-tight text-primary">
+            HR Management
+          </p>
+        ) : (
+          <p className="shrink-0 text-[18px] font-black tracking-tight text-sidebar-label/40">
+            TalenTrack
+          </p>
+        )}
+      </div>
+
+      {/* Center: Status Tabs (absolute centering) */}
+      {activeResumeStatus && (
+        <div className="absolute left-1/2 top-0 flex h-full -translate-x-1/2 items-center gap-2">
+          {STATUS_TABS.map((tab) => {
+            const isActive = tab.key === activeTab;
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                className={cn(
+                  "relative flex items-center px-4 py-1.5 rounded-full text-[13px] font-medium tracking-[0.01em] transition-all duration-200",
+                  isActive
+                    ? "bg-primary text-white shadow-md"
+                    : "text-foreground/60 hover:bg-accent hover:text-foreground",
+                )}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Right: Actions or User profile */}
+      <div className="flex shrink-0 items-center gap-4">
+        <div className="flex items-center gap-3 border-l border-topbar-border pl-4">
+          {notificationsInitial && (
+            <NotificationsBell initial={notificationsInitial} />
+          )}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <button className="flex shrink-0 items-center gap-2.5 rounded-full border-0 bg-card px-2 py-1.5 shadow-sm transition-all hover:shadow-md hover:ring-1 hover:ring-primary/10 active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-primary/30 sm:px-3" />
+              }
+            >
+              <div className="hidden flex-col items-end xl:flex">
+                <p className="text-[12px] font-bold text-sidebar-accent-foreground leading-none">{userName}</p>
+                <p className="text-[10px] font-medium text-sidebar-foreground/50 mt-1 uppercase tracking-tight">{roleLabel}</p>
+              </div>
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sidebar-accent font-bold text-sidebar-accent-foreground shadow-sm ring-2 ring-background transition-all">
+                {initials}
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-60 min-w-60 p-1.5">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="px-2 py-2">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-semibold text-sidebar-accent-foreground">{userName}</p>
+                    <p className="text-[11px] font-medium text-sidebar-foreground/60">{userEmail}</p>
+                  </div>
+                </DropdownMenuLabel>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator className="-mx-1.5 my-1.5" />
+              <DropdownMenuItem
+                render={
+                  <Link 
+                    href={profileHref} 
+                    className="flex w-full items-center gap-2.5 cursor-pointer px-2 py-2" 
+                  />
+                }
+              >
+                <User className="size-4 text-sidebar-foreground/70" />
+                <span className="text-[13px] font-medium">View Profile</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                render={
+                  <Link 
+                    href="/dashboard/settings" 
+                    className="flex w-full items-center gap-2.5 cursor-pointer px-2 py-2" 
+                  />
+                }
+              >
+                <Settings className="size-4 text-sidebar-foreground/70" />
+                <span className="text-[13px] font-medium">Settings</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="-mx-1.5 my-1.5" />
+              <DropdownMenuItem disabled className="flex items-center gap-2.5 px-2 py-2 opacity-60">
+                <Moon className="size-4 text-sidebar-foreground/70" />
+                <span className="text-[13px] font-medium">Dark Mode</span>
+                <span className="ml-auto text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Off</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="-mx-1.5 my-1.5" />
+              <DropdownMenuItem 
+                onClick={handleSignOut}
+                className="flex items-center gap-2.5 px-2 py-2 text-red-600 focus:bg-red-50 focus:text-red-700 cursor-pointer"
+              >
+                <LogOut className="size-4" />
+                <span className="text-[13px] font-medium">Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+    </div>
+    </>
+  );
+}

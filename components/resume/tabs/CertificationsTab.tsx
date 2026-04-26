@@ -1,0 +1,41 @@
+import { CertificationsSection } from "@/components/resume/sections/CertificationsSection";
+import type { Certification, CertificationInput } from "@/lib/db/types";
+
+export function CertificationsTab({
+  resumeId,
+  initial,
+  onItemsChange,
+  onPersisted,
+  disabled,
+  headerActions,
+  onAddingChange,
+  onNewDraftChange,
+  onActivateEdit,
+  isAdding,
+}: {
+  resumeId: string;
+  initial: Certification[];
+  onItemsChange?: (items: Certification[]) => void;
+  onPersisted?: () => void;
+  disabled: boolean;
+  headerActions?: React.ReactNode;
+  onAddingChange?: (isAdding: boolean) => void;
+  onNewDraftChange?: (draft: CertificationInput | null) => void;
+  onActivateEdit?: () => void;
+  isAdding?: boolean;
+}) {
+  return (
+    <CertificationsSection
+      resumeId={resumeId}
+      initial={initial}
+      onItemsChange={onItemsChange}
+      onPersisted={onPersisted}
+      disabled={disabled}
+      headerActions={headerActions}
+      onAddingChange={onAddingChange}
+      onNewDraftChange={onNewDraftChange}
+      onActivateEdit={onActivateEdit}
+      isAdding={isAdding}
+    />
+  );
+}
