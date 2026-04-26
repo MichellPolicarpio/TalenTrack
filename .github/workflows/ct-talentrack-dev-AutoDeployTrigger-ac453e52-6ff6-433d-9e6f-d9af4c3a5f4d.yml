@@ -1,0 +1,44 @@
+name: Trigger auto deployment for ct-talentrack-dev
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ master ]
+    paths:
+    - '**'
+    - '.github/workflows/ct-talentrack-dev-AutoDeployTrigger-ac453e52-6ff6-433d-9e6f-d9af4c3a5f4d.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:      
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions: 
+      id-token: write # This is required for requesting the OIDC JWT Token
+      contents: read # Required when GH token is used to authenticate with private repo
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.CTTALENTRACKDEV_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.CTTALENTRACKDEV_AZURE_TENANT_ID }}
+          subscription-id: "a41e3a62-8884-43e7-8fb9-0fdb1db8320f" # ID de suscripción directo
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          appSourcePath: ${{ github.workspace }}
+          dockerFilePath: Dockerfile
+          registryUrl: acrtalentrackdev.azurecr.io
+          registryUsername: ${{ secrets.CTTALENTRACKDEV_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.CTTALENTRACKDEV_REGISTRY_PASSWORD }}
+          containerAppName: ct-talentrack-dev
+          resourceGroup: rg-talentrack-dev
+          imageToBuild: acrtalentrackdev.azurecr.io/talentrack:latest
